@@ -1,0 +1,2 @@
+[run]
+omit = pypowsybl_jupyter/tests/*
