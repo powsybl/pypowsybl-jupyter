@@ -10,14 +10,8 @@ import { createTestModel } from './utils';
 
 import { SvgModel } from '..';
 
-describe('Example', () => {
-  describe('ExampleModel', () => {
-    it('should be createable', () => {
-      const model = createTestModel(SvgModel);
-      expect(model).toBeInstanceOf(SvgModel);
-      expect(model.get('value')).toEqual('Hello World');
-    });
-
+describe('SvgModel', () => {
+  describe('SvgModel', () => {
     it('should be createable with a value', () => {
       const state = { value: 'Foo Bar!' };
       const model = createTestModel(SvgModel, state);
