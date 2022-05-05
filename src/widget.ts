@@ -9,9 +9,8 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import {SVG} from '@svgdotjs/svg.js';
+import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.panzoom.js';
-
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
