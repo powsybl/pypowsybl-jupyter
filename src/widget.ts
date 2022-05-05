@@ -9,8 +9,8 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import { SVG } from '@svgdotjs/svg.js'
-import '@svgdotjs/svg.panzoom.js'
+import { SVG } from '@svgdotjs/svg.js';
+import '@svgdotjs/svg.panzoom.js';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
@@ -18,7 +18,7 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 import '../css/widget.css';
 
 export class SvgModel extends DOMWidgetModel {
-  defaults() {
+  defaults(): any {
     return {
       ...super.defaults(),
       _model_name: SvgModel.model_name,
@@ -44,11 +44,11 @@ export class SvgModel extends DOMWidgetModel {
 }
 
 export class SvgView extends DOMWidgetView {
-  render() {
+  render(): void {
     SVG()
-        .addTo(this.el)
-        .svg(this.model.get('value'))
-        .viewbox(0, 0, 1000, 1000)
-        .panZoom({zoomFactor: 0.2, wheelZoom: true});
+      .addTo(this.el)
+      .svg(this.model.get('value'))
+      .viewbox(0, 0, 1000, 1000)
+      .panZoom({ zoomFactor: 0.2, wheelZoom: true });
   }
 }
