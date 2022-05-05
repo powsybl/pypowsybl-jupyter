@@ -5,9 +5,9 @@
 
 import pytest
 
-from ..example import ExampleWidget
+from pypowsybl_jupyter import SvgWidget
 
 
-def test_example_creation_blank():
-    w = ExampleWidget()
-    assert w.value == 'Hello World'
+def test_creation_blank():
+    w = SvgWidget(value="test")
+    assert w.value == 'test'
