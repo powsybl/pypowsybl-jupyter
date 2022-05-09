@@ -45,10 +45,10 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
-    SVG()
-      .addTo(this.el)
-      .svg(this.model.get('value'))
-      .viewbox(0, 0, 1000, 1000)
+    this.el.innerHTML = this.model.get('value')
+
+    SVG(this.el.childNodes[0] as SVGSVGElement)
       .panZoom({ zoomFactor: 0.2, wheelZoom: true });
+
   }
 }
