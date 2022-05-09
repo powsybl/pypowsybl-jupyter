@@ -60,8 +60,8 @@ def display_svg(svg, fit_to_cell: bool = False) -> SvgWidget:
     Examples:
 
         .. code-block:: python
-            import pypowsybl_jupyter as pj
-            pj.display_svg(network.get_single_line_diagram('SUB-ID'))
+
+            display_svg(network.get_single_line_diagram('SUB-ID'))
     """
 
     doc = minidom.parseString(_get_svg_string(svg))
