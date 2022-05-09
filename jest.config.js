@@ -9,6 +9,7 @@ module.exports = {
     '@svgdotjs/svg.panzoom.js': '<rootDir>/node_modules/@svgdotjs/svg.panzoom.js/dist/svg.panzoom.esm.js'
   },
   preset: 'ts-jest/presets/js-with-babel',
+  testEnvironment: 'jsdom',
   moduleFileExtensions: ['ts', 'tsx', 'esm.js', 'js', 'jsx', 'json', 'node'],
   testPathIgnorePatterns: ['/lib/', '/node_modules/'],
   testRegex: '/__tests__/.*.spec.ts[x]?$',
