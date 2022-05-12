@@ -4,7 +4,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 from .svg import SvgWidget, display_svg
+from .explorer import network_explorer
 from ._version import __version__, version_info
+
 
 def _jupyter_labextension_paths():
     """Called by Jupyter Lab Server to detect if it is a valid labextension and
