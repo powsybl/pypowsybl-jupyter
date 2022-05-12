@@ -9,8 +9,9 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import { SVG } from '@svgdotjs/svg.js';
 import '@svgdotjs/svg.panzoom.js';
+
+import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer'
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
@@ -45,11 +46,6 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
-    this.el.innerHTML = this.model.get('value');
-
-    SVG(this.el.childNodes[0] as SVGSVGElement).panZoom({
-      zoomFactor: 0.2,
-      wheelZoom: true,
-    });
+    new NetworkAreaDiagramViewer(this.el, this.model.get('value'), 2000, 2000);
   }
 }
