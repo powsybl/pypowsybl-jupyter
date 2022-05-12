@@ -9,8 +9,6 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import '@svgdotjs/svg.panzoom.js';
-
 import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer'
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
