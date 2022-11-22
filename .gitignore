@@ -158,3 +158,4 @@ pypowsybl_jupyter/labextension
 
 # Intellij files
 .idea/
+*.iml

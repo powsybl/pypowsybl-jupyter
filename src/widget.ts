@@ -9,9 +9,8 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import { SVG } from '@svgdotjs/svg.js';
-import '@svgdotjs/svg.panzoom.js';
-
+import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer'
+import { SingleLineDiagramViewer } from '@powsybl/diagram-viewer'
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
 // Import the CSS
@@ -45,11 +44,74 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
-    this.el.innerHTML = this.model.get('value');
+    new NetworkAreaDiagramViewer(this.el, this.model.get('value'), 800, 500, 800, 500);
+  }
+}
 
-    SVG(this.el.childNodes[0] as SVGSVGElement).panZoom({
-      zoomFactor: 0.2,
-      wheelZoom: true,
-    });
+export class SvgSldModel extends DOMWidgetModel {
+  defaults(): any {
+    return {
+      ...super.defaults(),
+      _model_name: SvgSldModel.model_name,
+      _model_module: SvgSldModel.model_module,
+      _model_module_version: SvgSldModel.model_module_version,
+      _view_name: SvgSldModel.view_name,
+      _view_module: SvgSldModel.view_module,
+      _view_module_version: SvgSldModel.view_module_version,
+      clicked_nextvl: '',
+      clicked_switch: {},
+      clicked_feeder: {},
+    };
+  }
+
+  static serializers: ISerializers = {
+    ...DOMWidgetModel.serializers,
+    // Add any extra serializers here
+  };
+
+  static model_name = 'SvgSldModel';
+  static model_module = MODULE_NAME;
+  static model_module_version = MODULE_VERSION;
+  static view_name = 'SvgSldView'; // Set to null if no view
+  static view_module = MODULE_NAME; // Set to null if no view
+  static view_module_version = MODULE_VERSION;
+}
+
+export class SvgSldView extends DOMWidgetView {
+   handleNextVL = (id: string) => {
+    this.model.set('clicked_nextvl', id, { updated_view: this });
+    this.touch();
+    this.send({ event: 'click_nextvl' });
+  };
+
+  handleSwitch = (id:string, switch_status:boolean, element:any) => {
+    this.model.set('clicked_switch', {id: id, switch_status: switch_status}, { updated_view: this });
+    this.touch();
+    this.send({ event: 'click_switch' });
+  };
+
+  handleFeeder = (id:string, feederType:string | null, svgId:string, x:number, y:number) => {
+    this.model.set('clicked_feeder', {id: id, feederType: feederType}, { updated_view: this });
+    this.touch();
+    this.send({ event: 'click_feeder' });
+  };
+
+  render(): void {
+    const metadata = this.model.get('value_meta');
+
+    new SingleLineDiagramViewer(
+        this.el,
+        this.model.get('value'), //svg content
+        metadata ? JSON.parse(this.model.get('value_meta')) : null, //metadata
+        'voltage-level',
+        500,
+        600,
+        1000,
+        1200,
+        metadata ? this.handleNextVL : null, //callback on the next voltage arrows
+        metadata ? this.handleSwitch : null, //callback on the breakers
+        metadata ? this.handleFeeder : null, //callback on the feeders
+        'lightblue' //arrows color
+    );
   }
 }

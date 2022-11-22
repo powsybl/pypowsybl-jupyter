@@ -51,7 +51,8 @@
   "dependencies": {
     "@jupyter-widgets/base": "^4.0.0",
     "@svgdotjs/svg.js": "^3.1.2",
-    "@svgdotjs/svg.panzoom.js": "^2.1.2"
+    "@svgdotjs/svg.panzoom.js": "^2.1.2",
+    "@powsybl/diagram-viewer": "0.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.17.0",
