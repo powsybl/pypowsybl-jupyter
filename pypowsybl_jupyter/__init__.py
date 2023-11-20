@@ -22,7 +22,7 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': 'pypowsybl-jupyter',
+        'dest': 'pypowsybl_jupyter',
     }]
 
 
@@ -45,6 +45,6 @@ def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
         'src': 'nbextension',
-        'dest': 'pypowsybl-jupyter',
-        'require': 'pypowsybl-jupyter/extension'
+        'dest': 'pypowsybl_jupyter',
+        'require': 'pypowsybl_jupyter/extension'
     }]

@@ -1,5 +1,0 @@
-{
-  "load_extensions": {
-    "pypowsybl-jupyter/extension": true
-  }
-}
