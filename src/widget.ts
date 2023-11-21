@@ -61,6 +61,7 @@ export class SvgSldModel extends DOMWidgetModel {
       clicked_nextvl: '',
       clicked_switch: {},
       clicked_feeder: {},
+      clicked_bus: {},
     };
   }
 
@@ -96,6 +97,15 @@ export class SvgSldView extends DOMWidgetView {
     this.send({ event: 'click_feeder' });
   };
 
+  handleBus = (id:string, svgId:string, x:number, y:number) => {
+    this.model.set('clicked_bus', {id: id}, { updated_view: this });
+    this.touch();
+    this.send({ event: 'click_bus' });
+  };
+
+  handleTogglePopover = (shouldDisplay: boolean, anchorEl: any, equipmentId: string, equipmentType: string) => {
+  };
+
   render(): void {
     const metadata = this.model.get('value_meta');
 
@@ -111,7 +121,9 @@ export class SvgSldView extends DOMWidgetView {
         metadata ? this.handleNextVL : null, //callback on the next voltage arrows
         metadata ? this.handleSwitch : null, //callback on the breakers
         metadata ? this.handleFeeder : null, //callback on the feeders
-        'lightblue' //arrows color
+        metadata ? this.handleBus : null, //callback on the buses
+        'lightblue', //arrows color
+        this.handleTogglePopover //callback on the togglePopOver
     );
   }
 }

@@ -50,9 +50,7 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10 || ^2 || ^3 || ^4 || ^5 || ^6",
-    "@svgdotjs/svg.js": "^3.1.2",
-    "@svgdotjs/svg.panzoom.js": "^2.1.2",
-    "@powsybl/diagram-viewer": "0.1.5"
+    "@powsybl/diagram-viewer": "0.1.11"
   },
   "devDependencies": {
     "@babel/core": "^7.5.0",
