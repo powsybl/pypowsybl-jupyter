@@ -19,31 +19,31 @@ jupyter nbextension enable --py [--sys-prefix|--user|--system] pypowsybl_jupyter
 
 ## Examples
 
-In the examples directory there are some examples of how widgets can be used.
+In the examples directory there are some notebooks demonstrating the widgets.
 
 
 ## Development Installation
 
 Create a dev environment:
 ```bash
-conda create -n pypowsybl_jupyter-dev -c conda-forge nodejs=18 yarn=1 python=3.11 jupyterlab=3.6.6
+conda create -n pypowsybl_jupyter-dev -c conda-forge nodejs python jupyterlab
 conda activate pypowsybl_jupyter-dev
 ```
-
-Please note that the build could fail with different versions of yarn, python and jupyterlab.
-
 
 Install the python. This will also build the TS package.
 ```bash
 pip install -e ".[test]"
 ```
 
+
+### Note
+
 When developing your extensions, you need to manually enable your extensions with the
 notebook / lab frontend. For lab, this is done by the command:
 
 ```
 jupyter labextension develop --overwrite .
-yarn run build
+jlpm run build
 ```
 
 For classic notebook, you need to run:
@@ -65,7 +65,7 @@ terminals to watch for changes in the extension's source and automatically rebui
 
 ```bash
 # Watch the source directory in one terminal, automatically rebuilding when needed
-yarn run watch
+jlpm run watch
 # Run JupyterLab in another terminal
 jupyter lab
 ```
