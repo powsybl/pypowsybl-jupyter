@@ -49,5 +49,6 @@ jobs:
       - name: Test the extension
         run: |
           python -m pip install --upgrade -v -e ".[test]"
+          yarn run lint:check
           python -m pytest
           yarn run test
