@@ -16,7 +16,7 @@ import { MODULE_NAME, MODULE_VERSION } from './version';
 const EXTENSION_ID = 'pypowsybl_jupyter:plugin';
 
 /**
-  * The pypowsybl-jupyter plugin.
+ * The pypowsybl-jupyter plugin.
  */
 const pypowsyblJupyterPlugin: IPlugin<Application<Widget>, void> = {
   id: EXTENSION_ID,
@@ -34,7 +34,7 @@ export default pypowsyblJupyterPlugin;
  */
 function activateWidgetExtension(
   app: Application<Widget>,
-  registry: IJupyterWidgetRegistry
+  registry: IJupyterWidgetRegistry,
 ): void {
   registry.registerWidget({
     name: MODULE_NAME,

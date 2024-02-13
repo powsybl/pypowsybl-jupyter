@@ -9,8 +9,8 @@ import {
   ISerializers,
 } from '@jupyter-widgets/base';
 
-import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer'
-import { SingleLineDiagramViewer } from '@powsybl/diagram-viewer'
+import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer';
+import { SingleLineDiagramViewer } from '@powsybl/diagram-viewer';
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
 // Import the CSS
@@ -44,7 +44,14 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
-    new NetworkAreaDiagramViewer(this.el, this.model.get('value'), 800, 500, 800, 500);
+    new NetworkAreaDiagramViewer(
+      this.el,
+      this.model.get('value'),
+      800,
+      500,
+      800,
+      500,
+    );
   }
 }
 
@@ -79,51 +86,69 @@ export class SvgSldModel extends DOMWidgetModel {
 }
 
 export class SvgSldView extends DOMWidgetView {
-   handleNextVL = (id: string) => {
+  handleNextVL = (id: string) => {
     this.model.set('clicked_nextvl', id, { updated_view: this });
     this.touch();
     this.send({ event: 'click_nextvl' });
   };
 
-  handleSwitch = (id:string, switch_status:boolean, element:any) => {
-    this.model.set('clicked_switch', {id: id, switch_status: switch_status}, { updated_view: this });
+  handleSwitch = (id: string, switch_status: boolean, element: any) => {
+    this.model.set(
+      'clicked_switch',
+      { id: id, switch_status: switch_status },
+      { updated_view: this },
+    );
     this.touch();
     this.send({ event: 'click_switch' });
   };
 
-  handleFeeder = (id:string, feederType:string | null, svgId:string, x:number, y:number) => {
-    this.model.set('clicked_feeder', {id: id, feederType: feederType}, { updated_view: this });
+  handleFeeder = (
+    id: string,
+    feederType: string | null,
+    svgId: string,
+    x: number,
+    y: number,
+  ) => {
+    this.model.set(
+      'clicked_feeder',
+      { id: id, feederType: feederType },
+      { updated_view: this },
+    );
     this.touch();
     this.send({ event: 'click_feeder' });
   };
 
-  handleBus = (id:string, svgId:string, x:number, y:number) => {
-    this.model.set('clicked_bus', {id: id}, { updated_view: this });
+  handleBus = (id: string, svgId: string, x: number, y: number) => {
+    this.model.set('clicked_bus', { id: id }, { updated_view: this });
     this.touch();
     this.send({ event: 'click_bus' });
   };
 
-  handleTogglePopover = (shouldDisplay: boolean, anchorEl: any, equipmentId: string, equipmentType: string) => {
-  };
+  handleTogglePopover = (
+    shouldDisplay: boolean,
+    anchorEl: any,
+    equipmentId: string,
+    equipmentType: string,
+  ) => {};
 
   render(): void {
     const metadata = this.model.get('value_meta');
 
     new SingleLineDiagramViewer(
-        this.el,
-        this.model.get('value'), //svg content
-        metadata ? JSON.parse(this.model.get('value_meta')) : null, //metadata
-        'voltage-level',
-        500,
-        600,
-        1000,
-        1200,
-        metadata ? this.handleNextVL : null, //callback on the next voltage arrows
-        metadata ? this.handleSwitch : null, //callback on the breakers
-        metadata ? this.handleFeeder : null, //callback on the feeders
-        metadata ? this.handleBus : null, //callback on the buses
-        'lightblue', //arrows color
-        this.handleTogglePopover //callback on the togglePopOver
+      this.el,
+      this.model.get('value'), //svg content
+      metadata ? JSON.parse(this.model.get('value_meta')) : null, //metadata
+      'voltage-level',
+      500,
+      600,
+      1000,
+      1200,
+      metadata ? this.handleNextVL : null, //callback on the next voltage arrows
+      metadata ? this.handleSwitch : null, //callback on the breakers
+      metadata ? this.handleFeeder : null, //callback on the feeders
+      metadata ? this.handleBus : null, //callback on the buses
+      'lightblue', //arrows color
+      this.handleTogglePopover, //callback on the togglePopOver
     );
   }
 }
