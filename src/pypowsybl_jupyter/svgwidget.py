@@ -1,31 +1,27 @@
-# Copyright (c) 2022, RTE (http://www.rte-france.com)
+# Copyright (c) 2020-2024, RTE (http://www.rte-france.com)
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+#
 
 """
 Simple widget which enables to pan and zoom on an SVG object
 """
 
-from ipywidgets import DOMWidget
-from traitlets import Unicode
-from ._frontend import module_name, module_version
+import pathlib
+
+import anywidget
+import traitlets
 
 from xml.dom import minidom
 
 
-class SvgWidget(DOMWidget):
-    """
-    A widget which simply displays an SVG and allows to zoom and pan.
-    """
-    _model_name = Unicode('SvgModel').tag(sync=True)
-    _model_module = Unicode(module_name).tag(sync=True)
-    _model_module_version = Unicode(module_version).tag(sync=True)
-    _view_name = Unicode('SvgView').tag(sync=True)
-    _view_module = Unicode(module_name).tag(sync=True)
-    _view_module_version = Unicode(module_version).tag(sync=True)
-
-    value = Unicode().tag(sync=True)
+class SvgWidget(anywidget.AnyWidget):
+    _esm = pathlib.Path(__file__).parent / "static" / "svgwidget.js"
+    _css = pathlib.Path(__file__).parent / "static" / "svgwidget.css"
+    value = traitlets.Int(0).tag(sync=True)
+    svg_data = traitlets.Unicode().tag(sync=True)
 
 
 def _get_svg_string(svg) -> str:
@@ -44,7 +40,6 @@ def _get_svg_root(doc: minidom.Document):
     if not isinstance(svg_node, minidom.Element) or svg_node.tagName != 'svg':
         raise ValueError('Not a valid SVG document, root element should be <svg>.')
     return svg_node
-
 
 def display_svg(svg, fit_to_cell: bool = False) -> SvgWidget:
     """
@@ -70,4 +65,5 @@ def display_svg(svg, fit_to_cell: bool = False) -> SvgWidget:
     if fit_to_cell:
         svg_node.setAttribute('width', '100%')
         svg_node.setAttribute('height', '100%')
-    return SvgWidget(value=svg_node.toxml())
+    return SvgWidget(svg_data=svg_node.toxml())
+
