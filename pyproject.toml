@@ -1,14 +1,14 @@
 [build-system]
-requires = [
-    "hatchling>=1.21.1",
-    "jupyterlab>=4.0.0,<5",
-    "hatch-nodejs-version>=0.3.2",
-]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[project.urls]
+Homepage = "https://github.com/powsybl/pypowsybl-jupyter"
 
 [project]
 name = "pypowsybl_jupyter"
 description = "Widgets for pypowsybl in Jupyter notebooks"
+version = "0.1.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
@@ -34,84 +34,28 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "ipywidgets>=8.0.0",
+    "anywidget",
     "pypowsybl>=1.1.0",
 ]
-version = "0.1.0"
 
 [project.optional-dependencies]
-docs = [
-    "jupyter_sphinx",
-    "nbsphinx",
-    "nbsphinx-link",
-    "pypandoc",
-    "pytest_check_links",
-    "recommonmark",
-    "sphinx>=1.5",
-    "sphinx_rtd_theme",
-]
-examples = []
-test = [
-    "nbval",
-    "pytest-cov",
-    "pytest>=6.0",
-]
+dev = ["watchfiles", "jupyterlab"]
 
-[project.urls]
-Homepage = "https://github.com/powsybl/pypowsybl-jupyter"
-[tool.hatch.metadata]
-allow-direct-references = true
+# automatically add the dev feature to the default env (e.g., hatch shell)
+[tool.hatch.envs.default]
+features = ["dev"]
+
+
 [tool.hatch.build]
-artifacts = [
-    "pypowsybl_jupyter/nbextension/index.*",
-    "pypowsybl_jupyter/labextension/*.tgz",
-    "pypowsybl_jupyter/labextension",
-]
-
-[tool.hatch.build.targets.wheel.shared-data]
-"pypowsybl_jupyter/nbextension" = "share/jupyter/nbextensions/pypowsybl_jupyter"
-"pypowsybl_jupyter/labextension" = "share/jupyter/labextensions/pypowsybl_jupyter"
-"./install.json" = "share/jupyter/labextensions/pypowsybl_jupyter/install.json"
-"./pypowsybl_jupyter.json" = "etc/jupyter/nbconfig/notebook.d/pypowsybl_jupyter.json"
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-    ".github",
-]
+only-packages = true
+artifacts = ["src/pypowsybl_jupyter/static/*"]
 
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"
-ensured-targets = [
-    "pypowsybl_jupyter/nbextension/index.js",
-    "pypowsybl_jupyter/labextension/package.json",
-]
-skip-if-exists = [
-    "pypowsybl_jupyter/nbextension/index.js",
-    "pypowsybl_jupyter/labextension/package.json",
-]
-dependencies = [
-    "hatch-jupyter-builder>=0.8.3",
-]
+ensured-targets = ["src/pypowsybl_jupyter/static/sldwidget.js"]
+skip-if-exists = ["src/pypowsybl_jupyter/static/sldwidget.js"]
+dependencies = ["hatch-jupyter-builder>=0.5.0"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
-path = "."
-build_cmd = "build:prod"
-npm = ["jlpm"]
-
-[tool.tbump]
-field = [
-    { name = "channel", default = "" },
-    { name = "release", default = "" },
-]
-file = [
-    { src = "pyproject.toml", version_template = "version = \"{major}.{minor}.{patch}{channel}{release}\"" },
-    { src = "pypowsybl_jupyter/_version.py" },
-]
-
-[tool.tbump.version]
-current = "0.1.0"
-regex = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)((?P<channel>a|b|rc|.dev)(?P<release>\\d+))?"
-
-[tool.tbump.git]
-message_template = "Bump to {new_version}"
-tag_template = "v{new_version}"
+npm = "npm"
+build_cmd = "build"
