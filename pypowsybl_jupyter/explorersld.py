@@ -26,6 +26,7 @@ def network_explorer_sld(network: Network, vl_id: str = None, parameters: Layout
     """
 
     diagram_panel = widgets.Output()
+    diagram_panel.layout.border='2px solid lightgrey'
 
     def _show_svg_sld(_network: Network, _vl_id: str, _parameters: LayoutParameters):
         with diagram_panel:

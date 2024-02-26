@@ -15,37 +15,37 @@ def network_explorer(network: Network):
     Creates a basic explorer widget for this network.
     """
 
+    vls = network.get_voltage_levels(attributes=[])
+
     vl_input = widgets.Text(
         value='',
         placeholder='Voltage level ID',
-        description='Voltage level:',
+        description='Filter',
         disabled=False,
         continuous_update=True
     )
+    
+    def on_text_changed(d):
+        found.options = vls[vls.index.str.contains(d['new'], regex=False)].index
 
-    found = widgets.SelectMultiple(
-        options=[],
-        value=[],
-        rows=10,
+    vl_input.observe(on_text_changed, names='value')
+    
+    found = widgets.Select(
+        options=vls.index,
+        value=None,
+        rows=20,
         description='Found',
         disabled=False
     )
-
-    def on_text_changed(d):
-        vls = network.get_voltage_levels(attributes=[])
-        vls = vls[vls.index.str.startswith(d['new'])]
-        found.options = vls.index
-
-    vl_input.observe(on_text_changed, names='value')
-
-    button = widgets.Button(description="Display voltage level")
-    diagram_panel = widgets.Output()
-
-    def on_click(_):
+   
+    def on_selected(d):
         with diagram_panel:
             diagram_panel.clear_output()
-            display(display_svg(network.get_single_line_diagram(found.value[0])))
+            if d['new'] != None:
+                display(display_svg(network.get_single_line_diagram(d['new'])))
+    
+    found.observe(on_selected, names='value')
 
-    button.on_click(on_click)
-    left_panel = widgets.VBox([vl_input, found, button])
+    left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
+    diagram_panel = widgets.Output()
     return widgets.HBox([left_panel, diagram_panel])
