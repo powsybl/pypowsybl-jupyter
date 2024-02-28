@@ -2152,13 +2152,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@powsybl/diagram-viewer@npm:0.1.11":
-  version: 0.1.11
-  resolution: "@powsybl/diagram-viewer@npm:0.1.11"
+"@powsybl/diagram-viewer@npm:0.2.0":
+  version: 0.2.0
+  resolution: "@powsybl/diagram-viewer@npm:0.2.0"
   dependencies:
     "@svgdotjs/svg.js": ^3.0.12
     "@svgdotjs/svg.panzoom.js": ^2.1.2
-  checksum: 8b80bcc7ba0493704dcc8b503dcee8c3bbde706da98a61a309d50d7b6d5ca7f5515a33465b62b449ae963e25db3051b39cd1f7bd918d63531cae46721e8c0744
+  checksum: 75d327df86a0d2f292b463e64630f34d1ddef09578ccb7276229eebd8bf35bf94ad768edd7ed9a93f9d50149966c7ea0d8a2df9abfff6a12264f37ce0ff25dac
   languageName: node
   linkType: hard
 
@@ -7011,7 +7011,7 @@ __metadata:
     "@jupyterlab/builder": ^4.0.11
     "@lumino/application": ^2.3.0
     "@lumino/widgets": ^2.3.1
-    "@powsybl/diagram-viewer": 0.1.11
+    "@powsybl/diagram-viewer": 0.2.0
     "@types/jest": ^29.5.11
     "@types/webpack-env": ^1.18.4
     "@typescript-eslint/eslint-plugin": ^6.19.1
