@@ -5,7 +5,7 @@ Widgets for [pypowsybl](https://github.com/powsybl/pypowsybl) in the Jupyter not
 
 ## Installation
 
-You can install using `pip`:
+You can install pypowsybl-jupyter using `pip`:
 
 ```bash
 pip install pypowsybl_jupyter
@@ -33,6 +33,21 @@ conda activate pypowsybl_jupyter-dev
 Install the python. This will also build the TS package.
 ```bash
 pip install -e ".[test]"
+```
+
+## Packaging for distribution
+
+To package pypowsybl-jupyter in a .whl file, for distribution:
+```bash
+conda activate pypowsybl_jupyter-dev
+pip install build
+pip install -e ".[test]"
+python -m build .
+```
+
+The 'created .whl file' will be available in the 'dist' directory. To install the .whl file:
+```bash
+pip install <'created .whl file'>
 ```
 
 
