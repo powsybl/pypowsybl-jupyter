@@ -44,8 +44,8 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
-    const el_div = document.createElement("div");
-    el_div.classList.add("svg-viewer-widget");
+    const el_div = document.createElement('div');
+    el_div.classList.add('svg-viewer-widget');
     this.el.appendChild(el_div);
 
     new NetworkAreaDiagramViewer(
@@ -138,8 +138,8 @@ export class SvgSldView extends DOMWidgetView {
   render(): void {
     const metadata = this.model.get('value_meta');
 
-    const el_div = document.createElement("div");
-    el_div.classList.add("svg-sld-viewer-widget");
+    const el_div = document.createElement('div');
+    el_div.classList.add('svg-sld-viewer-widget');
     this.el.appendChild(el_div);
 
     new SingleLineDiagramViewer(
