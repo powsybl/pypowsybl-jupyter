@@ -33,7 +33,7 @@ def network_explorer(network: Network):
     found = widgets.Select(
         options=vls.index,
         value=None,
-        rows=20,
+        rows=25,
         description='Found',
         disabled=False
     )
@@ -48,4 +48,7 @@ def network_explorer(network: Network):
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
     diagram_panel = widgets.Output()
-    return widgets.HBox([left_panel, diagram_panel])
+    hbox = widgets.HBox([left_panel, diagram_panel])
+    hbox.layout.align_items='flex-end'
+    
+    return hbox

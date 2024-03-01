@@ -44,8 +44,12 @@ export class SvgModel extends DOMWidgetModel {
 
 export class SvgView extends DOMWidgetView {
   render(): void {
+    const el_div = document.createElement("div");
+    el_div.classList.add("svg-viewer-widget");
+    this.el.appendChild(el_div);
+
     new NetworkAreaDiagramViewer(
-      this.el,
+      el_div,
       this.model.get('value'),
       800,
       500,
@@ -134,8 +138,12 @@ export class SvgSldView extends DOMWidgetView {
   render(): void {
     const metadata = this.model.get('value_meta');
 
+    const el_div = document.createElement("div");
+    el_div.classList.add("svg-sld-viewer-widget");
+    this.el.appendChild(el_div);
+
     new SingleLineDiagramViewer(
-      this.el,
+      el_div,
       this.model.get('value'), //svg content
       metadata ? JSON.parse(this.model.get('value_meta')) : null, //metadata
       'voltage-level',

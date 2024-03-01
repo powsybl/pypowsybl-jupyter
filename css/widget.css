@@ -1,4 +1,9 @@
-.custom-widget {
-  background-color: lightseagreen;
-  padding: 0px 2px;
+.svg-viewer-widget {
+  border: 2px solid lightgrey;
+  display: inline-block;
+}
+
+.svg-sld-viewer-widget {
+  border: 2px solid lightgrey;
+  display: inline-block;
 }

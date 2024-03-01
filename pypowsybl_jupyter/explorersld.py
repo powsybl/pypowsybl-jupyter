@@ -26,7 +26,6 @@ def network_explorer_sld(network: Network, vl_id: str = None, parameters: Layout
     """
 
     diagram_panel = widgets.Output()
-    diagram_panel.layout.border='2px solid lightgrey'
 
     def _toggle_switch(_switch_id:str, _new_switch_status: bool, _network: Network, _vl_id:str):
         network.update_switches(id=_switch_id, open=_new_switch_status)
