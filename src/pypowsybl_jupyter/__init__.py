@@ -6,7 +6,7 @@
 #
 
 import importlib.metadata
-from .sldwidget import (
+from .svgsldwidget import (
     SvgSldWidget, display_sld_svg 
 )
 from .sldexplorer import network_explorer_sld

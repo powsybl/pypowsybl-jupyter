@@ -55,3 +55,19 @@ jupyter lab
 ```
 
 The changes should take effect after a source file is saved. If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
+
+## Packaging for distribution
+
+To package pypowsybl-jupyter in a .whl file, for distribution:
+```bash
+conda activate pypowsybl_jupyter-dev
+pip install build
+pip install -e .
+python -m build .
+```
+
+The 'created .whl file' will be available in the 'dist' directory. To install the .whl file:
+```bash
+pip install <'created .whl file'>
+```
+

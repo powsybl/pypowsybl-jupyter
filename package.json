@@ -23,7 +23,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@powsybl/diagram-viewer": "0.1.11"
+		"@powsybl/diagram-viewer": "0.2.0"
 	},
 	"devDependencies": {
 		"@anywidget/types": "^0.1.5",

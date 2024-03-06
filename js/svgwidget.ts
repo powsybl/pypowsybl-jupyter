@@ -15,12 +15,12 @@ interface SvgWidgetModel {
 }
 
 function render({ model, el }: RenderProps<SvgWidgetModel>) {
-        let adiv = document.createElement("div");
-        adiv.classList.add("svgwidget");
-        el.appendChild(adiv);
+        const el_div = document.createElement('div');
+        el_div.classList.add('svg-viewer-widget');
+        el.appendChild(el_div);
 
         new NetworkAreaDiagramViewer(
-                adiv,
+                el_div,
                 model.get('svg_data'),
                 800,
                 500,

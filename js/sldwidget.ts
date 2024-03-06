@@ -33,11 +33,13 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 	const handleNextVl = (id: string) => {
 		model.set("clicked_nextvl", id);
 		model.save_changes();
+		model.send({ event: 'click_nextvl' });
 	};
 	
 	const handleSwitch = (id: string, switch_status: boolean, element: any) => {
 		model.set("clicked_switch", { id: id, switch_status: switch_status });
 		model.save_changes();
+		model.send({ event: 'click_switch' });
 	};
 
 	const handleFeeder = (
@@ -52,11 +54,13 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 		  { id: id, feederType: feederType }
 		);
 		model.save_changes();
+		model.send({ event: 'click_feeder' });
 	};
 
 	const handleBus = (id: string, svgId: string, x: number, y: number) => {
 		model.set('clicked_bus', { id: id });
 		model.save_changes();
+		model.send({ event: 'click_bus' });
 	};
 
 	const handleTogglePopover = (
@@ -67,14 +71,14 @@ function render({ model, el }: RenderProps<WidgetModel>) {
 	  ) => {
 	};
 
-	let el_div = document.createElement("div");
-	el_div.classList.add("sldsvgwidget");
+	const el_div = document.createElement('div');
+    el_div.classList.add('svg-sld-viewer-widget');
     el.appendChild(el_div);
 
     new SingleLineDiagramViewer(
       el_div,
       svg_data,
-      metadata ? JSON.parse(model.get("value_meta")) : null,
+      metadata ? JSON.parse(metadata) : null,
       "voltage-level",
       500,
       600,
