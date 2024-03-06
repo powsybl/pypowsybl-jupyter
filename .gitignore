@@ -7,3 +7,5 @@ __pycache__
 .ipynb_checkpoints
 
 src/pypowsybl_jupyter/static
+pypowsybl_jupyter/labextension
+pypowsybl_jupyter/nbextension

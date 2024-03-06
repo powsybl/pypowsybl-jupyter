@@ -1,5 +1,4 @@
-.sldsvgwidget {
-	background: white;
-	border-radius: 10px;
-	border: 0;
+.svg-sld-viewer-widget {
+	border: 2px solid lightgrey;
+	display: inline-block;
 }

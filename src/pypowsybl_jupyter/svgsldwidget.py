@@ -15,6 +15,9 @@ import pathlib
 import anywidget
 import traitlets
 
+from ipywidgets import (
+    CallbackDispatcher
+)
 
 class SvgSldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
@@ -26,11 +29,54 @@ class SvgSldWidget(anywidget.AnyWidget):
     clicked_switch = traitlets.Dict().tag(sync=True)
     clicked_feeder = traitlets.Dict().tag(sync=True)
     clicked_bus = traitlets.Dict().tag(sync=True)
-
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self._on_nextvl_handlers = CallbackDispatcher()
+        self._on_switch_handlers = CallbackDispatcher()
+        self._on_feeder_handlers = CallbackDispatcher()
+        self._on_bus_handlers = CallbackDispatcher()
+        super().on_msg(self._handle_svgsld_msg)
 
+    def _handle_svgsld_msg(self, _, content, buffers):
+        if content.get('event', '') == 'click_nextvl':
+            self.nextvl()
+        elif content.get('event', '') == 'click_switch':
+            self.on_switch_msg()
+        elif content.get('event', '') == 'click_feeder':
+            self.on_feeder_msg()
+        elif content.get('event', '') == 'click_bus':
+            self.on_bus_msg()
 
+    #nextvl
+    def nextvl(self):
+        self._on_nextvl_handlers(self)
+
+    def on_nextvl(self, callback, remove=False):
+        self._on_nextvl_handlers.register_callback(callback, remove=remove)
+
+    #switch
+    def on_switch_msg(self):
+        self._on_switch_handlers(self)
+
+    def on_switch(self, callback, remove=False):
+        self._on_switch_handlers.register_callback(callback, remove=remove)
+
+    #feeder
+    def on_feeder_msg(self):
+        self._on_feeder_handlers(self)
+
+    def on_feeder(self, callback, remove=False):
+        self._on_feeder_handlers.register_callback(callback, remove=remove)
+
+    #bus
+    def on_bus_msg(self):
+        self._on_bus_handlers(self)
+
+    def on_bus(self, callback, remove=False):
+        self._on_bus_handlers.register_callback(callback, remove=remove)
+
+        
 def _get_svg_string(svg) -> str:
     if isinstance(svg, str):
         return svg
