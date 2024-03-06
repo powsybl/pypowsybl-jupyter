@@ -106,7 +106,7 @@ def display_sld_svg(svg, enable_callbacks: bool = False) -> SvgSldWidget:
 
     Args:
         svg:         the input SVG, as str or class providing an svg and metadata representation
-        enable_callbacks: if true, enable the callbacks for navication arrows, feeders and switches
+        enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
