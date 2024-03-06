@@ -33,10 +33,10 @@ def network_explorer_sld(network: Network, vl_id: str = None, parameters: Layout
 
     def _show_svg_sld(_network: Network, _vl_id: str, _parameters: LayoutParameters):
         with diagram_panel:
-            diagram_panel.clear_output()
             next_widget = display_sld_svg(_network.get_single_line_diagram(_vl_id, _parameters), enable_callbacks=True)
             next_widget.on_nextvl(lambda event: _show_svg_sld(_network, str(event.clicked_nextvl), _parameters))
             next_widget.on_switch(lambda event: _toggle_switch(event.clicked_switch.get('id'), event.clicked_switch.get('switch_status'), _network, _vl_id))
+            diagram_panel.clear_output(wait=True)
             display(next_widget)
 
     p=parameters if parameters is not None else LayoutParameters(use_name=True)

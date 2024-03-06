@@ -40,7 +40,7 @@ def network_explorer(network: Network):
    
     def on_selected(d):
         with diagram_panel:
-            diagram_panel.clear_output()
+            diagram_panel.clear_output(wait=True)
             if d['new'] != None:
                 display(display_svg(network.get_single_line_diagram(d['new'])))
     
