@@ -3,9 +3,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from .svg import SvgWidget, display_svg
+from .svgwidget import SvgWidget, display_svg
 from .explorer import network_explorer
-from .svgsld import SvgSldWidget, display_sld_svg
+from .svgsldwidget import SvgSldWidget, display_sld_svg
 from .explorersld import network_explorer_sld
 from ._version import __version__, version_info
 

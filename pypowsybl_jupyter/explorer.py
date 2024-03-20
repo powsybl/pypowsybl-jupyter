@@ -5,7 +5,7 @@
 
 from IPython.display import display
 from pypowsybl.network import Network
-from pypowsybl_jupyter.svg import display_svg
+from pypowsybl_jupyter.svgwidget import display_svg
 
 import ipywidgets as widgets
 
