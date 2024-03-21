@@ -6,8 +6,15 @@
 import pytest
 
 from pypowsybl_jupyter import SvgWidget
+from pypowsybl_jupyter import SvgSldWidget
 
 
-def test_creation_blank():
-    w = SvgWidget(value="test")
-    assert w.value == 'test'
+def test_creation_svgwidget():
+    w = SvgWidget(value="svgtest")
+    assert w.value == 'svgtest'
+
+def test_creation_svgsldwidget():
+    w = SvgSldWidget(value="svgtest", value_meta="svgtestmeta")
+    assert w.value == 'svgtest'
+    assert w.value_meta == 'svgtestmeta'
+

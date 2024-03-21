@@ -3,7 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from .svg import SvgWidget, display_svg
+from .svgwidget import SvgWidget, display_svg
+from .explorer import network_explorer
+from .svgsldwidget import SvgSldWidget, display_sld_svg
+from .explorersld import network_explorer_sld
 from ._version import __version__, version_info
 
 def _jupyter_labextension_paths():
@@ -20,7 +23,7 @@ def _jupyter_labextension_paths():
     """
     return [{
         'src': 'labextension',
-        'dest': 'pypowsybl-jupyter',
+        'dest': 'pypowsybl_jupyter',
     }]
 
 
@@ -43,6 +46,6 @@ def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
         'src': 'nbextension',
-        'dest': 'pypowsybl-jupyter',
-        'require': 'pypowsybl-jupyter/extension'
+        'dest': 'pypowsybl_jupyter',
+        'require': 'pypowsybl_jupyter/extension'
     }]

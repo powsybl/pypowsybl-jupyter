@@ -3,9 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import { Application, IPlugin } from '@phosphor/application';
+import { Application, IPlugin } from '@lumino/application';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { IJupyterWidgetRegistry } from '@jupyter-widgets/base';
 
@@ -13,7 +13,7 @@ import * as widgetExports from './widget';
 
 import { MODULE_NAME, MODULE_VERSION } from './version';
 
-const EXTENSION_ID = 'pypowsybl-jupyter:plugin';
+const EXTENSION_ID = 'pypowsybl_jupyter:plugin';
 
 /**
  * The pypowsybl-jupyter plugin.
@@ -34,7 +34,7 @@ export default pypowsyblJupyterPlugin;
  */
 function activateWidgetExtension(
   app: Application<Widget>,
-  registry: IJupyterWidgetRegistry
+  registry: IJupyterWidgetRegistry,
 ): void {
   registry.registerWidget({
     name: MODULE_NAME,

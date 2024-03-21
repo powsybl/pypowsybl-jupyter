@@ -7,5 +7,5 @@
 Information about the frontend package of the widgets.
 """
 
-module_name = "pypowsybl-jupyter"
+module_name = "pypowsybl_jupyter"
 module_version = "^0.1.0"

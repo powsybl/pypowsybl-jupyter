@@ -6,7 +6,7 @@ define(function() {
     window['requirejs'].config({
         map: {
             '*': {
-                'pypowsybl-jupyter': 'nbextensions/pypowsybl-jupyter/index',
+                'pypowsybl_jupyter': 'nbextensions/pypowsybl_jupyter/index',
             },
         }
     });

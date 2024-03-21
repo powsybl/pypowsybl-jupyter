@@ -23,6 +23,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.yarn/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -63,6 +64,7 @@ instance/
 docs/_build/
 docs/source/_static/embed-bundle.js
 docs/source/_static/embed-bundle.js.map
+docs/source/_static/embed-bundle.js.LICENSE.txt
 
 # PyBuilder
 target/
@@ -158,3 +160,4 @@ pypowsybl_jupyter/labextension
 
 # Intellij files
 .idea/
+*.iml

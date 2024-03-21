@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import * as widgets from '@jupyter-widgets/base';
+import * as baseManager from '@jupyter-widgets/base-manager';
 import * as services from '@jupyterlab/services';
 
 let numComms = 0;
@@ -46,7 +47,7 @@ export class MockComm implements widgets.IClassicComm {
   _on_close: ((x?: any) => void) | null = null;
 }
 
-export class DummyManager extends widgets.ManagerBase<HTMLElement> {
+export class DummyManager extends baseManager.ManagerBase {
   constructor() {
     super();
     this.el = window.document.createElement('div');
@@ -55,7 +56,7 @@ export class DummyManager extends widgets.ManagerBase<HTMLElement> {
   display_view(
     msg: services.KernelMessage.IMessage,
     view: widgets.DOMWidgetView,
-    options: any
+    options: any,
   ) {
     // TODO: make this a spy
     // TODO: return an html element
@@ -69,7 +70,7 @@ export class DummyManager extends widgets.ManagerBase<HTMLElement> {
   protected loadClass(
     className: string,
     moduleName: string,
-    moduleVersion: string
+    moduleVersion: string,
   ): Promise<any> {
     if (moduleName === '@jupyter-widgets/base') {
       if ((widgets as any)[className]) {
@@ -107,7 +108,7 @@ export interface Constructor<T> {
 
 export function createTestModel<T extends widgets.WidgetModel>(
   constructor: Constructor<T>,
-  attributes?: any
+  attributes?: any,
 ): T {
   const id = widgets.uuid();
   const widget_manager = new DummyManager();
