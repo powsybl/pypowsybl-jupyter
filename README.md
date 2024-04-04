@@ -73,7 +73,7 @@ To package pypowsybl-jupyter in a .whl file, for distribution:
 ```bash
 conda activate pypowsybl_jupyter-dev
 pip install build
-python -m build .
+python -m build --wheel
 ```
 
 The 'created .whl file' will be available in the 'dist' directory. To install the .whl file:
