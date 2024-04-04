@@ -9,11 +9,11 @@ import importlib.metadata
 from .svgsldwidget import (
     SvgSldWidget, display_sld_svg, update_sld_svg
 )
-from .sldexplorer import network_explorer_sld
+from .sldnavigator import sld_navigator
 from .svgwidget import (
     SvgWidget, display_svg, update_svg
 )
-from .explorer import network_explorer
+from .sldexplorer import sld_explorer
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
