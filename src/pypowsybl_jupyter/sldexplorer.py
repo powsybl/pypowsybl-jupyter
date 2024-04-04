@@ -7,7 +7,7 @@
 
 from IPython.display import display
 from pypowsybl.network import Network
-from .svgsldwidget import display_sld_svg, update_sld_svg
+from .sldwidget import display_sld, update_sld
 
 import ipywidgets as widgets
 
@@ -48,10 +48,10 @@ def sld_explorer(network: Network):
                 new_svg_data=network.get_single_line_diagram(d['new'])
 
                 if svgwidget==None:
-                    svgwidget=display_sld_svg(new_svg_data)
+                    svgwidget=display_sld(new_svg_data)
                     display(svgwidget)
                 else:
-                   update_sld_svg(svgwidget, new_svg_data)
+                   update_sld(svgwidget, new_svg_data)
                 
 
     found.observe(on_selected, names='value')

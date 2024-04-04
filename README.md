@@ -39,7 +39,7 @@ conda create -n pypowsybl_jupyter-dev -c conda-forge nodejs python jupyterlab
 conda activate pypowsybl_jupyter-dev
 ```
 
-Build, package and install pypowsybl_jupyter (python and typescript code). 
+Build, package and install pypowsybl_jupyter (python and typescript code): 
 
 ```bash
 pip install -e .
@@ -54,7 +54,18 @@ npm run dev
 jupyter lab
 ```
 
-The changes should take effect after a source file is saved. If you make a change to the python code then you will need to restart the notebook kernel to have it take effect.
+To enable the automatic reloading in Jupyter, please define this environment variable:
+
+```py
+%env ANYWIDGET_HMR=1
+```
+or, before launching a Jupyter session:
+
+```bash
+ANYWIDGET_HMR=1 jupyter lab
+```
+
+The changes should take effect after saving the source file. If the changes are not recognized, restarting the notebook kernel may help.
 
 ## Packaging for distribution
 
@@ -62,7 +73,6 @@ To package pypowsybl-jupyter in a .whl file, for distribution:
 ```bash
 conda activate pypowsybl_jupyter-dev
 pip install build
-pip install -e .
 python -m build .
 ```
 

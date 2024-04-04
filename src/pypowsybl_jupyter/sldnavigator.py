@@ -8,7 +8,7 @@
 from IPython.display import display
 from ipywidgets import widgets
 from pypowsybl.network import Network, LayoutParameters
-from .svgsldwidget import display_sld_svg, update_sld_svg
+from .sldwidget import display_sld, update_sld
 
 def sld_navigator(network: Network, vl_id: str = None, parameters: LayoutParameters = None):
     """
@@ -35,16 +35,16 @@ def sld_navigator(network: Network, vl_id: str = None, parameters: LayoutParamet
         idswitch = event.clicked_switch.get('id')
         statusswitch = event.clicked_switch.get('switch_status')
         network.update_switches(id=idswitch, open=statusswitch)
-        update_sld_svg(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), True, enable_callbacks= True)
+        update_sld(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), True, enable_callbacks= True)
 
     def _go_to_vl(event: any):
         nonlocal _current_vl_id
         _current_vl_id= str(event.clicked_nextvl)
-        update_sld_svg(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
+        update_sld(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
 
     diagram_panel = widgets.Output()
     with diagram_panel:
-        _sldwidget = display_sld_svg(network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
+        _sldwidget = display_sld(network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
         _sldwidget.on_nextvl(lambda event: _go_to_vl(event))
         _sldwidget.on_switch(lambda event: _toggle_switch(event))
         display(_sldwidget)

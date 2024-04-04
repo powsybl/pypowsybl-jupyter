@@ -19,7 +19,7 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
-class SvgSldWidget(anywidget.AnyWidget):
+class SldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "sldwidget.css"
     
@@ -92,7 +92,7 @@ def _get_svg_metadata(svg) -> str:
     else:
         raise ValueError('svg argument provide a _metadata method.')
 
-def display_sld_svg(svg, enable_callbacks: bool = False) -> SvgSldWidget:
+def display_sld(svg, enable_callbacks: bool = False) -> SldWidget:
     """
     Displays an SLD's SVG with support for panning and zooming.
 
@@ -112,9 +112,9 @@ def display_sld_svg(svg, enable_callbacks: bool = False) -> SvgSldWidget:
 
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     svg_value=_get_svg_string(svg)
-    return SvgSldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata})
+    return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata})
 
-def update_sld_svg(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False):
+def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False):
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     svg_value=_get_svg_string(svg)
     sldwidget.diagram_data= {"value": svg_value, "value_meta": svg_metadata, "keep_viewbox": keep_viewbox}
