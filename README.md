@@ -70,4 +70,3 @@ The 'created .whl file' will be available in the 'dist' directory. To install th
 ```bash
 pip install <'created .whl file'>
 ```
-
