@@ -3,30 +3,30 @@
 	"version": "0.1.0",
 	"description": "Widgets for pypowsybl in Jupyter notebooks",
 	"keywords": [
-	  "jupyter",
-	  "jupyterlab",
-	  "jupyterlab-extension",
-	  "widgets"
+		"jupyter",
+		"jupyterlab",
+		"jupyterlab-extension",
+		"widgets"
 	],
 	"homepage": "https://github.com/powsybl/pypowsybl-jupyter",
 	"bugs": {
-	  "url": "https://github.com/powsybl/pypowsybl-jupyter/issues"
+		"url": "https://github.com/powsybl/pypowsybl-jupyter/issues"
 	},
 	"license": "MPL-2.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/powsybl/pypowsybl-jupyter"
-	  },
+	},
 	"scripts": {
 		"dev": "npm run build -- --sourcemap=inline --watch",
 		"build": "esbuild js/*.ts --minify --format=esm --bundle --outdir=src/pypowsybl_jupyter/static",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@powsybl/diagram-viewer": "0.2.0"
+		"@powsybl/diagram-viewer": "0.3.4"
 	},
 	"devDependencies": {
-		"@anywidget/types": "^0.1.5",
+		"@anywidget/types": "^0.1.6",
 		"typescript": "^5.3.3",
 		"esbuild": "^0.20.0"
 	}

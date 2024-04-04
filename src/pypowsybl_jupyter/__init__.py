@@ -7,11 +7,11 @@
 
 import importlib.metadata
 from .svgsldwidget import (
-    SvgSldWidget, display_sld_svg 
+    SvgSldWidget, display_sld_svg, update_sld_svg
 )
 from .sldexplorer import network_explorer_sld
 from .svgwidget import (
-    SvgWidget, display_svg 
+    SvgWidget, display_svg, update_svg
 )
 from .explorer import network_explorer
 

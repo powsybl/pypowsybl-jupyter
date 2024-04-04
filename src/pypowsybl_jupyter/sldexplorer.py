@@ -8,7 +8,7 @@
 from IPython.display import display
 from ipywidgets import widgets
 from pypowsybl.network import Network, LayoutParameters
-from .svgsldwidget import display_sld_svg
+from .svgsldwidget import display_sld_svg, update_sld_svg
 
 def network_explorer_sld(network: Network, vl_id: str = None, parameters: LayoutParameters = None):
     """
@@ -25,22 +25,27 @@ def network_explorer_sld(network: Network, vl_id: str = None, parameters: Layout
 
             network_explorer_sld(pp.network.create_four_substations_node_breaker_network())
     """
+    
+    _params=parameters if parameters is not None else LayoutParameters(use_name=True)
+    _current_vl_id = vl_id if vl_id is not None else network.get_voltage_levels().index[0]
+    _sldwidget = None
+
+    def _toggle_switch(event: any):
+        idswitch = event.clicked_switch.get('id')
+        statusswitch = event.clicked_switch.get('switch_status')
+        network.update_switches(id=idswitch, open=statusswitch)
+        update_sld_svg(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), True, enable_callbacks= True)
+
+    def _go_to_vl(event: any):
+        nonlocal _current_vl_id
+        _current_vl_id= str(event.clicked_nextvl)
+        update_sld_svg(_sldwidget, network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
 
     diagram_panel = widgets.Output()
+    with diagram_panel:
+        _sldwidget = display_sld_svg(network.get_single_line_diagram(_current_vl_id, _params), enable_callbacks=True)
+        _sldwidget.on_nextvl(lambda event: _go_to_vl(event))
+        _sldwidget.on_switch(lambda event: _toggle_switch(event))
+        display(_sldwidget)
 
-    def _toggle_switch(_switch_id:str, _new_switch_status: bool, _network: Network, _vl_id:str):
-        network.update_switches(id=_switch_id, open=_new_switch_status)
-        _show_svg_sld(_network, _vl_id, p)
-
-    def _show_svg_sld(_network: Network, _vl_id: str, _parameters: LayoutParameters):
-        with diagram_panel:
-            next_widget = display_sld_svg(_network.get_single_line_diagram(_vl_id, _parameters), enable_callbacks=True)
-            next_widget.on_nextvl(lambda event: _show_svg_sld(_network, str(event.clicked_nextvl), _parameters))
-            next_widget.on_switch(lambda event: _toggle_switch(event.clicked_switch.get('id'), event.clicked_switch.get('switch_status'), _network, _vl_id))
-            diagram_panel.clear_output(wait=True)
-            display(next_widget)
-
-    p=parameters if parameters is not None else LayoutParameters(use_name=True)
-    starting_vl_id = vl_id if vl_id is not None else network.get_voltage_levels().index[0]
-    _show_svg_sld(network, starting_vl_id, p)
     return widgets.HBox([diagram_panel])

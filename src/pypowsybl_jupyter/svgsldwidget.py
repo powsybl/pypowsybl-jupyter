@@ -23,8 +23,7 @@ class SvgSldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "sldwidget.css"
     
-    value = traitlets.Unicode().tag(sync=True)
-    value_meta = traitlets.Unicode().tag(sync=True)
+    diagram_data  = traitlets.Dict().tag(sync=True)
     clicked_nextvl = traitlets.Unicode().tag(sync=True)
     clicked_switch = traitlets.Dict().tag(sync=True)
     clicked_feeder = traitlets.Dict().tag(sync=True)
@@ -112,5 +111,10 @@ def display_sld_svg(svg, enable_callbacks: bool = False) -> SvgSldWidget:
     """
 
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
-    return SvgSldWidget(value=_get_svg_string(svg), value_meta=svg_metadata)
+    svg_value=_get_svg_string(svg)
+    return SvgSldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata})
 
+def update_sld_svg(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False):
+    svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
+    svg_value=_get_svg_string(svg)
+    sldwidget.diagram_data= {"value": svg_value, "value_meta": svg_metadata, "keep_viewbox": keep_viewbox}

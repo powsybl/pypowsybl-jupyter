@@ -9,11 +9,13 @@ Homepage = "https://github.com/powsybl/pypowsybl-jupyter"
 name = "pypowsybl_jupyter"
 description = "Widgets for pypowsybl in Jupyter notebooks"
 version = "0.1.0"
+
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
 authors = [
     { name = "Sylvain Leclerc", email = "sylvain.leclerc@rte-france.com" },
+    { name = "Christian Biasuzzi", email = "christian.biasuzzi@soft.it" },
 ]
 keywords = [
     "IPython",
@@ -52,8 +54,6 @@ artifacts = ["src/pypowsybl_jupyter/static/*"]
 
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"
-ensured-targets = ["src/pypowsybl_jupyter/static/sldwidget.js"]
-skip-if-exists = ["src/pypowsybl_jupyter/static/sldwidget.js"]
 dependencies = ["hatch-jupyter-builder>=0.5.0"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]

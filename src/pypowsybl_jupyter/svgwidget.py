@@ -67,3 +67,12 @@ def display_svg(svg, fit_to_cell: bool = False) -> SvgWidget:
         svg_node.setAttribute('height', '100%')
     return SvgWidget(svg_data=svg_node.toxml())
 
+
+def update_svg(svgwidget, svg, fit_to_cell: bool = False):
+    doc = minidom.parseString(_get_svg_string(svg))
+    svg_node = _get_svg_root(doc)
+
+    if fit_to_cell:
+        svg_node.setAttribute('width', '100%')
+        svg_node.setAttribute('height', '100%')
+    svgwidget.svg_data=svg_node.toxml()

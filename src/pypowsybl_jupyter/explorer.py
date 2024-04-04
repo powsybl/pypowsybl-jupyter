@@ -7,7 +7,7 @@
 
 from IPython.display import display
 from pypowsybl.network import Network
-from .svgwidget import display_svg
+from .svgwidget import display_svg, update_svg
 
 import ipywidgets as widgets
 
@@ -18,6 +18,7 @@ def network_explorer(network: Network):
     """
 
     vls = network.get_voltage_levels(attributes=[])
+    svgwidget=None
 
     vl_input = widgets.Text(
         value='',
@@ -39,18 +40,26 @@ def network_explorer(network: Network):
         description='Found',
         disabled=False
     )
-   
+
     def on_selected(d):
+        nonlocal svgwidget
         with diagram_panel:
-            diagram_panel.clear_output(wait=True)
             if d['new'] != None:
-                display(display_svg(network.get_single_line_diagram(d['new'])))
-    
+                new_svg_data=network.get_single_line_diagram(d['new'])
+
+                if svgwidget==None:
+                    svgwidget=display_svg(new_svg_data)
+                    display(svgwidget)
+                else:
+                   update_svg(svgwidget, new_svg_data)
+                
+
     found.observe(on_selected, names='value')
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
     diagram_panel = widgets.Output()
     hbox = widgets.HBox([left_panel, diagram_panel])
     hbox.layout.align_items='flex-end'
+    
     
     return hbox
