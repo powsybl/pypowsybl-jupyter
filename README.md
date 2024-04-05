@@ -5,8 +5,6 @@ Widgets for [pypowsybl](https://github.com/powsybl/pypowsybl) in the Jupyter not
 
 ## Installation
 
-An existing python and jupyter-lab environment is assumed (the "installation from sources" section describes how to create a new environment from scratch, using conda).
-
 You can install the widget binaries using `pip`:
 
 ```bash
@@ -18,34 +16,17 @@ pip install pypowsybl_jupyter
 In the examples directory there are some notebooks demonstrating the widgets.
 
 
-## Installation from sources
+## Development installation
 
-Create a dev environment:
-```bash
-conda create -n pypowsybl_jupyter-dev -c conda-forge nodejs python jupyterlab
-conda activate pypowsybl_jupyter-dev
+Create a virtual environment and install pypowsybl_jupyter in *editable* mode with the optional development dependencies:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-Build, package and install pypowsybl_jupyter (python and typescript code). 
-```bash
-pip install .
-```
-
-## Development Installation
-
-Create a dev environment:
-```bash
-conda create -n pypowsybl_jupyter-dev -c conda-forge nodejs python jupyterlab
-conda activate pypowsybl_jupyter-dev
-```
-
-Build, package and install pypowsybl_jupyter (python and typescript code): 
-
-```bash
-pip install -e .
-```
-
-The "-e" flag sets the installation in development mode, enabling real-time editing and updates a running application. For example, if you use JupyterLab you can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the widget.
+For example, in editable mode you can watch the source directory for changes, to automatically rebuild the widget, and run JupyterLab in different terminals. Changes made in `js/` will be reflected in an open notebook where the widget is used.
 
 ```bash
 # Watch the source directory in one terminal, automatically rebuilding when needed
@@ -65,13 +46,12 @@ or, before launching a Jupyter session:
 ANYWIDGET_HMR=1 jupyter lab
 ```
 
-The changes should take effect after saving the source file. If the changes are not recognized, restarting the notebook kernel may help.
+The changes should take effect after saving a source file. In case a change is not recognized, restarting the notebook kernel may help.
 
 ## Packaging for distribution
 
-To package pypowsybl-jupyter in a .whl file, for distribution:
+To package pypowsybl_jupyter in a .whl file, for distribution:
 ```bash
-conda activate pypowsybl_jupyter-dev
 pip install build
 python -m build --wheel
 ```
