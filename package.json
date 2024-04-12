@@ -24,7 +24,7 @@
 		"lint": "eslint . --ext js,ts --max-warnings 0"
 	},
 	"dependencies": {
-		"@powsybl/diagram-viewer": "0.3.4"
+		"@powsybl/diagram-viewer": "0.4.0"
 	},
 	"devDependencies": {
 		"@anywidget/types": "^0.1.6",
