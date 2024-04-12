@@ -17,6 +17,11 @@ from .svgwidget import (
     SvgWidget, display_svg, update_svg
 )
 
+from .nadwidget import (
+    NadWidget, display_nad, update_nad
+)
+from .nadexplorer import nad_explorer
+
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
 except importlib.metadata.PackageNotFoundError:
