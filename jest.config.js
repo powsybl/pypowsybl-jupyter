@@ -14,9 +14,8 @@ module.exports = {
   testPathIgnorePatterns: ['/lib/', '/node_modules/'],
   testRegex: '/__tests__/.*.spec.ts[x]?$',
   transformIgnorePatterns: ['/node_modules/(?!(@jupyter(lab|-widgets)/.*|@svgdotjs/.*)/)'],
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.json',
-    },
+  transform: {
+    transform_regex: ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
   },
+  setupFilesAfterEnv: ['<rootDir>/setup-jest.js'],
 };

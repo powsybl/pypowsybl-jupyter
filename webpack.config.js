@@ -40,7 +40,7 @@ module.exports = [
   },
 
   /**
-   * Embeddable pypowsybl-jupyter bundle
+   * Embeddable pypowsybl_jupyter bundle
    *
    * This bundle is almost identical to the notebook extension bundle. The only
    * difference is in the configuration of the webpack public path for the
@@ -55,8 +55,8 @@ module.exports = [
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
         libraryTarget: 'amd',
-        library: "pypowsybl-jupyter",
-        publicPath: 'https://unpkg.com/pypowsybl-jupyter@' + version + '/dist/'
+        library: "pypowsybl_jupyter",
+        publicPath: 'https://unpkg.com/pypowsybl_jupyter@' + version + '/dist/'
     },
     devtool: 'source-map',
     module: {
@@ -77,7 +77,7 @@ module.exports = [
     output: {
       filename: 'embed-bundle.js',
       path: path.resolve(__dirname, 'docs', 'source', '_static'),
-      library: "pypowsybl-jupyter",
+      library: "pypowsybl_jupyter",
       libraryTarget: 'amd'
     },
     module: {
