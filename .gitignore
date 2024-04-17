@@ -9,3 +9,8 @@ __pycache__
 src/pypowsybl_jupyter/static
 pypowsybl_jupyter/labextension
 pypowsybl_jupyter/nbextension
+
+# Intellij files
+.idea/
+*.iml
+
