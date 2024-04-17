@@ -20,7 +20,7 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
         depth: the diagram depth around the voltage level, controls the size of the sub network
         low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
-        parameters: layout properties to adjust the svg rendering for the sld
+        parameters: layout properties to adjust the svg rendering for the nad
 
     Examples:
 
@@ -30,7 +30,7 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     """
 
     vls = network.get_voltage_levels(attributes=[])
-    svgwidget=None
+    nad_widget=None
 
     selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids 
     if len(selected_vl)==0:
@@ -38,7 +38,7 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
 
     selected_depth=depth
 
-    npars = parameters if parameters is not None else NadParameters(edge_name_displayed=True,
+    npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
         id_displayed=False,
         edge_info_along_edge=False,
         power_value_precision=1,
@@ -49,19 +49,19 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
         substation_description_displayed=True)
 
     def update_diagram():
-        nonlocal svgwidget, selected_vl, selected_depth
+        nonlocal nad_widget
         if len(selected_vl)>0:
             new_diagram_data=network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
-            if svgwidget==None:
-                svgwidget=display_nad(new_diagram_data)
+            if nad_widget==None:
+                nad_widget=display_nad(new_diagram_data)
             else:
-                update_nad(svgwidget,new_diagram_data)
+                update_nad(nad_widget,new_diagram_data)
 
 
     nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
 
     def on_nadslider_changed(d):
-        nonlocal svgwidget, selected_vl, selected_depth
+        nonlocal selected_depth
         selected_depth=d['new']
         update_diagram()
 
@@ -74,7 +74,6 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
         disabled=False,
         continuous_update=True
     )
-    
     
     def on_text_changed(d):
         nonlocal selected_vl
@@ -94,7 +93,7 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     )
 
     def on_selected(d):
-        nonlocal svgwidget, selected_vl, selected_depth
+        nonlocal selected_vl
         if d['new'] != None:
             selected_vl=d['new']
             update_diagram()
@@ -104,9 +103,8 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     update_diagram()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
-    right_panel = widgets.VBox([nadslider, svgwidget])
+    right_panel = widgets.VBox([nadslider, nad_widget])
     hbox = widgets.HBox([left_panel, right_panel])
     hbox.layout.align_items='flex-end'
-    
     
     return hbox
