@@ -86,7 +86,6 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     found = widgets.SelectMultiple(
         options=list(vls.index),
         value=selected_vl,
-        #rows=29,
         description='Found',
         disabled=False,
         layout=widgets.Layout(height='570px')

@@ -28,10 +28,18 @@ pip install -e ".[dev]"
 
 For example, in editable mode you can watch the source directory for changes, to automatically rebuild the widget, and run JupyterLab in different terminals. Changes made in `js/` will be reflected in an open notebook where the widget is used.
 
+Please note that pip only supports editable installs (enabled with the option -e) from a pyproject.toml files since v21.3. Make sure you have an up-to-date version of pip
+```sh
+pip install --upgrade pip
+```
+
+
 ```bash
 # Watch the source directory in one terminal, automatically rebuilding when needed
 npm run dev
-# Run JupyterLab in another terminal
+# Run JupyterLab in another terminal.
+# Please ensure that you also activate the virtual environment in the new terminal.
+source .venv/bin/activate
 jupyter lab
 ```
 
