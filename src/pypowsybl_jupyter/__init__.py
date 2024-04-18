@@ -12,11 +12,6 @@ from .sldwidget import (
 )
 from .sldexplorer import sld_explorer
 from .sldnavigator import sld_navigator
-
-from .svgwidget import (
-    SvgWidget, display_svg, update_svg
-)
-
 from .nadwidget import (
     NadWidget, display_nad, update_nad
 )
