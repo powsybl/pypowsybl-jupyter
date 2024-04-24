@@ -2,10 +2,11 @@
 
 Widgets for [pypowsybl](https://github.com/powsybl/pypowsybl) in the Jupyter notebook.
 
+The widgets should work with versions of Jupyter Lab >= 4, Notebook >= 7.
 
 ## Installation
 
-You can install the widget binaries using `pip`:
+You can install the widgets binaries using `pip`:
 
 ```bash
 pip install pypowsybl_jupyter
