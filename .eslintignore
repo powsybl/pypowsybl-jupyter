@@ -1,5 +1,4 @@
-node_modules
-dist
-coverage
-**/*.d.ts
-tests
+dist/
+node_modules/
+src/pypowsybl_jupyter/static
+
