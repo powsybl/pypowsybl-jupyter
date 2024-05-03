@@ -16,7 +16,7 @@ from .nadwidget import (
     NadWidget, display_nad, update_nad
 )
 from .nadexplorer import nad_explorer
-from .vlexplorer import vl_explorer
+from .networkexplorer import network_explorer
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")

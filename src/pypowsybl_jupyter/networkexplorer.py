@@ -11,9 +11,9 @@ from .sldwidget import display_sld, update_sld
 
 import ipywidgets as widgets
 
-def vl_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: LayoutParameters = None):
+def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: LayoutParameters = None):
     """
-    Creates a combined NAD and SLD explorer widget for the network's VLs. Diagrams are displayed on two different tabs.
+    Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
 
     Args:
         network: the input network
@@ -28,7 +28,7 @@ def vl_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nomin
 
         .. code-block:: python
 
-            vl_explorer(pp.network.create_eurostag_tutorial_example1_network())
+            network_explorer(pp.network.create_eurostag_tutorial_example1_network())
     """    
 
     vls = network.get_voltage_levels(attributes=[])
