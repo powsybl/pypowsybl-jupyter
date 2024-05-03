@@ -10,8 +10,6 @@ import importlib.metadata
 from .sldwidget import (
     SldWidget, display_sld, update_sld
 )
-from .sldexplorer import sld_explorer
-from .sldnavigator import sld_navigator
 from .nadwidget import (
     NadWidget, display_nad, update_nad
 )
