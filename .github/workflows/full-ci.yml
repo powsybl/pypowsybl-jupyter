@@ -61,3 +61,19 @@ jobs:
         with:
           name: pypowsybl_jupyter-wheel
           path: dist/*.whl
+
+  package:
+    name: Package wheels
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v3
+        with:
+          path: download
+
+      - name: Release on PyPi (fake test)
+        shell: bash
+        run: |
+          ls -R download
