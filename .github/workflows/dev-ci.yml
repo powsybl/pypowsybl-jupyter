@@ -1,12 +1,17 @@
-name: Build
+name: Dev CI
 
 on:
   push:
-    branches: 'vl_explorer_github_wf_'
+    branches:
+      # on all branches except main where full build will be run
+      - '*'
+      - '!main'
 
 jobs:
   build:
+    name: Build wheel
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
