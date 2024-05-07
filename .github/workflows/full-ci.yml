@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'vl_explorer_github_wf'
     tags:
       - 'v*.*.*'    
 
@@ -80,6 +79,7 @@ jobs:
           path: download
 
       - name: Release on PyPi (fake test)
+        if: startsWith(github.ref, 'refs/tags/')
         shell: bash
         run: |
           ls -R download
