@@ -2,3 +2,7 @@
 	border: 2px solid lightgrey;
 	display: inline-block;
 }
+
+.invalid-lf .nad-edge-infos {
+	opacity: 0.2;
+}
