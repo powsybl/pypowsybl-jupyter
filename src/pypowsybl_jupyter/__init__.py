@@ -13,8 +13,12 @@ from .sldwidget import (
 from .nadwidget import (
     NadWidget, display_nad, update_nad
 )
-from .nadexplorer import nad_explorer
-from .networkexplorer import network_explorer
+from .networkexplorer import  (
+    NetworkExplorer, network_explorer
+)
+from .nadexplorer import  (
+    NADExplorer, nad_explorer
+)
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
