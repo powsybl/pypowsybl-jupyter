@@ -10,12 +10,11 @@ import importlib.metadata
 from .sldwidget import (
     SldWidget, display_sld, update_sld
 )
-from .sldexplorer import sld_explorer
-from .sldnavigator import sld_navigator
 from .nadwidget import (
     NadWidget, display_nad, update_nad
 )
 from .nadexplorer import nad_explorer
+from .networkexplorer import network_explorer
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
