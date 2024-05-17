@@ -31,7 +31,7 @@ def _get_svg_string(svg) -> str:
     else:
         raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
 
-def display_nad(svg, invalid_lf: bool = True) -> NadWidget:
+def display_nad(svg, invalid_lf: bool = False) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
 
@@ -50,7 +50,7 @@ def display_nad(svg, invalid_lf: bool = True) -> NadWidget:
     """    
     return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg), "invalid_lf": invalid_lf})
 
-def update_nad(nadwidget, svg, invalid_lf: bool = True):
+def update_nad(nadwidget, svg, invalid_lf: bool = False):
     """
     Updates an existing NAD widget with a new SVG content
 

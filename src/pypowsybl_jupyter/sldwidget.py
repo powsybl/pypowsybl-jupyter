@@ -92,7 +92,7 @@ def _get_svg_metadata(svg) -> str:
     else:
         raise ValueError('svg argument provide a _metadata method.')
 
-def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = True) -> SldWidget:
+def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
     """
     Displays an SLD's SVG with support for panning and zooming.
 
@@ -115,7 +115,7 @@ def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = True) ->
     svg_value=_get_svg_string(svg)
     return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata, "invalid_lf": invalid_lf})
 
-def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False, invalid_lf: bool = True):
+def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False, invalid_lf: bool = False):
     """
     Updates an existing SLD widget with a new SVG content.
 
