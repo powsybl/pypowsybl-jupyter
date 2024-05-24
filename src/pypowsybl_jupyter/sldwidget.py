@@ -92,13 +92,14 @@ def _get_svg_metadata(svg) -> str:
     else:
         raise ValueError('svg argument provide a _metadata method.')
 
-def display_sld(svg, enable_callbacks: bool = False) -> SldWidget:
+def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
     """
     Displays an SLD's SVG with support for panning and zooming.
 
     Args:
         svg: the input SVG, as str or class providing an svg and metadata representation
         enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
+        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -112,9 +113,9 @@ def display_sld(svg, enable_callbacks: bool = False) -> SldWidget:
 
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     svg_value=_get_svg_string(svg)
-    return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata})
+    return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata, "invalid_lf": invalid_lf})
 
-def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False):
+def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False, invalid_lf: bool = False):
     """
     Updates an existing SLD widget with a new SVG content.
 
@@ -122,6 +123,7 @@ def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: boo
         sldwidget: the existing widget to update
         svg: the input NAD's SVG
         enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
+        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Examples:
 
@@ -132,4 +134,4 @@ def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: boo
 
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     svg_value=_get_svg_string(svg)
-    sldwidget.diagram_data= {"value": svg_value, "value_meta": svg_metadata, "keep_viewbox": keep_viewbox}
+    sldwidget.diagram_data= {"value": svg_value, "value_meta": svg_metadata, "keep_viewbox": keep_viewbox, "invalid_lf": invalid_lf}

@@ -66,9 +66,12 @@ function render({ model, el }: RenderProps<SldWidgetModel>) {
         const diagram_data = model.get('diagram_data');
         const svg_data = diagram_data['value']; //svg content
         const metadata = diagram_data['value_meta']; //metadata
+        const is_invalid_lf = diagram_data['invalid_lf'];
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-sld-viewer-widget');
+
+        el_div.classList.toggle('invalid-lf', is_invalid_lf);
 
         new SingleLineDiagramViewer(
             el_div,

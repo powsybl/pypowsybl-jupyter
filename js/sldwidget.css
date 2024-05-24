@@ -2,3 +2,7 @@
 	border: 2px solid lightgrey;
 	display: inline-block;
 }
+
+.invalid-lf :is(.sld-active-power, .sld-reactive-power, .sld-voltage, .sld-angle) {
+	opacity: 0.2;
+}

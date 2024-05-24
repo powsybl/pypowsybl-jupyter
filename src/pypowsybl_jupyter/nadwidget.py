@@ -31,12 +31,13 @@ def _get_svg_string(svg) -> str:
     else:
         raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
 
-def display_nad(svg) -> NadWidget:
+def display_nad(svg, invalid_lf: bool = False) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
 
     Args:
         svg: the input SVG, as str or class providing an svg and metadata representation
+        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -47,15 +48,16 @@ def display_nad(svg) -> NadWidget:
 
             display_nad(network.get_network_area_diagram())
     """    
-    return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg)})
+    return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg), "invalid_lf": invalid_lf})
 
-def update_nad(nadwidget, svg):
+def update_nad(nadwidget, svg, invalid_lf: bool = False):
     """
     Updates an existing NAD widget with a new SVG content
 
     Args:
         nadwidget: the existing widget to update
         svg: the input NAD's SVG
+        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Examples:
 
@@ -65,4 +67,4 @@ def update_nad(nadwidget, svg):
     """    
 
     svg_value=_get_svg_string(svg)
-    nadwidget.diagram_data= {"svg_data": svg_value}
+    nadwidget.diagram_data= {"svg_data": svg_value, "invalid_lf": invalid_lf}
