@@ -55,8 +55,13 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
 
     def go_to_vl(event: any):
         nonlocal selected_vl
-        selected_vl= str(event.clicked_nextvl)
-        found.value=selected_vl
+        arrow_vl= str(event.clicked_nextvl)
+        vl_filtered_list=list(found.options)
+        if arrow_vl not in vl_filtered_list:
+            vl_filtered_list.append(arrow_vl)
+            found.options=vl_filtered_list
+        selected_vl=arrow_vl    
+        found.value=arrow_vl	
 
     def toggle_switch(event: any):
         idswitch = event.clicked_switch.get('id')
@@ -106,12 +111,12 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
     )
     
     def on_text_changed(d):
-        nonlocal selected_vl
-        found.options = vls[vls.index.str.contains(d['new'], regex=False)].index
-        if len(found.options) > 0:
-            selected_vl=d['new']
+        nonlocal found
+        if d['new'] != '':
+            found.options = vls[vls.index.str.contains(d['new'], regex=False)].index
         else:
-            selected_vl=None   
+            found.options=list(vls.index)
+            found.value=selected_vl
 
     vl_input.observe(on_text_changed, names='value')
     
