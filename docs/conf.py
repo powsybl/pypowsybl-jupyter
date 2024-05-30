@@ -21,7 +21,7 @@ print(f'appended {source_path}')
 
 # -- Project information -----------------------------------------------------
 
-project = 'TODO add project name'
+project = 'pypowsybl-jupyter'
 copyright = '2024, RTE (http://www.rte-france.com)'
 
 
