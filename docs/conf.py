@@ -63,8 +63,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = "furo"
 
-html_title = 'TODO add project name'
-html_short_title = 'TODO add project name'
+html_title = 'pypowsybl-jupyter'
+html_short_title = 'pypowsybl-jupyter'
 
 html_logo = '_static/logos/logo_lfe_powsybl.svg'
 html_favicon = "_static/favicon.ico"
