@@ -5,13 +5,13 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 
-from pypowsybl.network import Network, NadParameters, LayoutParameters
+from pypowsybl.network import Network, NadParameters, SldParameters
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
 
 import ipywidgets as widgets
 
-def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: LayoutParameters = None):
+def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
 
@@ -51,7 +51,7 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         bus_legend=False,
         substation_description_displayed=True)
     
-    spars=sld_parameters if sld_parameters is not None else LayoutParameters(use_name=True)
+    spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=True)
 
     def go_to_vl(event: any):
         nonlocal selected_vl
