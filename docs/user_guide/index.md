@@ -1,4 +1,4 @@
-# User Guide
+# User guide
 
 Pypowsybl-jupyter provides a library of interactive widgets for jupyter, targeted at visualizing network  diagrams generated e.g., through PyPowSyBl (network-area diagrams and single-line diagrams).
 
