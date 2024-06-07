@@ -10,8 +10,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import os
 import sys
+import toml
 
 # Path to python sources, for doc generation on readthedocs
 source_path = os.path.abspath('..')
@@ -22,8 +24,37 @@ print(f'appended {source_path}')
 # -- Project information -----------------------------------------------------
 
 project = 'pypowsybl-jupyter'
-copyright = '2024, RTE (http://www.rte-france.com)'
+github_repository = "https://github.com/powsybl/pypowsybl-jupyter/"
+copyright_year = f'{2024}' if datetime.datetime.now().year == 2024 else f'2024-{datetime.datetime.now().year}'
 
+# Find the release information.
+# We have a single source of truth for our version number: the project's pyproject.toml file.
+def extract_version_from_toml_file(file_path):
+    release = version = 'dev'
+    try:
+        # Load the pyproject.toml file
+        with open(file_path, 'r') as file:
+            pyproject_data = toml.load(file)
+        
+        # Access the version attribute
+        read_version = pyproject_data.get('project', {}).get('version', None)
+        
+        if read_version is not None:
+            release = read_version
+             # The short X.Y version.
+            version = ".".join(release.split(".")[:2])
+        else:
+            print(f"The 'version' attribute is not found in {file_path}.")
+
+    except FileNotFoundError:
+        print(f"The file {file_path} does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    
+    return (release, version)
+
+file_with_version = os.path.join(source_path, "pyproject.toml")
+(release, version) = extract_version_from_toml_file(file_with_version)
 
 # -- General configuration ---------------------------------------------------
 
@@ -38,7 +69,10 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.intersphinx',
               'sphinx_tabs.tabs',
-              'myst_parser']
+              'myst_parser',
+              # Extension used to add a "copy" button on code blocks
+              'sphinx_copybutton'
+              ]
 myst_enable_extensions = [
     "amsmath",
     "colon_fence",
@@ -63,19 +97,22 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = "furo"
 
-html_title = 'pypowsybl-jupyter'
+html_title = f"{project} v{release}"
+
 html_short_title = 'pypowsybl-jupyter'
 
 html_logo = '_static/logos/logo_lfe_powsybl.svg'
 html_favicon = "_static/favicon.ico"
 
 html_context = {
-    "sidebar_logo_href": "https://powsybl.readthedocs.org"
+    "sidebar_logo_href": "https://powsybl.readthedocs.org",
+    "copyright_year": copyright_year,
+    "github_repository": github_repository
 }
 
 html_theme_options = {
     # the following 3 lines enable edit button
-    "source_repository": "https://github.com/powsybl/TODO-addrepositoryname/",
+    "source_repository": github_repository,
     "source_branch": "main",
     "source_directory": "docs/",
 }
