@@ -1,6 +1,8 @@
 # pypowsybl-jupyter
 
-Widgets for [pypowsybl](https://github.com/powsybl/pypowsybl) in the Jupyter notebook.
+Widgets for [PyPowSyBl](https://github.com/powsybl/pypowsybl) in [Jupyter](https://jupyter.org) notebooks.
+
+Pypowsybl-jupyter integrates the [powsybl-diagram-viewer](https://github.com/powsybl/powsybl-diagram-viewer) library to display diagrams and is built on [anywidget](https://github.com/manzt/anywidget/), an abstraction around the [Jupyter Widget](https://github.com/jupyter-widgets/ipywidgets) framework.
 
 The widgets should work with versions of Jupyter Lab >= 4, Notebook >= 7.
 
@@ -69,3 +71,13 @@ The 'created .whl file' will be available in the 'dist' directory. To install th
 ```bash
 pip install <'created .whl file'>
 ```
+
+## Notes
+
+Jupyter Widgets require Javascript extension code that Jupyter Lab needs to locate upon kernel startup.
+
+In a standalone Jupyter Lab setup, the widget package is usually deployed in the same environment, allowing Jupyter Lab to find and load the necessary JS code seamlessly (e.g., if you **pip install pypowsybl_jupyter** in your standalone environment, then start Jupyter Lab, the extension is activated and anywidget and Jupyter Widget are listed among the installed dependencies).
+
+However, installing Jupyter Widgets in kernels that are spawned by more controlled environment like [Mybinder](https://mybinder.org/), doesn't apparently let Jupyter Lab find the JS extension code, causing widgets to fail to display properly (e.g., in these cases, if you **pip install pypowsybl_jupyter** from inside a notebook a javascript error could appear in the widget's cell, with a message similar to *"Failed to load view class 'AnyView' from module 'anywidget'"*, despite the fact that no errors are shown during the installation nor that anywidget and Jupyter widget are still listed among the installed dependencies).
+
+To resolve this known limitation, widget packages need to be installed in such a way that they are available to the hosting environment. In the Mybinder case it seems to be sufficient to add an **anywidget** entry to the project's **requirements.txt** file, which is used by Mybinder's infrastructure to instantiate Jupyter Lab. Once anywidget is installed succesfully, any custom widget developed using anywidget, like pypowsybl_jupyter's widgets, can be installed and manged correctly from a notebook (i.e., running **pip install pypowsybl_jupyter** in a notebook should work correctly).
