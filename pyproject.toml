@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "pypowsybl>=1.2.0"]
 build-backend = "hatchling.build"
 
 [project.urls]
@@ -37,7 +37,6 @@ classifiers = [
 ]
 dependencies = [
     "anywidget",
-    "pypowsybl>=1.2.0",
 ]
 
 [project.optional-dependencies]
