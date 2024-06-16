@@ -1,14 +1,10 @@
-// Copyright (c) 2024, RTE (http://www.rte-france.com)
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-// SPDX-License-Identifier: MPL-2.0
-//
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import React, { useEffect, useRef, useState } from 'react';
-
-import { createRender, useModelState } from '@anywidget/react';
+import { createRender, useModelState, useModel } from '@anywidget/react';
 import { NetworkMap, GeoData, MapEquipments } from '@powsybl/diagram-viewer';
+import VoltageLevelChoice from './voltage-level-choice';
+import NominalVoltageFilter from './nominal-voltage-filter';
+
 import './networkmapwidget.css';
 
 import {
@@ -16,11 +12,24 @@ import {
     ThemeProvider,
     StyledEngineProvider,
 } from '@mui/material/styles';
+import { Box } from '@mui/system';
 
 const INITIAL_ZOOM = 9;
 const LABELS_ZOOM_THRESHOLD = 9;
 const ARROWS_ZOOM_THRESHOLD = 7;
 const useName = true;
+
+const styles = {
+    divNominalVoltageFilter: {
+        position: 'absolute',
+        right: '10px',
+        bottom: '40px',
+        zIndex: 0,
+        '&:hover': {
+            zIndex: 2,
+        },
+    },
+};
 
 const darkTheme = createTheme({
     palette: {
@@ -65,6 +74,8 @@ function showEquipmentMenu(equipment, x, y, type) {
 
 const render = createRender(() => {
     const networkMapRef = useRef();
+
+    let model = useModel();
 
     const [spos] = useModelState('spos');
     const [lpos] = useModelState('lpos');
@@ -111,6 +122,105 @@ const render = createRender(() => {
         }
     }, [params]);
 
+    const [
+        choiceVoltageLevelsSubstationId,
+        setChoiceVoltageLevelsSubstationId,
+    ] = useState(null);
+
+    const [position, setPosition] = useState([-1, -1]);
+
+    function closeChoiceVoltageLevelMenu() {
+        setChoiceVoltageLevelsSubstationId(null);
+    }
+
+    function propagate_selectedvl_event(voltageLevelId) {
+        model.set('selected_vl', voltageLevelId);
+        model.save_changes();
+        model.send({ event: 'select_vl' });
+    }
+
+    function choiceVoltageLevel(voltageLevelId) {
+        console.log(`# Choose Voltage Level : ${voltageLevelId}`);
+        closeChoiceVoltageLevelMenu();
+        propagate_selectedvl_event(voltageLevelId);
+    }
+
+    let choiceVoltageLevelsSubstation = null;
+    if (choiceVoltageLevelsSubstationId) {
+        choiceVoltageLevelsSubstation = mapEquipments?.getSubstation(
+            choiceVoltageLevelsSubstationId
+        );
+    }
+
+    const chooseVoltageLevelForSubstation = useCallback(
+        (idSubstation, x, y) => {
+            setChoiceVoltageLevelsSubstationId(idSubstation);
+            setPosition([x, y]);
+        },
+        []
+    );
+
+    function renderVoltageLevelChoice() {
+        return (
+            <VoltageLevelChoice
+                handleClose={closeChoiceVoltageLevelMenu}
+                onClickHandler={choiceVoltageLevel}
+                substation={choiceVoltageLevelsSubstation}
+                position={[position[0], position[1]]}
+            />
+        );
+    }
+
+    const [filteredNominalVoltages, setFilteredNominalVoltages] = useState();
+
+    function renderNominalVoltageFilter() {
+        return (
+            <Box sx={styles.divNominalVoltageFilter}>
+                <NominalVoltageFilter
+                    nominalVoltages={mapEquipments.getNominalVoltages()}
+                    filteredNominalVoltages={filteredNominalVoltages}
+                    onChange={setFilteredNominalVoltages}
+                />
+            </Box>
+        );
+    }
+
+    const renderMap = () => (
+        <NetworkMap
+            ref={networkMapRef}
+            mapEquipments={mapEquipments}
+            geoData={geoData}
+            labelsZoomThreshold={LABELS_ZOOM_THRESHOLD}
+            arrowsZoomThreshold={ARROWS_ZOOM_THRESHOLD}
+            initialZoom={INITIAL_ZOOM}
+            useName={useName}
+            centerOnSubstation={centerOnSubId}
+            onSubstationClick={(vlId) => {
+                console.log('# OpenVoltageLevel: ' + vlId);
+                propagate_selectedvl_event(vlId);
+            }}
+            onSubstationClickChooseVoltageLevel={
+                chooseVoltageLevelForSubstation
+            }
+            onSubstationMenuClick={(equipment, x, y) =>
+                showEquipmentMenu(equipment, x, y, 'substation')
+            }
+            onLineMenuClick={(equipment, x, y) =>
+                showEquipmentMenu(equipment, x, y, 'line')
+            }
+            onVoltageLevelMenuClick={(equipment, x, y) => {
+                console.log(
+                    `# VoltageLevel menu click: ${JSON.stringify(
+                        equipment
+                    )} at coordinates (${x}, ${y})`
+                );
+            }}
+            mapLibrary={'cartonolabel'}
+            mapTheme={'dark'}
+            filteredNominalVoltages={filteredNominalVoltages}
+        />
+    );
+
     return (
         <div ref={networkMapRef} className="network-map-viewer-widget">
             <StyledEngineProvider injectFirst>
@@ -122,43 +232,12 @@ const render = createRender(() => {
                             height: 600,
                         }}
                     >
-                        <NetworkMap
-                            ref={networkMapRef}
-                            mapEquipments={mapEquipments}
-                            geoData={geoData}
-                            labelsZoomThreshold={LABELS_ZOOM_THRESHOLD}
-                            arrowsZoomThreshold={ARROWS_ZOOM_THRESHOLD}
-                            initialZoom={INITIAL_ZOOM}
-                            useName={useName}
-                            centerOnSubstation={centerOnSubId}
-                            onSubstationClick={(vlId) => {
-                                console.log('# OpenVoltageLevel: ' + vlId);
-                            }}
-                            onSubstationClickChooseVoltageLevel={(
-                                idSubstation,
-                                x,
-                                y
-                            ) =>
-                                console.log(
-                                    `# Choose Voltage Level for substation: ${idSubstation}  at coordinates (${x}, ${y})`
-                                )
-                            }
-                            onSubstationMenuClick={(equipment, x, y) =>
-                                showEquipmentMenu(equipment, x, y, 'substation')
-                            }
-                            onLineMenuClick={(equipment, x, y) =>
-                                showEquipmentMenu(equipment, x, y, 'line')
-                            }
-                            onVoltageLevelMenuClick={(equipment, x, y) => {
-                                console.log(
-                                    `# VoltageLevel menu click: ${JSON.stringify(
-                                        equipment
-                                    )} at coordinates (${x}, ${y})`
-                                );
-                            }}
-                            mapLibrary={'cartonolabel'}
-                            mapTheme={'dark'}
-                        />
+                        {renderMap()}
+                        {choiceVoltageLevelsSubstationId &&
+                            renderVoltageLevelChoice()}
+
+                        {mapEquipments?.substations?.length > 0 &&
+                            renderNominalVoltageFilter()}
                     </div>
                 </ThemeProvider>
             </StyledEngineProvider>

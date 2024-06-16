@@ -12,6 +12,10 @@ import traitlets
 
 import json
 
+from ipywidgets import (
+    CallbackDispatcher
+)
+
 class NetworkMapWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "networkmapwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "networkmapwidget.css"
@@ -23,6 +27,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
     params  = traitlets.Dict().tag(sync=True)
 
+    selected_vl = traitlets.Unicode().tag(sync=True)
+
     def __init__(self, network, subId = None, display_lines:bool = True, **kwargs):
         super().__init__(**kwargs)
 
@@ -32,6 +38,19 @@ class NetworkMapWidget(anywidget.AnyWidget):
         self.smap=json.dumps(smap)
         self.spos=json.dumps(spos)
         self.params={"subId":  subId}
+
+        self._on_selectvl_handlers = CallbackDispatcher()
+        super().on_msg(self._handle_pw_msg)
+
+    def _handle_pw_msg(self, _, content, buffers):
+        if content.get('event', '') == 'select_vl':
+            self.selectvl()
+
+    def selectvl(self):
+        self._on_selectvl_handlers(self)
+
+    def on_selectvl(self, callback, remove=False):
+        self._on_selectvl_handlers.register_callback(callback, remove=remove)
 
     def center_on_substation(self, subId):
         self.params = {"subId":  subId}
@@ -97,7 +116,6 @@ class NetworkMapWidget(anywidget.AnyWidget):
                     ]
                 }
                 smap.append(entry)
-
 
             spos = [
                 {
