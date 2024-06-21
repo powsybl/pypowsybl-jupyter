@@ -8,6 +8,7 @@
 from pypowsybl.network import Network, NadParameters, SldParameters
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
+from .networkmapwidget import NetworkMapWidget
 
 import ipywidgets as widgets
 
@@ -34,6 +35,7 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
     vls = network.get_voltage_levels(attributes=[])
     nad_widget=None
     sld_widget=None
+    map_widget=None
 
     selected_vl = vls.index[0] if vl_id is None else vl_id 
     if selected_vl not in vls.index:
@@ -70,6 +72,15 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         update_sld_diagram(True)
         update_nad_diagram()
 
+    def go_to_vl_from_map(event: any):
+        nonlocal selected_vl
+        vl_from_map= str(event.selected_vl)
+        vl_filtered_list=list(found.options)
+        if vl_from_map not in vl_filtered_list:
+            vl_filtered_list.append(vl_from_map)
+            found.options=vl_filtered_list
+        selected_vl=vl_from_map    
+        found.value=vl_from_map
 
     def update_nad_diagram():
         nonlocal nad_widget
@@ -91,6 +102,16 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
 
             else:
                 update_sld(sld_widget, sld_diagram_data, keep_viewbox=kv, enable_callbacks=True)
+
+    def update_map():
+        nonlocal map_widget
+        if selected_vl is not None:
+            if map_widget==None:
+                map_widget=NetworkMapWidget(network)
+                map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
+
+            else:
+                map_widget.center_on_voltage_level(selected_vl)
 
 
     nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
@@ -134,20 +155,23 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
             selected_vl=d['new']
             update_nad_diagram()
             update_sld_diagram()
+            update_map()
 
     found.observe(on_selected, names='value')
 
     update_nad_diagram()
     update_sld_diagram()
+    update_map()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
     
     right_panel_nad = widgets.VBox([nadslider, nad_widget])
     right_panel_sld = widgets.HBox([sld_widget])
+    right_panel_map = widgets.HBox([map_widget])
 
     tabs_diagrams = widgets.Tab()
-    tabs_diagrams.children = [right_panel_nad, right_panel_sld]
-    tabs_diagrams.titles = ['Network Area', 'Single Line']
+    tabs_diagrams.children = [right_panel_nad, right_panel_sld, right_panel_map]
+    tabs_diagrams.titles = ['Network Area', 'Single Line', 'Network map']
     tabs_diagrams.layout=widgets.Layout(width='850px', height='700px')
     
     hbox = widgets.HBox([left_panel, tabs_diagrams])

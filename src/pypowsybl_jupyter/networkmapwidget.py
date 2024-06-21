@@ -29,15 +29,18 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
     selected_vl = traitlets.Unicode().tag(sync=True)
 
-    def __init__(self, network, subId = None, display_lines:bool = True, **kwargs):
+    def __init__(self, network, subId = None, display_lines:bool = True, use_line_extensions = False, **kwargs):
         super().__init__(**kwargs)
 
-        (lmap, lpos, smap, spos) = self.extract_map_data(network,display_lines)
+        (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_extensions)
         self.lmap=json.dumps(lmap)
         self.lpos=json.dumps(lpos)
         self.smap=json.dumps(smap)
         self.spos=json.dumps(spos)
         self.params={"subId":  subId}
+        self.vl_subs=vl_subs
+        self.sub_vls=sub_vls
+        self.subs_ids=subs_ids
 
         self._on_selectvl_handlers = CallbackDispatcher()
         super().on_msg(self._handle_pw_msg)
@@ -52,15 +55,31 @@ class NetworkMapWidget(anywidget.AnyWidget):
     def on_selectvl(self, callback, remove=False):
         self._on_selectvl_handlers.register_callback(callback, remove=remove)
 
-    def center_on_substation(self, subId):
-        self.params = {"subId":  subId}
+    def get_substation_id(self, vl_id):
+        return self.vl_subs.get(vl_id, None)
 
-    def extract_map_data(self, network, display_lines: bool = True):
+    def get_vls_ids(self, sub_id):
+        return self.sub_vls.get(sub_id, None)
+
+    def center_on_substation(self, sub_id):
+        if sub_id in self.subs_ids:
+            self.params = {"subId":  sub_id}
+
+    def center_on_voltage_level(self, vl_id):
+        sub_id=self.get_substation_id(vl_id)
+        if sub_id is not None:
+            self.params = {"subId":  sub_id}
+
+    def extract_map_data(self, network, display_lines: bool = True, use_line_extensions = False):
         lmap = []
         lpos = []
         smap = []
         spos = []
-        
+
+        vl_subs = dict()
+        sub_vls = dict()
+        subs_ids = set()
+
         subs_positions_df = network.get_extensions('substationPosition')
         if not subs_positions_df.empty:
 
@@ -91,16 +110,27 @@ class NetworkMapWidget(anywidget.AnyWidget):
                     'connected2': 'terminal2Connected'
                 }).to_dict(orient='records')
 
+                if use_line_extensions:
+                    lines_positions_from_extensions_df=network.get_extensions('linePosition').reset_index()
+                    lines_positions_from_extensions_sorted_df = lines_positions_from_extensions_df.sort_values(by=['id', 'num'])
+                    lines_positions_from_extensions_grouped_df = lines_positions_from_extensions_sorted_df.groupby('id').apply(lambda x: x[['latitude', 'longitude']].to_dict('records'), include_groups=False).to_dict()
 
-                for _, row in lines_positions_df.iterrows():
-                    entry = {
-                        "id": row['id'],
-                        "coordinates": [
-                            {"lat": row['v1_latitude'], "lon": row['v1_longitude']},
-                            {"lat": row['v2_latitude'], "lon": row['v2_longitude']}
-                        ]
-                    }
-                    lpos.append(entry)
+                    for idx, row in lines_positions_df.iterrows():
+                        id_val = row['id']
+                        coordinates = []
+                        if id_val in lines_positions_from_extensions_grouped_df:
+                            coordinates += [{'lat': coord['latitude'], 'lon': coord['longitude']} for coord in lines_positions_from_extensions_grouped_df[id_val]]
+                        lpos.append({'id': id_val, 'coordinates': coordinates})
+                else:
+                    for _, row in lines_positions_df.iterrows():
+                        entry = {
+                            "id": row['id'],
+                            "coordinates": [
+                                {"lat": row['v1_latitude'], "lon": row['v1_longitude']},
+                                {"lat": row['v2_latitude'], "lon": row['v2_longitude']}
+                            ]
+                        }
+                        lpos.append(entry)
 
 
             for s_id, group in vls_subs_df.groupby('substation_id'):
@@ -126,7 +156,11 @@ class NetworkMapWidget(anywidget.AnyWidget):
                     }
                 }
                 for _, row in subs_positions_df.reset_index().iterrows()
-            ]    
+            ]
 
-        return (lmap, lpos, smap, spos)
+            vl_subs = vls_df.set_index('id')['substation_id'].to_dict()
+            sub_vls = vls_df.groupby('substation_id')['id'].apply(list).to_dict()
+            subs_ids = set(network.get_substations().reset_index()['id'])
+
+        return (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids)
 

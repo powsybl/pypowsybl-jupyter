@@ -52,8 +52,16 @@
 
     <iidm:extension id="NHV1_NHV2_1">
         <lp:linePosition>
-            <lp:coordinate longitude="2.0" latitude="48.0"/>
-            <lp:coordinate longitude="2.1" latitude="48.1"/>
+            <sp:coordinate longitude="2.0" latitude="48.0"/>
+            <sp:coordinate longitude="2.1" latitude="48.1"/>
         </lp:linePosition>
     </iidm:extension>
+
+    <iidm:extension id="NHV1_NHV2_2">
+        <lp:linePosition>
+            <sp:coordinate longitude="2.0" latitude="48.0"/>
+            <sp:coordinate longitude="2.1" latitude="48.1"/>
+        </lp:linePosition>
+    </iidm:extension>
+
 </iidm:network>
