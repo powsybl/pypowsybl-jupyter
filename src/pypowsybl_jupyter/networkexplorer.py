@@ -12,7 +12,7 @@ from .networkmapwidget import NetworkMapWidget
 
 import ipywidgets as widgets
 
-def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, nominal_voltages_top_tiers_filter:int = -1):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
 
@@ -24,6 +24,7 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
         nad_parameters: layout properties to adjust the svg rendering for the NAD
         sld_parameters: layout properties to adjust the svg rendering for the SLD
+        nominal_voltages_top_tiers_filter: number of nominal voltages to select in the nominal voltages filter, starting from the highest (map viewer tab)
 
     Examples:
 
@@ -81,6 +82,8 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
             found.options=vl_filtered_list
         selected_vl=vl_from_map    
         found.value=vl_from_map
+        #move to the SLD tab
+        tabs_diagrams.selected_index=1
 
     def update_nad_diagram():
         nonlocal nad_widget
@@ -107,7 +110,7 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         nonlocal map_widget
         if selected_vl is not None:
             if map_widget==None:
-                map_widget=NetworkMapWidget(network)
+                map_widget=NetworkMapWidget(network, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter)
                 map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
 
             else:

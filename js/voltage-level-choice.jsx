@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -41,22 +41,6 @@ const styles = {
     },
 };
 
-const useNameOrId = (useName) => {
-    const getNameOrId = useCallback(
-        (infos) => {
-            if (infos != null) {
-                const name = infos.name;
-                return useName && name != null && name.trim() !== ''
-                    ? name
-                    : infos?.id;
-            }
-            return null;
-        },
-        [useName]
-    );
-    return { getNameOrId };
-};
-
 const voltageLevelComparator = (vl1, vl2) => {
     return vl1.nominalV < vl2.nominalV;
 };
@@ -84,6 +68,7 @@ const VoltageLevelChoice = ({
     onClickHandler,
     substation,
     position,
+    useNameOrId,
 }) => {
     const { getNameOrId } = useNameOrId();
 

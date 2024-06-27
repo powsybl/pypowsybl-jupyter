@@ -17,7 +17,6 @@ import { Box } from '@mui/system';
 const INITIAL_ZOOM = 9;
 const LABELS_ZOOM_THRESHOLD = 9;
 const ARROWS_ZOOM_THRESHOLD = 7;
-const useName = true;
 
 const styles = {
     divNominalVoltageFilter: {
@@ -82,7 +81,11 @@ const render = createRender(() => {
     const [smap] = useModelState('smap');
     const [lmap] = useModelState('lmap');
 
+    const [use_name] = useModelState('use_name');
+
     const [params, setParams] = useModelState('params');
+    const [nvls] = useModelState('nvls');
+
     const targetSubId = params['subId'];
     const [centerOnSubId, setCenterOnSubId] = useState(
         targetSubId === null ? null : { to: targetSubId }
@@ -160,6 +163,23 @@ const render = createRender(() => {
         []
     );
 
+    const useNameOrId = () => {
+        const useName = use_name;
+        const getNameOrId = useCallback(
+            (infos) => {
+                if (infos != null) {
+                    const name = infos.name;
+                    return useName && name != null && name.trim() !== ''
+                        ? name
+                        : infos?.id;
+                }
+                return null;
+            },
+            [useName]
+        );
+        return { getNameOrId };
+    };
+
     function renderVoltageLevelChoice() {
         return (
             <VoltageLevelChoice
@@ -167,11 +187,13 @@ const render = createRender(() => {
                 onClickHandler={choiceVoltageLevel}
                 substation={choiceVoltageLevelsSubstation}
                 position={[position[0], position[1]]}
+                useNameOrId={useNameOrId}
             />
         );
     }
 
-    const [filteredNominalVoltages, setFilteredNominalVoltages] = useState();
+    const [filteredNominalVoltages, setFilteredNominalVoltages] =
+        useState(nvls);
 
     function renderNominalVoltageFilter() {
         return (
@@ -193,7 +215,7 @@ const render = createRender(() => {
             labelsZoomThreshold={LABELS_ZOOM_THRESHOLD}
             arrowsZoomThreshold={ARROWS_ZOOM_THRESHOLD}
             initialZoom={INITIAL_ZOOM}
-            useName={useName}
+            useName={use_name}
             centerOnSubstation={centerOnSubId}
             onSubstationClick={(vlId) => {
                 console.log('# OpenVoltageLevel: ' + vlId);

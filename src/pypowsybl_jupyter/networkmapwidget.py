@@ -25,11 +25,16 @@ class NetworkMapWidget(anywidget.AnyWidget):
     smap = traitlets.Unicode().tag(sync=True)
     lmap = traitlets.Unicode().tag(sync=True)
 
+    use_name = traitlets.Bool().tag(sync=True)
+
+    nvls  = traitlets.List().tag(sync=True)
+
     params  = traitlets.Dict().tag(sync=True)
-
+    
     selected_vl = traitlets.Unicode().tag(sync=True)
+    
 
-    def __init__(self, network, subId = None, display_lines:bool = True, use_line_extensions = False, **kwargs):
+    def __init__(self, network, subId = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
         super().__init__(**kwargs)
 
         (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_extensions)
@@ -37,10 +42,12 @@ class NetworkMapWidget(anywidget.AnyWidget):
         self.lpos=json.dumps(lpos)
         self.smap=json.dumps(smap)
         self.spos=json.dumps(spos)
+        self.use_name=use_name
         self.params={"subId":  subId}
         self.vl_subs=vl_subs
         self.sub_vls=sub_vls
         self.subs_ids=subs_ids
+        self.nvls=self.extract_nominal_voltage_list(network, nominal_voltages_top_tiers_filter)
 
         self._on_selectvl_handlers = CallbackDispatcher()
         super().on_msg(self._handle_pw_msg)
@@ -70,7 +77,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         if sub_id is not None:
             self.params = {"subId":  sub_id}
 
-    def extract_map_data(self, network, display_lines: bool = True, use_line_extensions = False):
+    def extract_map_data(self, network, display_lines, use_line_extensions):
         lmap = []
         lpos = []
         smap = []
@@ -136,10 +143,11 @@ class NetworkMapWidget(anywidget.AnyWidget):
             for s_id, group in vls_subs_df.groupby('substation_id'):
                 entry = {
                     "id": s_id,
-                    "name": group['name_x'].iloc[0],  # name from df1
+                    "name": group['name_y'].iloc[0],  # name from df1
                     "voltageLevels": [
                         {
                             "id": row['id'],  # id from df2
+                            "name": row['name_x'],
                             "substationId": row['substation_id'],
                             "nominalV": row['nominal_v']
                         } for _, row in group.iterrows()
@@ -164,3 +172,9 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
         return (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids)
 
+    def extract_nominal_voltage_list(self, network, nvls_top_tiers):
+        nvls_filtered = []
+        nvls_filtered = sorted(network.get_voltage_levels()['nominal_v'].unique(), reverse=True)
+        if nvls_top_tiers != -1  :
+            nvls_filtered = nvls_filtered[:nvls_top_tiers]
+        return nvls_filtered
