@@ -1,0 +1,8 @@
+.network-map-viewer-widget {
+	border: 2px solid lightgrey;
+	display: inline-block;
+}
+
+.maplibregl-ctrl-bottom-left {
+	display: none;
+}

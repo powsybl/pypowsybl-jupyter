@@ -15,6 +15,7 @@ from .nadwidget import (
 )
 from .nadexplorer import nad_explorer
 from .networkexplorer import network_explorer
+from .networkmapwidget import NetworkMapWidget
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
