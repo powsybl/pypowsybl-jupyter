@@ -8,16 +8,20 @@
 from pypowsybl.network import Network, NadParameters, SldParameters
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
+from .selectcontext import SelectContext
 
 import ipywidgets as widgets
 
-def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 0,
+                     high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, 
+                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
 
     Args:
         network: the input network
         vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
+        use_name: when available, display VLs names instead of their ids (default is to use names)
         depth: the diagram depth around the voltage level, controls the size of the sub network. In the SLD tab will be always displayed one diagram, from the VL list currently selected item.
         low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
@@ -31,18 +35,15 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
             network_explorer(pp.network.create_eurostag_tutorial_example1_network())
     """    
 
-    vls = network.get_voltage_levels(attributes=[])
+    sel_ctx=SelectContext(network, vl_id, use_name)
+
     nad_widget=None
     sld_widget=None
 
-    selected_vl = vls.index[0] if vl_id is None else vl_id 
-    if selected_vl not in vls.index:
-        raise ValueError(f'a voltage level {vl_id} does not exist in the network.')
-        
     selected_depth=depth
 
     npars = nad_parameters if nad_parameters is not None else NadParameters(edge_name_displayed=False,
-        id_displayed=False,
+        id_displayed=not use_name,
         edge_info_along_edge=False,
         power_value_precision=1,
         angle_value_precision=0,
@@ -51,17 +52,15 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         bus_legend=False,
         substation_description_displayed=True)
     
-    spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=True)
+    spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=use_name, nodes_infos=True)
 
     def go_to_vl(event: any):
-        nonlocal selected_vl
         arrow_vl= str(event.clicked_nextvl)
-        vl_filtered_list=list(found.options)
-        if arrow_vl not in vl_filtered_list:
-            vl_filtered_list.append(arrow_vl)
-            found.options=vl_filtered_list
-        selected_vl=arrow_vl    
-        found.value=arrow_vl	
+        sel_ctx.extend_filtered_vls(arrow_vl)
+        found.value=None
+        found.options=sel_ctx.get_filtered_vls_as_list()
+        sel_ctx.set_selected(arrow_vl)
+        found.value=sel_ctx.get_selected()
 
     def toggle_switch(event: any):
         idswitch = event.clicked_switch.get('id')
@@ -70,11 +69,12 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
         update_sld_diagram(True)
         update_nad_diagram()
 
-
     def update_nad_diagram():
         nonlocal nad_widget
-        if len(selected_vl)>0:
-            new_diagram_data=network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
+        if sel_ctx.get_selected() is not None:
+            new_diagram_data=network.get_network_area_diagram(voltage_level_ids=sel_ctx.get_selected(), 
+                                                              depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, 
+                                                              low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
             if nad_widget==None:
                 nad_widget=display_nad(new_diagram_data)
             else:
@@ -82,8 +82,8 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
 
     def update_sld_diagram(kv: bool = False):
         nonlocal sld_widget
-        if selected_vl is not None:
-            sld_diagram_data=network.get_single_line_diagram(selected_vl, spars)
+        if sel_ctx.get_selected() is not None:
+            sld_diagram_data=network.get_single_line_diagram(sel_ctx.get_selected(), spars)
             if sld_widget==None:
                 sld_widget=display_sld(sld_diagram_data, enable_callbacks=True)
                 sld_widget.on_nextvl(lambda event: go_to_vl(event))
@@ -92,8 +92,8 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
             else:
                 update_sld(sld_widget, sld_diagram_data, keep_viewbox=kv, enable_callbacks=True)
 
-
-    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
+    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, 
+                                  continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
 
     def on_nadslider_changed(d):
         nonlocal selected_depth
@@ -104,34 +104,34 @@ def network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_
 
     vl_input = widgets.Text(
         value='',
-        placeholder='Voltage level ID',
+        placeholder='Voltage level Name' if use_name else 'Voltage level Id',
         description='Filter',
         disabled=False,
-        continuous_update=True
+        continuous_update=True,
+        layout=widgets.Layout(width='350px')
     )
-    
+
     def on_text_changed(d):
         nonlocal found
-        if d['new'] != '':
-            found.options = vls[vls.index.str.contains(d['new'], regex=False)].index
-        else:
-            found.options=list(vls.index)
-            found.value=selected_vl
+        sel_ctx.apply_filter_by_name(d['new'])
+        found.value=None
+        found.options = sel_ctx.get_filtered_vls_as_list()
+        if sel_ctx.is_selected_in_filtered_vls():
+            found.value=sel_ctx.get_selected()
 
     vl_input.observe(on_text_changed, names='value')
     
     found = widgets.Select(
-        options=list(vls.index),
-        value=selected_vl,
+        options=sel_ctx.get_filtered_vls_as_list(),
+        value=sel_ctx.get_selected(),
         description='Found',
         disabled=False,
-        layout=widgets.Layout(height='670px')
+        layout=widgets.Layout(width='350px', height='670px')
     )
 
     def on_selected(d):
-        nonlocal selected_vl
         if d['new'] != None:
-            selected_vl=d['new']
+            sel_ctx.set_selected(d['new'])
             update_nad_diagram()
             update_sld_diagram()
 
