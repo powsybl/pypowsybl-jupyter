@@ -122,23 +122,13 @@ class NetworkMapWidget(anywidget.AnyWidget):
                     lines_positions_from_extensions_sorted_df = lines_positions_from_extensions_df.sort_values(by=['id', 'num'])
                     lines_positions_from_extensions_grouped_df = lines_positions_from_extensions_sorted_df.groupby('id').apply(lambda x: x[['latitude', 'longitude']].to_dict('records'), include_groups=False).to_dict()
 
-                    for idx, row in lines_positions_df.iterrows():
-                        id_val = row['id']
-                        coordinates = []
-                        if id_val in lines_positions_from_extensions_grouped_df:
-                            coordinates += [{'lat': coord['latitude'], 'lon': coord['longitude']} for coord in lines_positions_from_extensions_grouped_df[id_val]]
-                        lpos.append({'id': id_val, 'coordinates': coordinates})
-                else:
                     for _, row in lines_positions_df.iterrows():
-                        entry = {
-                            "id": row['id'],
-                            "coordinates": [
-                                {"lat": row['v1_latitude'], "lon": row['v1_longitude']},
-                                {"lat": row['v2_latitude'], "lon": row['v2_longitude']}
-                            ]
-                        }
-                        lpos.append(entry)
-
+                        id_val = row['id']
+                        coordinates = [{'lat': coord['latitude'], 'lon': coord['longitude']} for coord in lines_positions_from_extensions_grouped_df.get(id_val, [])]
+                        if coordinates:    
+                            lpos.append({'id': id_val, 'coordinates': coordinates})
+                
+                # note that if there are no linePositions for a line, the viewer component draws the lines using the substation positions
 
             for s_id, group in vls_subs_df.groupby('substation_id'):
                 entry = {

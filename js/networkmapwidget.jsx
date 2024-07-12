@@ -13,6 +13,7 @@ import {
     StyledEngineProvider,
 } from '@mui/material/styles';
 import { Box } from '@mui/system';
+import LinearProgress from '@mui/material/LinearProgress';
 
 const INITIAL_ZOOM = 9;
 const LABELS_ZOOM_THRESHOLD = 9;
@@ -27,6 +28,11 @@ const styles = {
         '&:hover': {
             zIndex: 2,
         },
+    },
+    divTemporaryGeoDataLoading: {
+        position: 'absolute',
+        width: '100%',
+        zIndex: 2,
     },
 };
 
@@ -91,14 +97,29 @@ const render = createRender(() => {
         targetSubId === null ? null : { to: targetSubId }
     );
 
-    const geoData = new GeoData(new Map(), new Map());
-    geoData.setSubstationPositions(JSON.parse(spos));
-    geoData.setLinePositions(JSON.parse(lpos));
+    const [mapDataReady, setMapDataReady] = useState(false);
 
-    const mapEquipments = new WidgetMapEquipments(
-        JSON.parse(smap),
-        JSON.parse(lmap)
-    );
+    const [equipmentData, setEquipmentData] = useState({
+        gdata: new GeoData(new Map(), new Map()),
+        edata: new WidgetMapEquipments([], []),
+    });
+
+    useEffect(() => {
+        let initDataTask = new Promise((resolve, reject) => {
+            const geoData = new GeoData(new Map(), new Map());
+            geoData.setSubstationPositions(JSON.parse(spos));
+            geoData.setLinePositions(JSON.parse(lpos));
+            const mapEquipments = new WidgetMapEquipments(
+                JSON.parse(smap),
+                JSON.parse(lmap)
+            );
+            resolve({ gdata: geoData, edata: mapEquipments });
+        });
+        initDataTask.then((result) => {
+            setMapDataReady(true);
+            setEquipmentData(result);
+        });
+    }, []);
 
     useEffect(() => {
         const handleContextmenu = (e) => {
@@ -150,7 +171,7 @@ const render = createRender(() => {
 
     let choiceVoltageLevelsSubstation = null;
     if (choiceVoltageLevelsSubstationId) {
-        choiceVoltageLevelsSubstation = mapEquipments?.getSubstation(
+        choiceVoltageLevelsSubstation = equipmentData.edata?.getSubstation(
             choiceVoltageLevelsSubstationId
         );
     }
@@ -199,7 +220,7 @@ const render = createRender(() => {
         return (
             <Box sx={styles.divNominalVoltageFilter}>
                 <NominalVoltageFilter
-                    nominalVoltages={mapEquipments.getNominalVoltages()}
+                    nominalVoltages={equipmentData.edata.getNominalVoltages()}
                     filteredNominalVoltages={filteredNominalVoltages}
                     onChange={setFilteredNominalVoltages}
                 />
@@ -210,8 +231,8 @@ const render = createRender(() => {
     const renderMap = () => (
         <NetworkMap
             ref={networkMapRef}
-            mapEquipments={mapEquipments}
-            geoData={geoData}
+            mapEquipments={equipmentData.edata}
+            geoData={equipmentData.gdata}
             labelsZoomThreshold={LABELS_ZOOM_THRESHOLD}
             arrowsZoomThreshold={ARROWS_ZOOM_THRESHOLD}
             initialZoom={INITIAL_ZOOM}
@@ -254,11 +275,15 @@ const render = createRender(() => {
                             height: 600,
                         }}
                     >
+                        <Box sx={styles.divTemporaryGeoDataLoading}>
+                            {!mapDataReady && <LinearProgress />}
+                        </Box>
+
                         {renderMap()}
                         {choiceVoltageLevelsSubstationId &&
                             renderVoltageLevelChoice()}
 
-                        {mapEquipments?.substations?.length > 0 &&
+                        {equipmentData.edata?.substations?.length > 0 &&
                             renderNominalVoltageFilter()}
                     </div>
                 </ThemeProvider>
