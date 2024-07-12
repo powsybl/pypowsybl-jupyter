@@ -16,7 +16,7 @@ import { ListItemButton } from '@mui/material';
 
 const styles = {
     nominalVoltageZone: {
-        minWidth: '90px',
+        minWidth: '110px',
         maxHeight: '300px',
         overflowY: 'auto',
     },
