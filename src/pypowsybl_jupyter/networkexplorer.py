@@ -113,7 +113,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def on_text_changed(d):
         nonlocal found
-        sel_ctx.apply_filter_by_name(d['new'])
+        sel_ctx.apply_filter(d['new'])
         found.value=None
         found.options = sel_ctx.get_filtered_vls_as_list()
         if sel_ctx.is_selected_in_filtered_vls():
