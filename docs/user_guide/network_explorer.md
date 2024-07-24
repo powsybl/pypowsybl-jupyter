@@ -37,10 +37,11 @@ Switches can also be clicked, causing their status in the network to change; Ple
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None)
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
+- use_name: when available, display VLs names instead of their ids (default is to use names)
 - depth: the diagram depth around the voltage level, controls the size of the sub network. In the SLD tab will be always displayed one diagram, from the VL list currently selected item.
 - low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
 - high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
