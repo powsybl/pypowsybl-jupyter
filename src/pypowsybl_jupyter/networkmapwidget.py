@@ -16,7 +16,31 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
+from pypowsybl.network import Network
+
 class NetworkMapWidget(anywidget.AnyWidget):
+    """
+    Creates a Network map widget, displaying substations and lines for a network. The widget allows zooming and pannign the map, filtering based on nominal voltages
+
+    Args:
+        network: the input network.
+        subId: if not None, centers the network on the substation with the given substation id. Default is None.
+        use_name: When True (default) the widget displays network's elements names (if available, otherwise their ids); When False, the widget displays network's elements ids.
+        display_lines: When True (default) the network lines are displayed on the map. When false, the widget displays only the substations.
+        use_line_extensions: When False (default) the widget does not use the network's line extensions; Each line is drawn as a straight line connecting two substations.
+        nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
+
+
+    Returns:
+        A jupyter widget with the network map, allowing to zoom and panthe map,.
+
+    Examples:
+
+        .. code-block:: python
+
+            NetworkMapWidget(network)
+    """
+
     _esm = pathlib.Path(__file__).parent / "static" / "networkmapwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "networkmapwidget.css"
     
@@ -34,7 +58,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
     selected_vl = traitlets.Unicode().tag(sync=True)
     
 
-    def __init__(self, network, subId = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
+    def __init__(self, network:Network, subId:str = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
         super().__init__(**kwargs)
 
         (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_extensions)
