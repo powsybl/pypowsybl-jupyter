@@ -78,10 +78,10 @@ function render({ model, el }: RenderProps<SldWidgetModel>) {
             svg_data,
             metadata ? JSON.parse(metadata) : null,
             'voltage-level',
-            500,
+            800,
             600,
-            1000,
-            1200,
+            800,
+            600,
             metadata ? handleNextVl : null, //callback on the next voltage arrows
             metadata ? handleSwitch : null, //callback on the breakers
             metadata ? handleFeeder : null, //callback on the feeders
