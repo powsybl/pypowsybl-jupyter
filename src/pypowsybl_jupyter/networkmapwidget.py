@@ -16,6 +16,8 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
+import pandas as pd
+
 from pypowsybl.network import Network
 
 class NetworkMapWidget(anywidget.AnyWidget):
@@ -48,6 +50,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
     lpos = traitlets.Unicode().tag(sync=True)
     smap = traitlets.Unicode().tag(sync=True)
     lmap = traitlets.Unicode().tag(sync=True)
+    tlmap = traitlets.Unicode().tag(sync=True)
+    hlmap = traitlets.Unicode().tag(sync=True)
 
     use_name = traitlets.Bool().tag(sync=True)
 
@@ -61,11 +65,13 @@ class NetworkMapWidget(anywidget.AnyWidget):
     def __init__(self, network:Network, subId:str = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
         super().__init__(**kwargs)
 
-        (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_extensions)
+        (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids, tlmap, hlmap) = self.extract_map_data(network, display_lines, use_line_extensions)
         self.lmap=json.dumps(lmap)
         self.lpos=json.dumps(lpos)
         self.smap=json.dumps(smap)
         self.spos=json.dumps(spos)
+        self.tlmap=json.dumps(tlmap)
+        self.hlmap=json.dumps(hlmap)
         self.use_name=use_name
         self.params={"subId":  subId}
         self.vl_subs=vl_subs
@@ -101,11 +107,45 @@ class NetworkMapWidget(anywidget.AnyWidget):
         if sub_id is not None:
             self.params = {"subId":  sub_id}
 
+    def get_tie_lines_info(self, network, vls_with_coords):
+        ties_df=network.get_tie_lines().reset_index()[['id', 'name', 'dangling_line1_id', 'dangling_line2_id']]
+        danglings_df=network.get_dangling_lines().reset_index()[['id', 'name', 'p', 'i', 'voltage_level_id', 'connected']]
+        tie_lines_info=[]
+        if not(ties_df.empty or danglings_df.empty):
+            tie_d_1 = pd.merge(ties_df, danglings_df, left_on='dangling_line1_id', right_on='id', suffixes=('', '_d1'))
+            tie_d_1.rename(columns={'name': 'name_T', 'dangling_line1_id_d1': 'dangling_line1_id_d1_D', 'id_d1': 'd_id1_D'}, inplace=True)
+            tie_d_2 = pd.merge(tie_d_1, danglings_df, left_on='dangling_line2_id', right_on='id', suffixes=('_d1', '_d2'))
+            tie_res = tie_d_2[['id_d1' ,'name_T', 'voltage_level_id_d1', 'voltage_level_id_d2', 'connected_d1', 'connected_d2', 'p_d1', 'p_d2', 'i_d1', 'i_d2']]
+            tie_res = tie_res.fillna(0)
+            tie_res.columns = ['id', 'name', 'voltageLevelId1', 'voltageLevelId2', 'terminal1Connected', 'terminal2Connected', 'p1', 'p2', 'i1', 'i2']
+            tie_res=tie_res[tie_res['voltageLevelId1'].isin(vls_with_coords.index) & tie_res['voltageLevelId2'].isin(vls_with_coords.index)]
+            tie_lines_info = tie_res.to_dict(orient='records') 
+        return tie_lines_info
+
+    def get_hvdc_lines_info(self, network, vls_with_coords):
+        hvdc_lines_df = network.get_hvdc_lines().reset_index()[['id', 'name', 'converters_mode', 'converter_station1_id', 'converter_station2_id', 'connected1', 'connected2']]	
+        lcc_stations_df = network.get_lcc_converter_stations().reset_index()[['id', 'name', 'p', 'i', 'voltage_level_id']]
+        vsc_stations_df = network.get_vsc_converter_stations().reset_index()[['id', 'name', 'p', 'i', 'voltage_level_id']]
+        stations_df = pd.concat([lcc_stations_df, vsc_stations_df])
+        hvdc_lines_info = []
+        if not(hvdc_lines_df.empty or stations_df.empty):
+            hvdc_s_1=pd.merge(hvdc_lines_df, stations_df, left_on='converter_station1_id', right_on='id', suffixes=('', '_s1'))
+            hvdc_s_1.rename(columns={'name': 'name_S', 'id_s1': 'id_s1_S'}, inplace=True)
+            hvdc_s_2=pd.merge(hvdc_s_1, stations_df, left_on='converter_station2_id', right_on='id', suffixes=('_s1', '_s2'))
+            h_res= hvdc_s_2[['id_s1' ,'name_S', 'voltage_level_id_s1', 'voltage_level_id_s2', 'connected1', 'connected2', 'p_s1', 'p_s2', 'i_s1', 'i_s2']]
+            h_res = h_res.fillna(0)
+            h_res.columns = ['id', 'name', 'voltageLevelId1', 'voltageLevelId2', 'terminal1Connected', 'terminal2Connected', 'p1', 'p2', 'i1', 'i2']
+            h_res=h_res[h_res['voltageLevelId1'].isin(vls_with_coords.index) & h_res['voltageLevelId2'].isin(vls_with_coords.index)]
+            hvdc_lines_info = h_res.to_dict(orient='records')    
+        return hvdc_lines_info            
+
     def extract_map_data(self, network, display_lines, use_line_extensions):
         lmap = []
         lpos = []
         smap = []
         spos = []
+        tlmap = []
+        hlmap = []
 
         vl_subs = dict()
         sub_vls = dict()
@@ -151,6 +191,10 @@ class NetworkMapWidget(anywidget.AnyWidget):
                         coordinates = [{'lat': coord['latitude'], 'lon': coord['longitude']} for coord in lines_positions_from_extensions_grouped_df.get(id_val, [])]
                         if coordinates:    
                             lpos.append({'id': id_val, 'coordinates': coordinates})
+
+                vls_with_coords = vls_subs_df.set_index('id')[[]]
+                tlmap = self.get_tie_lines_info(network, vls_with_coords)
+                hlmap = self.get_hvdc_lines_info(network, vls_with_coords)
                 
                 # note that if there are no linePositions for a line, the viewer component draws the lines using the substation positions
 
@@ -184,7 +228,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
             sub_vls = vls_df.groupby('substation_id')['id'].apply(list).to_dict()
             subs_ids = set(network.get_substations().reset_index()['id'])
 
-        return (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids)
+        return (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids, tlmap, hlmap)
 
     def extract_nominal_voltage_list(self, network, nvls_top_tiers):
         nvls_filtered = []
