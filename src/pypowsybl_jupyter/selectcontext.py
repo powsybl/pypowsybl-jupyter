@@ -8,10 +8,11 @@
 import pandas as pd
 from collections import deque
 from pypowsybl.network import Network
+from typing import Callable, Set
 
 class SelectContext:
 
-    def __init__(self, network:Network = None, vl_id : str = None, use_name:bool = True, history_max_length:int = -1):
+    def __init__(self, network:Network = None, vl_id : str = None, use_name:bool = True, history_max_length:int = -1, filter_vls_function: Callable[[Network], Set[str]] = None):
         self.network = network
         self.use_name = use_name
         self.display_attribute = 'name' if use_name else 'id'
@@ -20,13 +21,24 @@ class SelectContext:
         self.vls['name'] = self.vls['name'].replace('', pd.NA).fillna(self.vls.index.to_series().astype(str))
         self.vls['id'] = self.vls.index
 
+        if self.vls.empty:
+            raise ValueError(f'the network does not contain any voltage level.')
+
+        self.filter_vls_function = filter_vls_function
+
         self.vls = self.vls.sort_values(by=self.display_attribute) if use_name else self.vls.sort_index()
 
         self.apply_filter(None)
 
         self.history = deque(maxlen=None if history_max_length == -1 else history_max_length)
 
-        self.set_selected(self.vls.index[0] if vl_id is None else vl_id)
+        self.set_selected(self.vls_filtered.index[0] if vl_id is None else vl_id)
+
+    def filter_vls(self, filter_function: Callable[[Network], Set[str]]) -> pd.DataFrame:
+        vls_df = self.get_vls()
+        filtered_vls_ids = filter_function(self.network)
+        filtered_vls = vls_df[vls_df['id'].isin(filtered_vls_ids)]
+        return filtered_vls
 
     def get_vls(self):
         return self.vls
@@ -42,11 +54,17 @@ class SelectContext:
         return self.selected_vl
     
     def apply_filter(self, sfilter, search_attribute = None):
+        if self.filter_vls_function is not None:
+            funcfiltered=self.filter_vls(self.filter_vls_function)
+        else:
+            funcfiltered=self.vls
+
         if sfilter is not None and sfilter != '':
             search_by = self.display_attribute if search_attribute is None else search_attribute
-            self.vls_filtered = self.vls[self.vls[search_by].str.contains(sfilter, case=False, na=False, regex=False)]
+            self.vls_filtered = funcfiltered[funcfiltered[search_by].str.contains(sfilter, case=False, na=False, regex=False)]
         else:
-            self.vls_filtered = self.vls
+            self.vls_filtered = funcfiltered
+
 
     def is_selected_in_filtered_vls(self):
         return self.selected_vl in self.vls_filtered.index

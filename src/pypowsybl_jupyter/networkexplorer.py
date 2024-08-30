@@ -6,6 +6,7 @@
 #
 
 from pypowsybl.network import Network, NadParameters, SldParameters
+from typing import Callable, Set
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
 from .selectcontext import SelectContext
@@ -14,7 +15,8 @@ import ipywidgets as widgets
 
 def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 0,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, 
-                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
+                     filter_vls_function: Callable[[Network], Set[str]] = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
 
@@ -27,6 +29,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
         nad_parameters: layout properties to adjust the svg rendering for the NAD
         sld_parameters: layout properties to adjust the svg rendering for the SLD
+        filter_vls_function: filter the voltage levels list, using some custom logic. The parameter function must return a set of VL ids
 
     Examples:
 
@@ -35,7 +38,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             network_explorer(pp.network.create_eurostag_tutorial_example1_network())
     """    
 
-    sel_ctx=SelectContext(network, vl_id, use_name, history_max_length = 10)
+    sel_ctx=SelectContext(network, vl_id, use_name, history_max_length = 10, filter_vls_function = filter_vls_function)
 
     nad_widget=None
     sld_widget=None
