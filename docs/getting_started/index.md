@@ -28,6 +28,7 @@ network_explorer(network)
 ```
 
 Through the network explorer widget you can display NAD and SLD diagrams for a voltage level, selected from the available network's voltage levels, in two dedicated tabs.
+A third tab, 'Network map' displays the network's substations and lines on a map.
 
 ![getting started demo](/_static/img/getting_started_1.png)
 
