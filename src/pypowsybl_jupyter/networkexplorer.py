@@ -16,7 +16,8 @@ import ipywidgets as widgets
 def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 0,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
-                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
+                     use_line_geodata:bool = False):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -31,6 +32,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nominal_voltages_top_tiers_filter: number of nominal voltages to select in the nominal voltages filter, starting from the highest. -1 means all the nominal  voltages (map viewer tab)
         nad_parameters: layout properties to adjust the svg rendering for the NAD
         sld_parameters: layout properties to adjust the svg rendering for the SLD
+        use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
 
     Examples:
 
@@ -110,7 +112,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nonlocal map_widget
         if sel_ctx.get_selected() is not None:
             if map_widget==None:
-                map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter)
+                map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter, use_line_geodata = use_line_geodata)
                 map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
 
             else:

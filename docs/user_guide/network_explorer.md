@@ -48,7 +48,7 @@ A further click on an entry in the list will navigate the explorer to the corres
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False):
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
@@ -59,3 +59,4 @@ network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, de
 - nominal_voltages_top_tiers_filter: number of nominal voltages to select in the Network map's nominal voltages filter, starting from the highest. -1 means all the nominal voltages.
 - nad_parameters: layout properties to adjust the svg rendering for the NAD
 - sld_parameters: layout properties to adjust the svg rendering for the SLD
+- use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.

@@ -24,10 +24,10 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
     Args:
         network: the input network.
-        subId: if not None, centers the network on the substation with the given substation id. Default is None.
+        sub_id: if not None, centers the network on the substation with the given substation id. Default is None.
         use_name: When True (default) the widget displays network's elements names (if available, otherwise their ids); When False, the widget displays network's elements ids.
         display_lines: When True (default) the network lines are displayed on the map. When false, the widget displays only the substations.
-        use_line_extensions: When False (default) the widget does not use the network's line extensions; Each line is drawn as a straight line connecting two substations.
+        use_line_geodata: When False (default) the widget does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
         nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
 
 
@@ -58,16 +58,16 @@ class NetworkMapWidget(anywidget.AnyWidget):
     selected_vl = traitlets.Unicode().tag(sync=True)
     
 
-    def __init__(self, network:Network, subId:str = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
+    def __init__(self, network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
         super().__init__(**kwargs)
 
-        (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_extensions)
+        (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids) = self.extract_map_data(network, display_lines, use_line_geodata)
         self.lmap=json.dumps(lmap)
         self.lpos=json.dumps(lpos)
         self.smap=json.dumps(smap)
         self.spos=json.dumps(spos)
         self.use_name=use_name
-        self.params={"subId":  subId}
+        self.params={"subId":  sub_id}
         self.vl_subs=vl_subs
         self.sub_vls=sub_vls
         self.subs_ids=subs_ids
@@ -101,7 +101,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         if sub_id is not None:
             self.params = {"subId":  sub_id}
 
-    def extract_map_data(self, network, display_lines, use_line_extensions):
+    def extract_map_data(self, network, display_lines, use_line_geodata):
         lmap = []
         lpos = []
         smap = []
@@ -141,7 +141,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
                     'connected2': 'terminal2Connected'
                 }).to_dict(orient='records')
 
-                if use_line_extensions:
+                if use_line_geodata:
                     lines_positions_from_extensions_df=network.get_extensions('linePosition').reset_index()
                     lines_positions_from_extensions_sorted_df = lines_positions_from_extensions_df.sort_values(by=['id', 'num'])
                     lines_positions_from_extensions_grouped_df = lines_positions_from_extensions_sorted_df.groupby('id').apply(lambda x: x[['latitude', 'longitude']].to_dict('records'), include_groups=False).to_dict()

@@ -26,14 +26,14 @@ A click on a substation pops up a list of its VL.
 
 ## Widget API
 ```python
-NetworkMapWidget(network:Network, subId:str = None, use_name:bool = True, display_lines:bool = True, use_line_extensions = False, nominal_voltages_top_tiers_filter = -1) -> NetworkMapWidget
+NetworkMapWidget(network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1) -> NetworkMapWidget
 ```
 
 - network: the input network.
-- subId: if not None, centers the network on the substation with the given substation id. Default is None.
+- sub_id: if not None, centers the network on the substation with the given substation id. Default is None.
 - use_name: When True (default) the widget displays network's elements names (if available, otherwise their ids); When False, the widget displays network's elements ids.
 - display_lines: When True (default) the network lines are displayed on the map. When false, the widget displays only the substations.
-- use_line_extensions: When False (default) the widget does not use the network's line extensions; Each line is drawn as a straight line connecting two substations.
+- use_line_geodata: When False (default) the widget does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
 - nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
 
 
