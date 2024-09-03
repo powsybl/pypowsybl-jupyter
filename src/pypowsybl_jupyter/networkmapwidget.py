@@ -20,7 +20,7 @@ from pypowsybl.network import Network
 
 class NetworkMapWidget(anywidget.AnyWidget):
     """
-    Creates a Network map widget, displaying substations and lines for a network. The widget allows zooming and pannign the map, filtering based on nominal voltages
+    Creates a Network map widget, displaying substations and lines for a network. The widget allows zooming and panning the map, and filtering based on nominal voltages.
 
     Args:
         network: the input network.
@@ -32,7 +32,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
 
     Returns:
-        A jupyter widget with the network map, allowing to zoom and panthe map,.
+        A jupyter widget with the network map, allowing to zoom and pan the map, and filtering based on nominal voltages.
 
     Examples:
 
