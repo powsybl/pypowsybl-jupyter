@@ -10,7 +10,7 @@ from .nadwidget import display_nad, update_nad
 
 import ipywidgets as widgets
 
-def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 0, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
+def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
     """
     Creates a basic nad explorer widget for a network, built with the nad widget.
 

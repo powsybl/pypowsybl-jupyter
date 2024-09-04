@@ -48,7 +48,7 @@ A further click on an entry in the list will navigate the explorer to the corres
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 0, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False):
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False):
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
