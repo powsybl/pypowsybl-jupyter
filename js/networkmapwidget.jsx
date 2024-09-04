@@ -64,14 +64,16 @@ const darkTheme = createTheme({
 });
 
 class WidgetMapEquipments extends MapEquipments {
-    initEquipments(smapdata, lmapdata) {
+    initEquipments(smapdata, lmapdata, tlmapdata, hlmapdata) {
         this.updateSubstations(smapdata, true);
         this.updateLines(lmapdata, true);
+        this.updateTieLines(tlmapdata, true);
+        this.updateHvdcLines(hlmapdata, true);
     }
 
-    constructor(smapdata, lmapdata) {
+    constructor(smapdata, lmapdata, tlmapdata, hlmapdata) {
         super();
-        this.initEquipments(smapdata, lmapdata);
+        this.initEquipments(smapdata, lmapdata, tlmapdata, hlmapdata);
     }
 }
 
@@ -94,6 +96,8 @@ const render = createRender(() => {
     const [lpos] = useModelState('lpos');
     const [smap] = useModelState('smap');
     const [lmap] = useModelState('lmap');
+    const [tlmap] = useModelState('tlmap');
+    const [hlmap] = useModelState('hlmap');
 
     const [use_name] = useModelState('use_name');
 
@@ -109,7 +113,7 @@ const render = createRender(() => {
 
     const [equipmentData, setEquipmentData] = useState({
         gdata: new GeoData(new Map(), new Map()),
-        edata: new WidgetMapEquipments([], []),
+        edata: new WidgetMapEquipments([], [], [], []),
     });
 
     useEffect(() => {
@@ -119,7 +123,9 @@ const render = createRender(() => {
             geoData.setLinePositions(JSON.parse(lpos));
             const mapEquipments = new WidgetMapEquipments(
                 JSON.parse(smap),
-                JSON.parse(lmap)
+                JSON.parse(lmap),
+                JSON.parse(tlmap),
+                JSON.parse(hlmap)
             );
             resolve({ gdata: geoData, edata: mapEquipments });
         });
@@ -258,6 +264,12 @@ const render = createRender(() => {
             }
             onLineMenuClick={(equipment, x, y) =>
                 showEquipmentMenu(equipment, x, y, 'line')
+            }
+            onTieLineMenuClick={(equipment, x, y) =>
+                showEquipmentMenu(equipment, x, y, 'tie-line')
+            }
+            onHvdcLineMenuClick={(equipment, x, y) =>
+                showEquipmentMenu(equipment, x, y, 'hvdc-line')
             }
             onVoltageLevelMenuClick={(equipment, x, y) => {
                 console.log(
