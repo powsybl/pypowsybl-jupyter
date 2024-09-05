@@ -26,7 +26,7 @@ Pan and zoom features are available for the diagram.
 Other than the target network, the NAD explorer can be customized using additional parameters:
 
 ```python
-nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 0, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
+nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
 ```
 
 - network: the input network

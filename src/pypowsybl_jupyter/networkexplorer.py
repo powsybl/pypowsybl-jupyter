@@ -13,7 +13,7 @@ from .selectcontext import SelectContext
 
 import ipywidgets as widgets
 
-def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 0,
+def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 1,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
