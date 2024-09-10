@@ -8,15 +8,19 @@
 from pypowsybl.network import Network, NadParameters, SldParameters
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
+from .networkmapwidget import NetworkMapWidget
 from .selectcontext import SelectContext
 
 import ipywidgets as widgets
 
-def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 0,
-                     high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, 
-                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None):
+def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 1,
+                     high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
+                     nominal_voltages_top_tiers_filter:int = -1,
+                     nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
+                     use_line_geodata:bool = False):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
+    A third tab, 'Network map' displays the network's substations and lines on a map.
 
     Args:
         network: the input network
@@ -25,8 +29,10 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         depth: the diagram depth around the voltage level, controls the size of the sub network. In the SLD tab will be always displayed one diagram, from the VL list currently selected item.
         low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
+        nominal_voltages_top_tiers_filter: number of nominal voltages to select in the nominal voltages filter, starting from the highest. -1 means all the nominal  voltages (map viewer tab)
         nad_parameters: layout properties to adjust the svg rendering for the NAD
         sld_parameters: layout properties to adjust the svg rendering for the SLD
+        use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
 
     Examples:
 
@@ -39,6 +45,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     nad_widget=None
     sld_widget=None
+    map_widget=None
 
     selected_depth=depth
 
@@ -61,13 +68,20 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         update_select_widget(found, None, None, on_selected)
         update_explorer()
 
-
     def toggle_switch(event: any):
         idswitch = event.clicked_switch.get('id')
         statusswitch = event.clicked_switch.get('switch_status')
         network.update_switches(id=idswitch, open=statusswitch)
         update_sld_diagram(sel_ctx.get_selected(), True)
         update_nad_diagram(sel_ctx.get_selected())
+
+    def go_to_vl_from_map(event: any):
+        vl_from_map= str(event.selected_vl)
+        sel_ctx.set_selected(vl_from_map, add_to_history=True)
+        update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
+        update_select_widget(found, None, None, on_selected)
+        #switch to the SLD tab
+        tabs_diagrams.selected_index=1
 
     def update_nad_diagram(el):
         nonlocal nad_widget
@@ -92,6 +106,15 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             else:
                 update_sld(sld_widget, sld_diagram_data, keep_viewbox=kv, enable_callbacks=True)
 
+    def update_map(el):
+        nonlocal map_widget
+        if el is not None:
+            if map_widget==None:
+                map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter)
+                map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
+            else:
+                map_widget.center_on_voltage_level(el)
+    
     nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, 
                                   continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
 
@@ -171,6 +194,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         sel=sel_ctx.get_selected()
         update_nad_diagram(sel)
         update_sld_diagram(sel)
+        update_map(sel)
 
     update_explorer()
 
@@ -181,10 +205,11 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     right_panel_nad = widgets.VBox([nadslider, nad_widget])
     right_panel_sld = widgets.VBox([spacer_label,sld_widget])
+    right_panel_map = widgets.VBox([spacer_label, map_widget])
 
     tabs_diagrams = widgets.Tab()
-    tabs_diagrams.children = [right_panel_nad, right_panel_sld]
-    tabs_diagrams.titles = ['Network Area', 'Single Line']
+    tabs_diagrams.children = [right_panel_nad, right_panel_sld, right_panel_map]
+    tabs_diagrams.titles = ['Network Area', 'Single Line', 'Network map']
     tabs_diagrams.layout=widgets.Layout(width='850px', height='700px', margin='0 0 0 4px')
 
     left_vbox = widgets.VBox([voltage_levels_label, left_panel])
