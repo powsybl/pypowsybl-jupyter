@@ -31,10 +31,11 @@ class SelectContext:
     def get_vls(self):
         return self.vls
     
-    def set_selected(self, id):
+    def set_selected(self, id, add_to_history=True):
         if id in self.vls.index:
             self.selected_vl = id
-            self.add_to_history(id)
+            if add_to_history:
+                self.add_to_history(id)
         else:
             raise ValueError(f'a voltage level with id={id} does not exist in the network.')
 
@@ -61,10 +62,6 @@ class SelectContext:
     def add_to_history(self, id):
         if (id in self.vls.index):
             row_to_add = self.vls.loc[id].to_dict()
-            for item in self.history:
-                if item['id'] == row_to_add['id']:
-                    self.history.remove(item)
-                    break
             self.history.appendleft(row_to_add)
 
     def get_history_as_list(self):

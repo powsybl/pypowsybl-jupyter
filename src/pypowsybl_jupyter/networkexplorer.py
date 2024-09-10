@@ -56,7 +56,9 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def go_to_vl(event: any):
         arrow_vl= str(event.clicked_nextvl)
-        sel_ctx.set_selected(arrow_vl)
+        sel_ctx.set_selected(arrow_vl, add_to_history=True)
+        update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
+        update_select_widget(found, None, None, on_selected)
         update_explorer()
 
 
@@ -135,7 +137,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     
     found = widgets.Select(
         options=sel_ctx.get_filtered_vls_as_list(),
-        value=sel_ctx.get_selected(),
+        value=None,
         description='Found',
         disabled=False,
         layout=widgets.Layout(flex='80%', height='100%', width='350px', margin='0 0 0 0')
@@ -143,7 +145,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def on_selected(d):
         if d['new'] != None:
-            sel_ctx.set_selected(d['new'])
+            sel_ctx.set_selected(d['new'], add_to_history=True)
+            update_select_widget(history, None, sel_ctx.get_history_as_list(), on_selected_history)
             update_explorer()
 
     found.observe(on_selected, names='value')
@@ -158,23 +161,18 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def on_selected_history(d):
         if d['new'] != None:
-            sel_ctx.set_selected(d['new'])
+            sel_ctx.set_selected(d['new'], add_to_history=False)
+            update_select_widget(found, None, None, on_selected)
             update_explorer()
 
     history.observe(on_selected_history, names='value')
 
     def update_explorer():
         sel=sel_ctx.get_selected()
-
-        update_select_widget(found, sel if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
-        update_select_widget(history, sel, sel_ctx.get_history_as_list(), on_selected_history)
-
         update_nad_diagram(sel)
         update_sld_diagram(sel)
 
-
-    update_nad_diagram(sel_ctx.get_selected())
-    update_sld_diagram(sel_ctx.get_selected())
+    update_explorer()
 
     voltage_levels_label=widgets.Label("Voltage levels")
     spacer_label=widgets.Label("")
