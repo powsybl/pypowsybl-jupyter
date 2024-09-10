@@ -2,7 +2,7 @@
 
 Network explorer is interactive network explorer widget, built on pypowsybl-jupyter's widgets (SLD, NAD, Network map) and some standard [ipywidgets](https://ipywidgets.readthedocs.io/en/stable/index.html): select lists, tabs, etc.
 
-Through the widget, you can select a voltage level from the list (or search of a specific one using the Filter) and the NAD and SLD diagrams for that voltage level will be displayed in the two "Network Area" and "Single Line" tabs, respectively. Both diagrams can be panned and zoomed. A third tab, 'Network map' displays the network's substations and lines on a map, if substations and lines geo data is available in the network.
+Through the widget, you can select a voltage level from the list (or search of a specific one using the Filter) and the NAD and SLD diagrams for that voltage level will be displayed in the two "Network Area" and "Single Line" tabs, respectively. Both diagrams can be panned and zoomed. A third tab, 'Network map' displays the network's substations and lines on a map, if substations and lines geo data is available in the network. The last displayed voltage levels are listed in a history box, on the explorer's bottom left corner.
 
 The following code, to be run in a notebook, first creates a network, then displays the network explorer on it.
 
