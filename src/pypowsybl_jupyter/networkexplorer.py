@@ -63,10 +63,13 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def go_to_vl(event: any):
         arrow_vl= str(event.clicked_nextvl)
-        sel_ctx.set_selected(arrow_vl, add_to_history=True)
-        update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
-        update_select_widget(found, None, None, on_selected)
-        update_explorer()
+        if arrow_vl != sel_ctx.get_selected():
+            sel_ctx.set_selected(arrow_vl, add_to_history=True)
+            update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
+            update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
+            update_explorer()
+        history.focus()
+        
 
     def toggle_switch(event: any):
         idswitch = event.clicked_switch.get('id')
@@ -77,9 +80,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def go_to_vl_from_map(event: any):
         vl_from_map= str(event.selected_vl)
-        sel_ctx.set_selected(vl_from_map, add_to_history=True)
-        update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
-        update_select_widget(found, None, None, on_selected)
+        if vl_from_map != sel_ctx.get_selected():
+            sel_ctx.set_selected(vl_from_map, add_to_history=True)
+            update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
+            update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
+            update_explorer()
+        history.focus()
         #switch to the SLD tab
         tabs_diagrams.selected_index=1
 
@@ -185,7 +191,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def on_selected_history(d):
         if d['new'] != None:
             sel_ctx.set_selected(d['new'], add_to_history=False)
-            update_select_widget(found, None, None, on_selected)
+            update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
             update_explorer()
 
     history.observe(on_selected_history, names='value')
