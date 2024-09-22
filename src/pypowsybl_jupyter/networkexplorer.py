@@ -61,6 +61,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     
     spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=use_name, nodes_infos=True)
 
+    NAD_TAB_INDEX = 0
+
     def go_to_vl(event: any):
         arrow_vl= str(event.clicked_nextvl)
         if arrow_vl != sel_ctx.get_selected():
@@ -69,14 +71,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
             update_explorer()
         history.focus()
-        
 
     def toggle_switch(event: any):
         idswitch = event.clicked_switch.get('id')
         statusswitch = event.clicked_switch.get('switch_status')
         network.update_switches(id=idswitch, open=statusswitch)
         update_sld_diagram(sel_ctx.get_selected(), True)
-        update_nad_diagram(sel_ctx.get_selected())
+        if tabs_diagrams.selected_index==NAD_TAB_INDEX:
+            update_nad_diagram(sel_ctx.get_selected())
 
     def go_to_vl_from_map(event: any):
         vl_from_map= str(event.selected_vl)
@@ -89,8 +91,10 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         #switch to the SLD tab
         tabs_diagrams.selected_index=1
 
+    nad_displayed_vl_id=None
+
     def update_nad_diagram(el):
-        nonlocal nad_widget
+        nonlocal nad_widget, nad_displayed_vl_id
         if el is not None:
             new_diagram_data=network.get_network_area_diagram(voltage_level_ids=el, 
                                                               depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, 
@@ -99,6 +103,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 nad_widget=display_nad(new_diagram_data)
             else:
                 update_nad(nad_widget,new_diagram_data)
+            nad_displayed_vl_id=el
 
     def update_sld_diagram(el, kv: bool = False):
         nonlocal sld_widget
@@ -196,13 +201,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     history.observe(on_selected_history, names='value')
 
-    def update_explorer():
+    def update_explorer(force_update=False):
         sel=sel_ctx.get_selected()
-        update_nad_diagram(sel)
+        if force_update or tabs_diagrams.selected_index==NAD_TAB_INDEX:
+            update_nad_diagram(sel)
         update_sld_diagram(sel)
         update_map(sel)
 
-    update_explorer()
+    update_explorer(True)
 
     voltage_levels_label=widgets.Label("Voltage levels")
     spacer_label=widgets.Label("")
@@ -217,6 +223,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     tabs_diagrams.children = [right_panel_nad, right_panel_sld, right_panel_map]
     tabs_diagrams.titles = ['Network Area', 'Single Line', 'Network map']
     tabs_diagrams.layout=widgets.Layout(width='850px', height='700px', margin='0 0 0 4px')
+
+    def on_select_tab(widget):
+        tab_idx = widget['new']
+        sel = sel_ctx.get_selected()
+        if tab_idx==NAD_TAB_INDEX and nad_displayed_vl_id != sel:
+            update_nad_diagram(sel)
+
+    tabs_diagrams.observe(on_select_tab, names='selected_index')    
 
     left_vbox = widgets.VBox([voltage_levels_label, left_panel])
     right_vbox = widgets.VBox([spacer_label, tabs_diagrams])
