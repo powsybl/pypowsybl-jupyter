@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/pypowsybl-jupyter/badge/?version=stable)](https://powsybl.readthedocs.io/projects/pypowsybl-jupyter)
+
 # pypowsybl-jupyter
 
 Widgets for [PyPowSyBl](https://github.com/powsybl/pypowsybl) in [Jupyter](https://jupyter.org) notebooks.
