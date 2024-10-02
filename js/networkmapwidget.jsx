@@ -23,7 +23,7 @@ import {
 import { Box } from '@mui/system';
 import LinearProgress from '@mui/material/LinearProgress';
 
-const INITIAL_ZOOM = 9;
+const INITIAL_ZOOM = 0;
 const LABELS_ZOOM_THRESHOLD = 9;
 const ARROWS_ZOOM_THRESHOLD = 7;
 
