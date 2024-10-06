@@ -79,14 +79,16 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         update_nad_diagram(sel_ctx.get_selected())
 
     def select_vl_and_activate_sld_tab(vl_id: str):
+        #first, switch to the SLD tab
+        tabs_diagrams.selected_index=1
+        
+        #then, updates explorer's content
         if vl_id != sel_ctx.get_selected():
             sel_ctx.set_selected(vl_id, add_to_history=True)
             update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
             update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
             update_explorer()
         history.focus()
-        #switch to the SLD tab
-        tabs_diagrams.selected_index=1
 
     def go_to_vl_from_map(event: any):
         vl_id= str(event.selected_vl)
@@ -174,7 +176,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     
     found = widgets.Select(
         options=sel_ctx.get_filtered_vls_as_list(),
-        value=None,
+        value=sel_ctx.get_selected(),
         description='Found',
         disabled=False,
         layout=widgets.Layout(flex='80%', height='100%', width='350px', margin='0 0 0 0')
