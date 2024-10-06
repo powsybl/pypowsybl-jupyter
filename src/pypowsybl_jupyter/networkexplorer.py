@@ -71,27 +71,37 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
             update_explorer()
         history.focus()
-
+        
+    nad_displayed_vl_id=None
+    
     def toggle_switch(event: any):
+        nonlocal nad_displayed_vl_id
         idswitch = event.clicked_switch.get('id')
         statusswitch = event.clicked_switch.get('switch_status')
         network.update_switches(id=idswitch, open=statusswitch)
         update_sld_diagram(sel_ctx.get_selected(), True)
-        if tabs_diagrams.selected_index==NAD_TAB_INDEX:
-            update_nad_diagram(sel_ctx.get_selected())
+        #force a NAD update, as soon as the NAD tab is selected
+        nad_displayed_vl_id=None
 
-    def go_to_vl_from_map(event: any):
-        vl_from_map= str(event.selected_vl)
-        if vl_from_map != sel_ctx.get_selected():
-            sel_ctx.set_selected(vl_from_map, add_to_history=True)
+    def select_vl_and_activate_sld_tab(vl_id: str):
+        #first, switch to the SLD tab
+        tabs_diagrams.selected_index=1
+        
+        #then, updates explorer's content
+        if vl_id != sel_ctx.get_selected():
+            sel_ctx.set_selected(vl_id, add_to_history=True)
             update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
             update_select_widget(found, sel_ctx.get_selected() if sel_ctx.is_selected_in_filtered_vls() else None, None, on_selected)
             update_explorer()
         history.focus()
-        #switch to the SLD tab
-        tabs_diagrams.selected_index=1
 
-    nad_displayed_vl_id=None
+    def go_to_vl_from_map(event: any):
+        vl_id= str(event.selected_vl)
+        select_vl_and_activate_sld_tab(vl_id)
+
+    def go_to_vl_from_nad(event: any):
+        vl_id= str(event.selected_node['equipment_id'])
+        select_vl_and_activate_sld_tab(vl_id)        
 
     def update_nad_diagram(el):
         nonlocal nad_widget, nad_displayed_vl_id
@@ -171,7 +181,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     
     found = widgets.Select(
         options=sel_ctx.get_filtered_vls_as_list(),
-        value=None,
+        value=sel_ctx.get_selected(),
         description='Found',
         disabled=False,
         layout=widgets.Layout(flex='80%', height='100%', width='350px', margin='0 0 0 0')
