@@ -12,20 +12,103 @@ import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer';
 
 interface NadWidgetModel {
     diagram_data: any;
+    selected_node: any;
+    moved_node: any;
+    moved_text_node: any;
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
+    const handleSelectNode = (equipmentId: string, nodeId: string) => {
+        model.set('selected_node', {
+            equipment_id: equipmentId,
+            node_id: nodeId,
+        });
+        model.save_changes();
+        model.send({ event: 'select_node' });
+    };
+
+    const handleMoveNode = (
+        equipmentId: string,
+        nodeId: string,
+        x: number,
+        y: number,
+        xOrig: number,
+        yOrig: number
+    ) => {
+        model.set('moved_node', {
+            equipment_id: equipmentId,
+            node_id: nodeId,
+            x: x,
+            y: y,
+            x_orig: xOrig,
+            y_orig: yOrig,
+        });
+        model.save_changes();
+        model.send({ event: 'move_node' });
+    };
+
+    const handleMoveTextNode = (
+        equipmentId: string,
+        nodeId: string,
+        textNodeId: string,
+        shiftX: number,
+        shiftY: number,
+        shiftXOrig: number,
+        shiftYOrig: number,
+        connectionShiftX: number,
+        connectionShiftY: number,
+        connectionShiftXOrig: number,
+        connectionShiftYOrig: number
+    ) => {
+        model.set('moved_text_node', {
+            equipment_id: equipmentId,
+            node_id: nodeId,
+            text_node_id: textNodeId,
+            shift_x: shiftX,
+            shift_y: shiftY,
+            shift_x_orig: shiftXOrig,
+            shift_y_orig: shiftYOrig,
+            connection_shift_x: connectionShiftX,
+            connection_shift_y: connectionShiftY,
+            connection_shift_x_orig: connectionShiftXOrig,
+            connection_shift_y_orig: connectionShiftYOrig,
+        });
+        model.save_changes();
+        model.send({ event: 'move_text_node' });
+    };
+
     function render_diagram(model: any): any {
         const diagram_data = model.get('diagram_data');
         const svg_data = diagram_data['svg_data']; //svg content
         const is_invalid_lf = diagram_data['invalid_lf'];
+        const is_enabled_callbacks = diagram_data['enable_callbacks'];
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
 
         el_div.classList.toggle('invalid-lf', is_invalid_lf);
 
-        new NetworkAreaDiagramViewer(el_div, svg_data, 800, 600, 800, 600);
+        new NetworkAreaDiagramViewer(
+            el_div,
+            svg_data,
+            800,
+            600,
+            800,
+            600,
+            handleMoveNode,
+            handleMoveTextNode,
+            handleSelectNode,
+            is_enabled_callbacks,
+            false,
+            null
+        );
+
+        // prevents the default jupyter-lab's behavior (it already uses the shift+click combination)
+        el_div.addEventListener('mousedown', function (event: MouseEvent) {
+            if (event.shiftKey) {
+                event.preventDefault();
+            }
+        });
 
         return el_div;
     }

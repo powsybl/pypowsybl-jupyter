@@ -19,9 +19,11 @@ network_explorer(network)
 
 The selected voltage level is the displayed NAD's center. 
 
-![network-explorer  NAD tab](/_static/img/network_explorer_1.png)
+![network-explorer NAD tab](/_static/img/network_explorer_1.png)
 
 A 'depth' slider controls the size of the sub network.
+
+Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level.
 
 ## Single Line tab
 
