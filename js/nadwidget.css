@@ -6,3 +6,10 @@
 .invalid-lf .nad-edge-infos {
 	opacity: 0.2;
 }
+
+.grayout :is(.nad-vl-nodes *, .nad-branch-edges *, .nad-text-edges *, .nad-text-nodes *, .nad-vl-nodes .nad-overvoltage *, .nad-vl-nodes .nad-undervoltage *, .nad-branch-edges .nad-overload .nad-edge-path *) {
+	opacity: 0.9;
+	--nad-vl-color: #7d7f7c;
+	stroke: #7d7f7c;
+	animation-play-state: paused;
+}

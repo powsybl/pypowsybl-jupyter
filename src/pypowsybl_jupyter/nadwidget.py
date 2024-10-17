@@ -71,7 +71,7 @@ def _get_svg_string(svg) -> str:
     else:
         raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
 
-def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False) -> NadWidget:
+def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
 
@@ -89,9 +89,9 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False) -
 
             display_nad(network.get_network_area_diagram())
     """    
-    return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg), "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks})
+    return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg), "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout})
 
-def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False):
+def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False):
     """
     Updates an existing NAD widget with a new SVG content
 
@@ -109,4 +109,4 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
     """    
 
     svg_value=_get_svg_string(svg)
-    nadwidget.diagram_data= {"svg_data": svg_value, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks}
+    nadwidget.diagram_data= {"svg_data": svg_value, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout}
