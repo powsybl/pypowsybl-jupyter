@@ -10,6 +10,7 @@ from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
 from .networkmapwidget import NetworkMapWidget
 from .selectcontext import SelectContext
+from .assets import EMPTY_SVG, PROGRESS_BAR_SVG, PROGRESS_EMPTY_SVG
 
 from IPython.display import display
 import ipywidgets as widgets
@@ -40,7 +41,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         .. code-block:: python
 
             network_explorer(pp.network.create_eurostag_tutorial_example1_network())
-    """    
+    """
 
     sel_ctx=SelectContext(network, vl_id, use_name, history_max_length = 10)
 
@@ -85,9 +86,10 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nad_displayed_vl_id=None
 
     def select_vl_and_activate_sld_tab(vl_id: str):
-        #switch to the SLD tab
+        #first, switch to the SLD tab
         tabs_diagrams.selected_index=1
         
+        #then, updates explorer's content
         if vl_id != sel_ctx.get_selected():
             sel_ctx.set_selected(vl_id, add_to_history=True)
             update_select_widget(history, sel_ctx.get_selected(), sel_ctx.get_history_as_list(), on_selected_history)
@@ -103,30 +105,29 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         vl_id= str(event.selected_node['equipment_id'])
         select_vl_and_activate_sld_tab(vl_id)
 
-    def update_nad_diagram(el):
-        nonlocal nad_widget, nad_displayed_vl_id
+    def compute_sld_data(el):
         if el is not None:
-            new_diagram_data=network.get_network_area_diagram(voltage_level_ids=el, 
-                                                              depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, 
-                                                              low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
-            if nad_widget==None:
-                nad_widget=display_nad(new_diagram_data, enable_callbacks=True)
-                nad_widget.on_select_node(lambda event : go_to_vl_from_nad(event))
-            else:
-                update_nad(nad_widget,new_diagram_data, enable_callbacks=True)
-            nad_displayed_vl_id=el
+            sld_data=network.get_single_line_diagram(el, spars)
+        else:
+            sld_data=EMPTY_SVG
+        return sld_data
+    
+    current_sld_data = compute_sld_data(None)
+
+    def update_sld_widget(sld_diagram_data, kv: bool = False, enable_callbacks=True):
+        nonlocal sld_widget
+        if sld_widget==None:
+            sld_widget=display_sld(sld_diagram_data, enable_callbacks=enable_callbacks)
+            sld_widget.on_nextvl(lambda event: go_to_vl(event))
+            sld_widget.on_switch(lambda event: toggle_switch(event))
+
+        else:
+            update_sld(sld_widget, sld_diagram_data, keep_viewbox=kv, enable_callbacks=enable_callbacks)
 
     def update_sld_diagram(el, kv: bool = False):
-        nonlocal sld_widget
-        if el is not None:
-            sld_diagram_data=network.get_single_line_diagram(el, spars)
-            if sld_widget==None:
-                sld_widget=display_sld(sld_diagram_data, enable_callbacks=True)
-                sld_widget.on_nextvl(lambda event: go_to_vl(event))
-                sld_widget.on_switch(lambda event: toggle_switch(event))
-
-            else:
-                update_sld(sld_widget, sld_diagram_data, keep_viewbox=kv, enable_callbacks=True)
+        nonlocal current_sld_data
+        current_sld_data=compute_sld_data(el)
+        update_sld_widget(current_sld_data, kv, enable_callbacks=True)
 
     def update_map(el):
         nonlocal map_widget
@@ -144,7 +145,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def on_nadslider_changed(d):
         nonlocal selected_depth
         selected_depth=d['new']
-        update_nad_diagram_wrapped(sel_ctx.get_selected())
+        update_nad_diagram(sel_ctx.get_selected())
 
     nadslider.observe(on_nadslider_changed, names='value')
 
@@ -213,38 +214,63 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     history.observe(on_selected_history, names='value')
 
-    IN_PROGRESS_ON="<div style='color: white; background-color: red; padding: 0px 5px 0px 5px;'>Computing NAD diagram: please wait ...</div>"
-    IN_PROGRESS_OFF=""
-    in_progress_label = widgets.HTML(value=IN_PROGRESS_OFF, 
-         layout=widgets.Layout(width='auto', justify_content='flex-end', margin='0px 25px 0px 0px'))
+    def compute_nad_data(el, depth=0):
+        if el is not None:
+            nad_data=network.get_network_area_diagram(voltage_level_ids=el, 
+                                                      depth=depth, high_nominal_voltage_bound=high_nominal_voltage_bound, 
+                                                      low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
+        else:
+            nad_data=EMPTY_SVG
+        return nad_data
+
+    current_nad_data = compute_nad_data(None)
+
+    def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False):
+        nonlocal nad_widget
+        if nad_widget==None:
+            nad_widget=display_nad(new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout)
+            nad_widget.on_select_node(lambda event : go_to_vl_from_nad(event))
+        else:
+            update_nad(nad_widget,new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout)
+
+    in_progress_widget=widgets.HTML(value=PROGRESS_EMPTY_SVG, 
+                                    layout=widgets.Layout(width='30', justify_content='flex-end', margin='0px 20px 0px 0px'))
 
     def enable_in_progress():
-        in_progress_label.value=IN_PROGRESS_ON
+        in_progress_widget.value=PROGRESS_BAR_SVG
         found.disabled=True
         history.disabled=True
         nadslider.disabled=True
         vl_input.disabled=True
-        if nad_widget != None:
-            display(in_progress_label)
+        display(vl_input)
 
     def disable_in_progress():
         found.disabled=False
         history.disabled=False
         nadslider.disabled=False
         vl_input.disabled=False
-        in_progress_label.value=IN_PROGRESS_OFF
+        in_progress_widget.value=PROGRESS_EMPTY_SVG
 
-    def update_nad_diagram_wrapped(el):
-        enable_in_progress()
+    def update_nad_diagram(el):
+        nonlocal current_nad_data, nad_displayed_vl_id
+        if nad_widget != None:
+            enable_in_progress()
+            update_nad_widget(current_nad_data, enable_callbacks=False, grayout=True)
+            display(nad_widget)
+            update_sld_widget(current_sld_data, True, enable_callbacks=False)
+            display(sld_widget)
         try:
-            update_nad_diagram(el)
+            current_nad_data=compute_nad_data(el, selected_depth)
+            update_nad_widget(current_nad_data, enable_callbacks=True, grayout=False)
+            nad_displayed_vl_id=el
         finally:
+            update_sld_widget(current_sld_data, True, enable_callbacks=True)
             disable_in_progress()
     
     def update_explorer(force_update=False):
         sel=sel_ctx.get_selected()
         if force_update or tabs_diagrams.selected_index==NAD_TAB_INDEX:
-            update_nad_diagram_wrapped(sel)
+            update_nad_diagram(sel)
         update_sld_diagram(sel)
         update_map(sel)
         history.focus()
@@ -254,9 +280,10 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     voltage_levels_label=widgets.Label("Voltage levels")
     spacer_label=widgets.Label("")
 
-    left_panel = widgets.VBox([vl_input, found, history], layout=widgets.Layout(width='100%', height='100%', display='flex', flex_flow='column'))
+    left_panel = widgets.VBox([vl_input, found, history], 
+                              layout=widgets.Layout(width='100%', height='100%', display='flex', flex_flow='column'))
 
-    nad_top_section = widgets.HBox([nadslider, in_progress_label],layout=widgets.Layout(justify_content='space-between')) 
+    nad_top_section = widgets.HBox([nadslider, in_progress_widget],layout=widgets.Layout(justify_content='space-between')) 
     right_panel_nad = widgets.VBox([nad_top_section, nad_widget])
     right_panel_sld = widgets.VBox([spacer_label,sld_widget])
     right_panel_map = widgets.VBox([spacer_label, map_widget])
@@ -270,7 +297,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         tab_idx = widget['new']
         sel = sel_ctx.get_selected()
         if tab_idx==NAD_TAB_INDEX and nad_displayed_vl_id != sel:
-            update_nad_diagram_wrapped(sel)
+            update_nad_diagram(sel)
 
     tabs_diagrams.observe(on_select_tab, names='selected_index')    
 
@@ -280,4 +307,3 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     hbox = widgets.HBox([left_vbox, right_vbox])
 
     return hbox
-

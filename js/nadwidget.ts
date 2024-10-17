@@ -81,12 +81,15 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const diagram_data = model.get('diagram_data');
         const svg_data = diagram_data['svg_data']; //svg content
         const is_invalid_lf = diagram_data['invalid_lf'];
+        const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
 
         el_div.classList.toggle('invalid-lf', is_invalid_lf);
+
+        el_div.classList.toggle('grayout', is_grayout);
 
         new NetworkAreaDiagramViewer(
             el_div,
