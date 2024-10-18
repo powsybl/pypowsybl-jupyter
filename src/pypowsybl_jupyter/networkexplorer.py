@@ -259,12 +259,18 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             display(nad_widget)
             update_sld_widget(current_sld_data, True, enable_callbacks=False)
             display(sld_widget)
+            if map_widget != None:
+                map_widget.set_enable_callbacks(False)
+                display(map_widget)
         try:
             current_nad_data=compute_nad_data(el, selected_depth)
             update_nad_widget(current_nad_data, enable_callbacks=True, grayout=False)
             nad_displayed_vl_id=el
         finally:
             update_sld_widget(current_sld_data, True, enable_callbacks=True)
+            if map_widget != None:
+                map_widget.set_enable_callbacks(True)
+
             disable_in_progress()
     
     def update_explorer(force_update=False):
