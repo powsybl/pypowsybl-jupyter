@@ -77,16 +77,6 @@ class WidgetMapEquipments extends MapEquipments {
     }
 }
 
-//called after a click (right mouse click) on an equipment (line or substation)
-function showEquipmentMenu(equipment, x, y, type) {
-    console.log(
-        '# Show equipment menu: ' +
-            JSON.stringify(equipment) +
-            ', type: ' +
-            type
-    );
-}
-
 const render = createRender(() => {
     const networkMapRef = useRef();
 
@@ -103,6 +93,8 @@ const render = createRender(() => {
 
     const [params, setParams] = useModelState('params');
     const [nvls] = useModelState('nvls');
+
+    const [enable_callbacks] = useModelState('enable_callbacks');
 
     const targetSubId = params['subId'];
     const [centerOnSubId, setCenterOnSubId] = useState(
@@ -172,13 +164,14 @@ const render = createRender(() => {
     }
 
     function propagate_selectedvl_event(voltageLevelId) {
-        model.set('selected_vl', voltageLevelId);
-        model.save_changes();
-        model.send({ event: 'select_vl' });
+        if (enable_callbacks) {
+            model.set('selected_vl', voltageLevelId);
+            model.save_changes();
+            model.send({ event: 'select_vl' });
+        }
     }
 
     function choiceVoltageLevel(voltageLevelId) {
-        console.log(`# Choose Voltage Level : ${voltageLevelId}`);
         closeChoiceVoltageLevelMenu();
         propagate_selectedvl_event(voltageLevelId);
     }
@@ -253,31 +246,11 @@ const render = createRender(() => {
             useName={use_name}
             centerOnSubstation={centerOnSubId}
             onSubstationClick={(vlId) => {
-                console.log('# OpenVoltageLevel: ' + vlId);
                 propagate_selectedvl_event(vlId);
             }}
             onSubstationClickChooseVoltageLevel={
                 chooseVoltageLevelForSubstation
             }
-            onSubstationMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'substation')
-            }
-            onLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'line')
-            }
-            onTieLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'tie-line')
-            }
-            onHvdcLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'hvdc-line')
-            }
-            onVoltageLevelMenuClick={(equipment, x, y) => {
-                console.log(
-                    `# VoltageLevel menu click: ${JSON.stringify(
-                        equipment
-                    )} at coordinates (${x}, ${y})`
-                );
-            }}
             mapLibrary={'cartonolabel'}
             mapTheme={'dark'}
             filteredNominalVoltages={filteredNominalVoltages}
