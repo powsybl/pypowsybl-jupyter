@@ -128,23 +128,6 @@ const render = createRender(() => {
     }, []);
 
     useEffect(() => {
-        const handleContextmenu = (e) => {
-            //e.preventDefault();
-            e.stopPropagation();
-        };
-        networkMapRef.current.addEventListener(
-            'contextmenu',
-            handleContextmenu
-        );
-        return () => {
-            networkMapRef.current.removeEventListener(
-                'contextmenu',
-                handleContextmenu
-            );
-        };
-    }, []);
-
-    useEffect(() => {
         const targetSubId = params['subId'];
         if (!('centered' in params)) {
             setCenterOnSubId(targetSubId === null ? null : { to: targetSubId });
