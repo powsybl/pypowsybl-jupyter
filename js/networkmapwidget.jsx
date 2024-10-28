@@ -63,6 +63,25 @@ const darkTheme = createTheme({
     aggrid: 'ag-theme-alpine-dark',
 });
 
+const lightTheme = createTheme({
+    palette: {
+        mode: 'light',
+    },
+    link: {
+        color: 'blue',
+    },
+    node: {
+        background: '#1976d2',
+        hover: '#84adce',
+        border: '#0f3d68',
+    },
+    selectedRow: {
+        background: '#8E9C9B',
+    },
+    mapboxStyle: 'mapbox://styles/mapbox/light-v9',
+    aggrid: 'ag-theme-alpine',
+});
+
 class WidgetMapEquipments extends MapEquipments {
     initEquipments(smapdata, lmapdata, tlmapdata, hlmapdata) {
         this.updateSubstations(smapdata, true);
@@ -107,6 +126,8 @@ const render = createRender(() => {
         gdata: new GeoData(new Map(), new Map()),
         edata: new WidgetMapEquipments([], [], [], []),
     });
+
+    const [dark_mode] = useModelState('dark_mode');
 
     useEffect(() => {
         let initDataTask = new Promise((resolve, reject) => {
@@ -235,7 +256,7 @@ const render = createRender(() => {
                 chooseVoltageLevelForSubstation
             }
             mapLibrary={'cartonolabel'}
-            mapTheme={'dark'}
+            mapTheme={dark_mode ? 'dark' : 'light'}
             filteredNominalVoltages={filteredNominalVoltages}
         />
     );
@@ -243,7 +264,7 @@ const render = createRender(() => {
     return (
         <div ref={networkMapRef} className="network-map-viewer-widget">
             <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={darkTheme}>
+                <ThemeProvider theme={dark_mode ? darkTheme : lightTheme}>
                     <div
                         style={{
                             position: 'relative',
