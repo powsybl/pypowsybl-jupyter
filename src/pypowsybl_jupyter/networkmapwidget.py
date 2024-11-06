@@ -62,6 +62,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
     
     selected_vl = traitlets.Unicode().tag(sync=True)
 
+    enable_callbacks = traitlets.Bool().tag(sync=True)
+
     dark_mode = traitlets.Bool().tag(sync=True)
 
     def __init__(self, network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1, 
@@ -81,6 +83,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         self.sub_vls=sub_vls
         self.subs_ids=subs_ids
         self.nvls=self.extract_nominal_voltage_list(network, nominal_voltages_top_tiers_filter)
+        self.enable_callbacks=True
         self.dark_mode=dark_mode
 
         self._on_selectvl_handlers = CallbackDispatcher()
@@ -110,6 +113,9 @@ class NetworkMapWidget(anywidget.AnyWidget):
         sub_id=self.get_substation_id(vl_id)
         if sub_id is not None:
             self.params = {"subId":  sub_id}
+
+    def set_enable_callbacks(self, enabled=True):
+        self.enable_callbacks = enabled
 
     def set_dark_mode(self, dark_mode=False):
         self.dark_mode = dark_mode
