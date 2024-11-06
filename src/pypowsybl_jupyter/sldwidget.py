@@ -19,6 +19,8 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
+from .util import _get_svg_string, _get_svg_metadata
+
 class SldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "sldwidget.css"
@@ -74,23 +76,6 @@ class SldWidget(anywidget.AnyWidget):
 
     def on_bus(self, callback, remove=False):
         self._on_bus_handlers.register_callback(callback, remove=remove)
-
-        
-def _get_svg_string(svg) -> str:
-    if isinstance(svg, str):
-        return svg
-    elif hasattr(svg, '_repr_svg_'):
-        return svg._repr_svg_()
-    else:
-        raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
-
-def _get_svg_metadata(svg) -> str:
-    if isinstance(svg, str):
-        return None
-    elif hasattr(svg, '_metadata'):
-        return svg._metadata
-    else:
-        raise ValueError('svg argument provide a _metadata method.')
 
 def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
     """

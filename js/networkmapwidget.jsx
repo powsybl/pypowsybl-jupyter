@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { createRender, useModelState, useModel } from '@anywidget/react';
-import { NetworkMap, GeoData, MapEquipments } from '@powsybl/diagram-viewer';
+import { NetworkMap, GeoData, MapEquipments } from '@powsybl/network-viewer';
 import VoltageLevelChoice from './voltage-level-choice';
 import NominalVoltageFilter from './nominal-voltage-filter';
 

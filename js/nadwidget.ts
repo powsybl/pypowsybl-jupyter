@@ -8,7 +8,7 @@
 import type { RenderProps } from '@anywidget/types';
 import './nadwidget.css';
 
-import { NetworkAreaDiagramViewer } from '@powsybl/diagram-viewer';
+import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
 
 interface NadWidgetModel {
     diagram_data: any;
@@ -79,7 +79,8 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
     function render_diagram(model: any): any {
         const diagram_data = model.get('diagram_data');
-        const svg_data = diagram_data['svg_data']; //svg content
+        const svg_data = diagram_data['svg_data'];
+        const metadata = diagram_data['metadata'];
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
@@ -94,6 +95,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         new NetworkAreaDiagramViewer(
             el_div,
             svg_data,
+            metadata ? JSON.parse(metadata) : null,
             800,
             600,
             800,
@@ -103,6 +105,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             handleSelectNode,
             is_enabled_callbacks,
             false,
+            null,
             null
         );
 

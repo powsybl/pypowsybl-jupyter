@@ -18,6 +18,8 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
+from .util import _get_svg_string, _get_svg_metadata
+
 class NadWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "nadwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "nadwidget.css"
@@ -63,14 +65,6 @@ class NadWidget(anywidget.AnyWidget):
     def on_move_text_node(self, callback, remove=False):
         self._on_move_text_node_handler.register_callback(callback, remove=remove)
 
-def _get_svg_string(svg) -> str:
-    if isinstance(svg, str):
-        return svg
-    elif hasattr(svg, '_repr_svg_'):
-        return svg._repr_svg_()
-    else:
-        raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
-
 def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
@@ -89,8 +83,10 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
         .. code-block:: python
 
             display_nad(network.get_network_area_diagram())
-    """    
-    return NadWidget(diagram_data= {"svg_data": _get_svg_string(svg), "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout})
+    """
+    svg_value=_get_svg_string(svg)
+    svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
+    return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout})
 
 def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False):
     """
@@ -111,4 +107,5 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
     """    
 
     svg_value=_get_svg_string(svg)
-    nadwidget.diagram_data= {"svg_data": svg_value, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout}
+    svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
+    nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout}
