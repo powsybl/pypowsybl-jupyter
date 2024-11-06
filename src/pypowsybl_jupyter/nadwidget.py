@@ -77,8 +77,9 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
 
     Args:
         svg: the input SVG, as str or class providing an svg and metadata representation
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-        enable_callbacks: if true, enable the callbacks for moving and selecting nodes in the diagram.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        enable_callbacks: if True, enable the callbacks for moving and selecting nodes in the diagram.
+        grayout: if True, changes the diagram elements' color to gray.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -98,8 +99,9 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
     Args:
         nadwidget: the existing widget to update
         svg: the input NAD's SVG
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-        enable_callbacks: if true, enable the callbacks for moving and selecting nodes in the diagram.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        enable_callbacks: if True, enable the callbacks for moving and selecting nodes in the diagram.
+        grayout: if True, changes the diagram elements' color to gray.
 
     Examples:
 

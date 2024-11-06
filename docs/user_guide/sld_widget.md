@@ -38,20 +38,20 @@ update_sld(sld, network.get_single_line_diagram(vl1))
 display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
 ```
 
-- svg: the input SVG, as str or class providing an svg and metadata representation
-- enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-- invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+- svg: the input SVG, as str or class providing an svg and metadata representation.
+- enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches.
+- invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
 
 ```python
 update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False, invalid_lf: bool = False)
 ```
 
-- sldwidget: the existing widget to update
-- svg: the input NAD's SVG
-- keep_viewbox: if True, keeps the current pan and zoom after the update
-- enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-- invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+- sldwidget: the existing widget to update.
+- svg: the input NAD's SVG.
+- keep_viewbox: if True, keeps the current pan and zoom after the update.
+- enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
+- invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
 
 ## Customize widget's interactions

@@ -97,9 +97,9 @@ def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -
     Displays an SLD's SVG with support for panning and zooming.
 
     Args:
-        svg: the input SVG, as str or class providing an svg and metadata representation
-        enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        svg: the input SVG, as str or class providing an svg and metadata representation.
+        enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -120,10 +120,11 @@ def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: boo
     Updates an existing SLD widget with a new SVG content.
 
     Args:
-        sldwidget: the existing widget to update
-        svg: the input NAD's SVG
-        enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        sldwidget: the existing widget to update.
+        svg: the input NAD's SVG.
+        keep_viewbox: if True, keeps the current pan and zoom after the update.
+        enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Examples:
 

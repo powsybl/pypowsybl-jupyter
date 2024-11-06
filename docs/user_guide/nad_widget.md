@@ -32,22 +32,24 @@ update_nad(nad, network.get_network_area_diagram(voltage_level_ids=vlid, depth=0
 ## Widget API
 
 ```python
-display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False) -> NadWidget
+display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget
 ```
 
 - svg: the input SVG, as str or class providing an svg and metadata representation
-- invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if true, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes
+- invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes.
+- grayout: if True, changes the diagram elements' color to gray.
 
 
 ```python
-update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False)
+update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False)
 ```
 
 - nadwidget: the existing widget to update
 - svg: the input NAD's SVG
-- invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if true, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes
+- invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes.
+- grayout: if True, changes the diagram elements' color to gray.
 
 ## Customize widget's interactions
 By default, only the pan and zoom interactions with the diagram are active.
