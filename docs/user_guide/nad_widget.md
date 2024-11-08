@@ -37,7 +37,7 @@ display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayo
 
 - svg: the input SVG, as str or class providing an svg and metadata representation
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 
 
@@ -48,7 +48,7 @@ update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = Fa
 - nadwidget: the existing widget to update
 - svg: the input NAD's SVG
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 
 ## Customize widget's interactions
@@ -63,6 +63,8 @@ Use these widget's methods to register a callback on a specific event:
 - on_move_text_node
 
 The [network explorer widget](/user_guide/network_explorer.md) demonstrates the approach.
+
+Please note that the callbacks works with versions of PyPowSyBl equal or greater than v1.8.1.
 
 Example: the code below activates a callback when a node is selected (through SHIFT+CLICK) in the widget (it prints the selected node's ID to the log).
 
