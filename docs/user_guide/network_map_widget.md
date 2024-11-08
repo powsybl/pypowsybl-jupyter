@@ -6,6 +6,9 @@ The widget allows you to pan and zoom the map. A filter on the network's nominal
 
 The following code, to be run in a notebook, first creates a network, then displays the Network map widget on it.
 
+Please note that substation's and line's IIDM extensions are only available in PyPowSyBl starting from v1.5.0; With earlier versions of PyPowSyBl the map would be empty.
+
+
 ```python
 import pypowsybl.network as pn
 from pypowsybl_jupyter import NetworkMapWidget
