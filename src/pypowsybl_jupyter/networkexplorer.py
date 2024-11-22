@@ -53,12 +53,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     npars = nad_parameters if nad_parameters is not None else NadParameters(edge_name_displayed=False,
         id_displayed=not use_name,
-        edge_info_along_edge=False,
+        edge_info_along_edge=True,
         power_value_precision=1,
         angle_value_precision=0,
         current_value_precision=1,
         voltage_value_precision=0,
-        bus_legend=False,
+        bus_legend=True,
         substation_description_displayed=True)
     
     spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=use_name, nodes_infos=True)
