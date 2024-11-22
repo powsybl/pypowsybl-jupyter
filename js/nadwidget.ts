@@ -77,10 +77,12 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
-    function render_diagram(model: any): any {
+    function render_diagram(
+        model: any,
+        diagram_svg: string,
+        diagram_meta: string | null
+    ): any {
         const diagram_data = model.get('diagram_data');
-        const svg_data = diagram_data['svg_data'];
-        const metadata = diagram_data['metadata'];
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
@@ -94,8 +96,8 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         new NetworkAreaDiagramViewer(
             el_div,
-            svg_data,
-            metadata ? JSON.parse(metadata) : null,
+            diagram_svg,
+            diagram_meta ? JSON.parse(diagram_meta) : null,
             800,
             600,
             800,
@@ -119,12 +121,29 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         return el_div;
     }
 
-    const diagram_element = render_diagram(model);
+    const diagram_element = render_diagram(
+        model,
+        model.get('diagram_data')['svg_data'],
+        model.get('diagram_data')['metadata']
+    );
     el.appendChild(diagram_element);
 
     model.on('change:diagram_data', () => {
+        const diagram_data = model.get('diagram_data');
+        const keep_viewbox = diagram_data['keep_viewbox'];
+        let diagram_svg = '';
+        let diagram_meta = null;
+
         const nodes = el.querySelectorAll('.svg-nad-viewer-widget')[0];
-        const new_el = render_diagram(model);
+
+        if (keep_viewbox) {
+            diagram_svg = nodes.querySelector(':scope > svg')?.outerHTML ?? '';
+        } else {
+            diagram_svg = diagram_data['svg_data'];
+            diagram_meta = diagram_data['metadata'];
+        }
+
+        const new_el = render_diagram(model, diagram_svg, diagram_meta);
         el.replaceChild(new_el, nodes);
     });
 }
