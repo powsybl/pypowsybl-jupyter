@@ -18,7 +18,7 @@ from ipywidgets import (
 
 import pandas as pd
 
-from pypowsybl.network import Network
+from pypowsybl.network import Network, get_extensions_names
 
 class NetworkMapWidget(anywidget.AnyWidget):
     """
@@ -164,7 +164,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
         sub_vls = dict()
         subs_ids = set()
 
-        subs_positions_df = network.get_extensions('substationPosition')
+        # substationPosition extension is available only in PyPowSyBl starting from v1.5.0
+        subs_positions_df = pd.DataFrame() if 'substationPosition' not in get_extensions_names() else network.get_extensions('substationPosition') 
         if not subs_positions_df.empty:
 
             subs_df = network.get_substations()

@@ -7,7 +7,7 @@
 
 import type { RenderProps, Initialize } from '@anywidget/types';
 
-import { SingleLineDiagramViewer } from '@powsybl/diagram-viewer';
+import { SingleLineDiagramViewer } from '@powsybl/network-viewer';
 
 import './sldwidget.css';
 

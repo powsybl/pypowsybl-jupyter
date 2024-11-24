@@ -23,7 +23,7 @@ The selected voltage level is the displayed NAD's center.
 
 A 'depth' slider controls the size of the sub network.
 
-Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level.
+Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
 
 ## Single Line tab
 
@@ -38,6 +38,8 @@ Switches can also be clicked, causing their status in the network to change; Ple
 ![network-explorer MAP tab](/_static/img/network_explorer_3.png)
 
 The 'Network map' displays the network's substations and lines on a map. The map is empty if the network does not contain geo data.
+Please note that substation's and line's IIDM extensions are only available in PyPowSyBl starting from v1.5.0; With earlier versions of PyPowSyBl the map would be empty, too.
+
 By clicking on a substation, a list with the substation's voltage levels appears. 
 
 ![network-explorer MAP tab VLs list](/_static/img/network_explorer_4.png)
