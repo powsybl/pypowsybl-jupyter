@@ -1,7 +1,7 @@
 # NAD widget
 
 NAD is an interactive widget that displays a Network Area Diagram's SVG, generated for example using the PyPowSyBl APIs, in a Jupyter notebook
-The widget allows you to pan and zoom the diagram, to focus on a specific part when the network is large.
+The widget allows you to pan and zoom the diagram, to focus on a specific part when the network is large. It is also possible to interactively move nodes by drag&drop (feature available with versions of pypowsybl equal to or greater than v1.8.1).
 
 The following code, to be run in a notebook, first creates a network, then displays the NAD widget on it.
 
@@ -37,7 +37,7 @@ display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayo
 
 - svg: the input SVG, as str or class providing an svg and metadata representation
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 
 
@@ -48,7 +48,7 @@ update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = Fa
 - nadwidget: the existing widget to update
 - svg: the input NAD's SVG
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
+- enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 
 ## Customize widget's interactions
