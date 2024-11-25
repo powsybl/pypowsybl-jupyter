@@ -1,6 +1,6 @@
 # Network explorer widget
 
-Network explorer is interactive network explorer widget, built on pypowsybl-jupyter's widgets (SLD, NAD, Network map) and some standard [ipywidgets](https://ipywidgets.readthedocs.io/en/stable/index.html): select lists, tabs, etc.
+Network explorer is an interactive widget, built on pypowsybl-jupyter's widgets (SLD, NAD, Network map) and some standard [ipywidgets](https://ipywidgets.readthedocs.io/en/stable/index.html): select lists, tabs, etc.
 
 Through the widget, you can select a voltage level from the list (or search of a specific one using the Filter) and the NAD and SLD diagrams for that voltage level will be displayed in the two "Network Area" and "Single Line" tabs, respectively. Both diagrams can be panned and zoomed. A third tab, 'Network map' displays the network's substations and lines on a map, if substations and lines geo data is available in the network. The last displayed voltage levels are listed in a history box, on the explorer's bottom left corner.
 
@@ -23,7 +23,9 @@ The selected voltage level is the displayed NAD's center.
 
 A 'depth' slider controls the size of the sub network.
 
-Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
+Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level. 
+In the diagram, nodes can be moved interactively by drag&drop (e.g., to change the diagram layout for presentation purposes). However, the new node positions are not currently saved; Therefore, after switching to a new VL and then switching back to the current VL, the original nodes layout would be restored. 
+Please note that the select and move features require versions of PyPowSyBl equal to or greater than v1.8.1.
 
 ## Single Line tab
 
