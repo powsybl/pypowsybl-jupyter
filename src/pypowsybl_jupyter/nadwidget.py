@@ -88,7 +88,7 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout})
 
-def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False):
+def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False, keep_viewbox: bool = False):
     """
     Updates an existing NAD widget with a new SVG content
 
@@ -98,6 +98,7 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
         invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
         enable_callbacks: if True, enable the callbacks for moving and selecting nodes in the diagram. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
         grayout: if True, changes the diagram elements' color to gray.
+        keep_viewbox: if True, keeps the current diagram content, including pan and zoom settings.
 
     Examples:
 
@@ -108,4 +109,4 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
 
     svg_value=_get_svg_string(svg)
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
-    nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout}
+    nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout, "keep_viewbox": keep_viewbox}

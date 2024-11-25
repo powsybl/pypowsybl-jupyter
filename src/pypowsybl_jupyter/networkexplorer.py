@@ -225,13 +225,13 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     current_nad_data = compute_nad_data(None)
 
-    def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False):
+    def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False, keep_viewbox=False):
         nonlocal nad_widget
         if nad_widget==None:
             nad_widget=display_nad(new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout)
             nad_widget.on_select_node(lambda event : go_to_vl_from_nad(event))
         else:
-            update_nad(nad_widget,new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout)
+            update_nad(nad_widget,new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout, keep_viewbox=keep_viewbox)
 
     in_progress_widget=widgets.HTML(value=PROGRESS_EMPTY_SVG, 
                                     layout=widgets.Layout(width='30', justify_content='flex-end', margin='0px 20px 0px 0px'))
@@ -254,9 +254,9 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def update_nad_diagram(el):
         nonlocal current_nad_data, nad_displayed_vl_id
         if nad_widget != None:
-            enable_in_progress()
-            update_nad_widget(current_nad_data, enable_callbacks=False, grayout=True)
+            update_nad_widget('', enable_callbacks=False, grayout=True, keep_viewbox=True)
             display(nad_widget)
+            enable_in_progress()
             update_sld_widget(current_sld_data, True, enable_callbacks=False)
             display(sld_widget)
             if map_widget != None:

@@ -50,6 +50,7 @@ update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = Fa
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 - enable_callbacks: if True, enable the callbacks for selecting nodes (through a SHIFT+CLICK on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
+- keep_viewbox: if True, keeps the current diagram content, including pan and zoom settings.
 
 ## Customize widget's interactions
 By default, only the pan and zoom interactions with the diagram are active.
