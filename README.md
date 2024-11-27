@@ -1,3 +1,9 @@
+[![PyPI Latest Release](https://img.shields.io/pypi/v/pypowsybl-jupyter.svg)](https://pypi.org/project/pypowsybl-jupyter/)
+[![Documentation Status](https://readthedocs.org/projects/pypowsybl-jupyter/badge/?version=latest)](https://powsybl.readthedocs.io/projects/pypowsybl-jupyter/en/latest/?badge=latest)
+[![MPL-2.0 License](https://img.shields.io/badge/license-MPL_2.0-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![Slack](https://img.shields.io/badge/slack-powsybl-blueviolet.svg?logo=slack)](https://join.slack.com/t/powsybl/shared_invite/zt-rzvbuzjk-nxi0boim1RKPS5PjieI0rA)
+[![Actions Status](https://github.com/powsybl/pypowsybl/workflows/Full%20CI/badge.svg)](https://github.com/powsybl/pypowsybl-jupyter/actions)
+
 # pypowsybl-jupyter
 
 Widgets for [PyPowSyBl](https://github.com/powsybl/pypowsybl) in [Jupyter](https://jupyter.org) notebooks.
