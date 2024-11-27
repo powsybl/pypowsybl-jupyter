@@ -19,6 +19,8 @@ from ipywidgets import (
     CallbackDispatcher
 )
 
+from .util import _get_svg_string, _get_svg_metadata
+
 class SldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "sldwidget.css"
@@ -75,31 +77,14 @@ class SldWidget(anywidget.AnyWidget):
     def on_bus(self, callback, remove=False):
         self._on_bus_handlers.register_callback(callback, remove=remove)
 
-        
-def _get_svg_string(svg) -> str:
-    if isinstance(svg, str):
-        return svg
-    elif hasattr(svg, '_repr_svg_'):
-        return svg._repr_svg_()
-    else:
-        raise ValueError('svg argument should be a string or provide a _repr_svg_ method.')
-
-def _get_svg_metadata(svg) -> str:
-    if isinstance(svg, str):
-        return None
-    elif hasattr(svg, '_metadata'):
-        return svg._metadata
-    else:
-        raise ValueError('svg argument provide a _metadata method.')
-
 def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
     """
     Displays an SLD's SVG with support for panning and zooming.
 
     Args:
-        svg: the input SVG, as str or class providing an svg and metadata representation
-        enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        svg: the input SVG, as str or class providing an svg and metadata representation.
+        enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -120,10 +105,11 @@ def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: boo
     Updates an existing SLD widget with a new SVG content.
 
     Args:
-        sldwidget: the existing widget to update
-        svg: the input NAD's SVG
-        enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches
-        invalid_lf: When True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        sldwidget: the existing widget to update.
+        svg: the input NAD's SVG.
+        keep_viewbox: if True, keeps the current pan and zoom after the update.
+        enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
+        invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 
     Examples:
 

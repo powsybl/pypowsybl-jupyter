@@ -18,7 +18,7 @@ from ipywidgets import (
 
 import pandas as pd
 
-from pypowsybl.network import Network
+from pypowsybl.network import Network, get_extensions_names
 
 class NetworkMapWidget(anywidget.AnyWidget):
     """
@@ -31,6 +31,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         display_lines: When True (default) the network lines are displayed on the map. When false, the widget displays only the substations.
         use_line_geodata: When False (default) the widget does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
         nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
+        dark_mode: When True, sets the widget's display theme to dark (default is False).
 
 
     Returns:
@@ -60,9 +61,13 @@ class NetworkMapWidget(anywidget.AnyWidget):
     params  = traitlets.Dict().tag(sync=True)
     
     selected_vl = traitlets.Unicode().tag(sync=True)
-    
 
-    def __init__(self, network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1, **kwargs):
+    enable_callbacks = traitlets.Bool().tag(sync=True)
+
+    dark_mode = traitlets.Bool().tag(sync=True)
+
+    def __init__(self, network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1, 
+                 dark_mode:bool = False, **kwargs):
         super().__init__(**kwargs)
 
         (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids, tlmap, hlmap) = self.extract_map_data(network, display_lines, use_line_geodata)
@@ -78,6 +83,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
         self.sub_vls=sub_vls
         self.subs_ids=subs_ids
         self.nvls=self.extract_nominal_voltage_list(network, nominal_voltages_top_tiers_filter)
+        self.enable_callbacks=True
+        self.dark_mode=dark_mode
 
         self._on_selectvl_handlers = CallbackDispatcher()
         super().on_msg(self._handle_pw_msg)
@@ -106,6 +113,12 @@ class NetworkMapWidget(anywidget.AnyWidget):
         sub_id=self.get_substation_id(vl_id)
         if sub_id is not None:
             self.params = {"subId":  sub_id}
+
+    def set_enable_callbacks(self, enabled=True):
+        self.enable_callbacks = enabled
+
+    def set_dark_mode(self, dark_mode=False):
+        self.dark_mode = dark_mode
 
     def get_tie_lines_info(self, network, vls_with_coords):
         ties_df=network.get_tie_lines().reset_index()[['id', 'name', 'dangling_line1_id', 'dangling_line2_id']]
@@ -151,7 +164,8 @@ class NetworkMapWidget(anywidget.AnyWidget):
         sub_vls = dict()
         subs_ids = set()
 
-        subs_positions_df = network.get_extensions('substationPosition')
+        # substationPosition extension is available only in PyPowSyBl starting from v1.5.0
+        subs_positions_df = pd.DataFrame() if 'substationPosition' not in get_extensions_names() else network.get_extensions('substationPosition') 
         if not subs_positions_df.empty:
 
             subs_df = network.get_substations()

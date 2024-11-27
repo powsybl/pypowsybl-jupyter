@@ -19,12 +19,12 @@
 	},
 	"scripts": {
 		"dev": "npm run build -- --sourcemap=inline --watch",
-		"build": "esbuild js/*.ts js/*.jsx --minify --format=esm --bundle --outdir=src/pypowsybl_jupyter/static",
+		"build": "node ./esbuild.mjs",
 		"typecheck": "tsc --noEmit",
 		"lint": "eslint . --ext js,ts,jsx --max-warnings 0"
 	},
 	"dependencies": {
-		"@powsybl/diagram-viewer": "0.4.0"
+		"@powsybl/network-viewer": "1.0.0"
 	},
 	"devDependencies": {
 		"@anywidget/types": "^0.1.6",

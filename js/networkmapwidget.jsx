@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { createRender, useModelState, useModel } from '@anywidget/react';
-import { NetworkMap, GeoData, MapEquipments } from '@powsybl/diagram-viewer';
+import { NetworkMap, GeoData, MapEquipments } from '@powsybl/network-viewer';
 import VoltageLevelChoice from './voltage-level-choice';
 import NominalVoltageFilter from './nominal-voltage-filter';
 
@@ -23,7 +23,7 @@ import {
 import { Box } from '@mui/system';
 import LinearProgress from '@mui/material/LinearProgress';
 
-const INITIAL_ZOOM = 9;
+const INITIAL_ZOOM = 0;
 const LABELS_ZOOM_THRESHOLD = 9;
 const ARROWS_ZOOM_THRESHOLD = 7;
 
@@ -63,6 +63,25 @@ const darkTheme = createTheme({
     aggrid: 'ag-theme-alpine-dark',
 });
 
+const lightTheme = createTheme({
+    palette: {
+        mode: 'light',
+    },
+    link: {
+        color: 'blue',
+    },
+    node: {
+        background: '#1976d2',
+        hover: '#84adce',
+        border: '#0f3d68',
+    },
+    selectedRow: {
+        background: '#8E9C9B',
+    },
+    mapboxStyle: 'mapbox://styles/mapbox/light-v9',
+    aggrid: 'ag-theme-alpine',
+});
+
 class WidgetMapEquipments extends MapEquipments {
     initEquipments(smapdata, lmapdata, tlmapdata, hlmapdata) {
         this.updateSubstations(smapdata, true);
@@ -75,16 +94,6 @@ class WidgetMapEquipments extends MapEquipments {
         super();
         this.initEquipments(smapdata, lmapdata, tlmapdata, hlmapdata);
     }
-}
-
-//called after a click (right mouse click) on an equipment (line or substation)
-function showEquipmentMenu(equipment, x, y, type) {
-    console.log(
-        '# Show equipment menu: ' +
-            JSON.stringify(equipment) +
-            ', type: ' +
-            type
-    );
 }
 
 const render = createRender(() => {
@@ -104,6 +113,8 @@ const render = createRender(() => {
     const [params, setParams] = useModelState('params');
     const [nvls] = useModelState('nvls');
 
+    const [enable_callbacks] = useModelState('enable_callbacks');
+
     const targetSubId = params['subId'];
     const [centerOnSubId, setCenterOnSubId] = useState(
         targetSubId === null ? null : { to: targetSubId }
@@ -115,6 +126,8 @@ const render = createRender(() => {
         gdata: new GeoData(new Map(), new Map()),
         edata: new WidgetMapEquipments([], [], [], []),
     });
+
+    const [dark_mode] = useModelState('dark_mode');
 
     useEffect(() => {
         let initDataTask = new Promise((resolve, reject) => {
@@ -133,23 +146,6 @@ const render = createRender(() => {
             setMapDataReady(true);
             setEquipmentData(result);
         });
-    }, []);
-
-    useEffect(() => {
-        const handleContextmenu = (e) => {
-            //e.preventDefault();
-            e.stopPropagation();
-        };
-        networkMapRef.current.addEventListener(
-            'contextmenu',
-            handleContextmenu
-        );
-        return () => {
-            networkMapRef.current.removeEventListener(
-                'contextmenu',
-                handleContextmenu
-            );
-        };
     }, []);
 
     useEffect(() => {
@@ -172,13 +168,14 @@ const render = createRender(() => {
     }
 
     function propagate_selectedvl_event(voltageLevelId) {
-        model.set('selected_vl', voltageLevelId);
-        model.save_changes();
-        model.send({ event: 'select_vl' });
+        if (enable_callbacks) {
+            model.set('selected_vl', voltageLevelId);
+            model.save_changes();
+            model.send({ event: 'select_vl' });
+        }
     }
 
     function choiceVoltageLevel(voltageLevelId) {
-        console.log(`# Choose Voltage Level : ${voltageLevelId}`);
         closeChoiceVoltageLevelMenu();
         propagate_selectedvl_event(voltageLevelId);
     }
@@ -253,33 +250,13 @@ const render = createRender(() => {
             useName={use_name}
             centerOnSubstation={centerOnSubId}
             onSubstationClick={(vlId) => {
-                console.log('# OpenVoltageLevel: ' + vlId);
                 propagate_selectedvl_event(vlId);
             }}
             onSubstationClickChooseVoltageLevel={
                 chooseVoltageLevelForSubstation
             }
-            onSubstationMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'substation')
-            }
-            onLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'line')
-            }
-            onTieLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'tie-line')
-            }
-            onHvdcLineMenuClick={(equipment, x, y) =>
-                showEquipmentMenu(equipment, x, y, 'hvdc-line')
-            }
-            onVoltageLevelMenuClick={(equipment, x, y) => {
-                console.log(
-                    `# VoltageLevel menu click: ${JSON.stringify(
-                        equipment
-                    )} at coordinates (${x}, ${y})`
-                );
-            }}
             mapLibrary={'cartonolabel'}
-            mapTheme={'dark'}
+            mapTheme={dark_mode ? 'dark' : 'light'}
             filteredNominalVoltages={filteredNominalVoltages}
         />
     );
@@ -287,7 +264,7 @@ const render = createRender(() => {
     return (
         <div ref={networkMapRef} className="network-map-viewer-widget">
             <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={darkTheme}>
+                <ThemeProvider theme={dark_mode ? darkTheme : lightTheme}>
                     <div
                         style={{
                             position: 'relative',
