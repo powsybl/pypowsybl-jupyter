@@ -103,7 +103,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     def go_to_vl_from_nad(event: any):
         vl_id= str(event.selected_node['equipment_id'])
-        select_vl_and_activate_sld_tab(vl_id)
+        if sel_ctx.is_in_vls(vl_id):
+            select_vl_and_activate_sld_tab(vl_id)
 
     def compute_sld_data(el):
         if el is not None:
