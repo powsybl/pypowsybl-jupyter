@@ -67,3 +67,6 @@ class SelectContext:
 
     def get_history_as_list(self):
         return [(item[self.display_attribute], item['id']) for item in self.history]
+    
+    def is_in_vls(self, id):
+        return id in self.vls.index
