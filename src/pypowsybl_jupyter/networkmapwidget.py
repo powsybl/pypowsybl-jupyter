@@ -150,7 +150,10 @@ class NetworkMapWidget(anywidget.AnyWidget):
             h_res.columns = ['id', 'name', 'voltageLevelId1', 'voltageLevelId2', 'terminal1Connected', 'terminal2Connected', 'p1', 'p2', 'i1', 'i2']
             h_res=h_res[h_res['voltageLevelId1'].isin(vls_with_coords.index) & h_res['voltageLevelId2'].isin(vls_with_coords.index)]
             hvdc_lines_info = h_res.to_dict(orient='records')    
-        return hvdc_lines_info            
+        return hvdc_lines_info
+
+    def filter_invalid_coordinates(self, df, lat_attr='latitude', lon_attr='longitude'):
+        return df[df[lat_attr].between(-90, 90) & df[lon_attr].between(-180, 180)]        
 
     def extract_map_data(self, network, display_lines, use_line_geodata):
         lmap = []
@@ -171,6 +174,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
             subs_df = network.get_substations()
 
             subs_positions_df = subs_df.merge(subs_positions_df, left_on='id', right_on='id')[['name','latitude','longitude']]
+            subs_positions_df = self.filter_invalid_coordinates(subs_positions_df)
             
             vls_df = network.get_voltage_levels().reset_index()
             vls_subs_df = vls_df.merge(subs_positions_df, left_on='substation_id', right_on='id')[['id','name_x','substation_id','name_y','nominal_v','latitude','longitude']]
@@ -197,6 +201,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
                 if use_line_geodata:
                     lines_positions_from_extensions_df=network.get_extensions('linePosition').reset_index()
+                    lines_positions_from_extensions_df = self.filter_invalid_coordinates(lines_positions_from_extensions_df)
                     lines_positions_from_extensions_sorted_df = lines_positions_from_extensions_df.sort_values(by=['id', 'num'])
                     lines_positions_from_extensions_grouped_df = lines_positions_from_extensions_sorted_df.groupby('id').apply(lambda x: x[['latitude', 'longitude']].to_dict('records'), include_groups=False).to_dict()
 
