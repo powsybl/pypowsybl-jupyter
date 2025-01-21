@@ -28,6 +28,7 @@ class NadWidget(anywidget.AnyWidget):
     selected_node = traitlets.Dict().tag(sync=True)
     moved_node = traitlets.Dict().tag(sync=True)
     moved_text_node = traitlets.Dict().tag(sync=True)
+    current_nad_metadata = traitlets.Unicode().tag(sync=True)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -65,6 +66,9 @@ class NadWidget(anywidget.AnyWidget):
     def on_move_text_node(self, callback, remove=False):
         self._on_move_text_node_handler.register_callback(callback, remove=remove)
 
+    def trigger_update_metadata(self):
+        self.send({'type': 'triggerRetrieveMetadata'})
+    
 def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.

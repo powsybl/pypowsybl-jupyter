@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 
-from pypowsybl.network import Network, NadParameters, SldParameters
+from pypowsybl.network import Network, NadParameters, SldParameters, NadLayoutType
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
 from .networkmapwidget import NetworkMapWidget
@@ -14,6 +14,8 @@ from .assets import EMPTY_SVG, PROGRESS_BAR_SVG, PROGRESS_EMPTY_SVG
 
 from IPython.display import display
 import ipywidgets as widgets
+import json
+import pandas as pd
 
 def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 1,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
@@ -59,7 +61,9 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         current_value_precision=1,
         voltage_value_precision=0,
         bus_legend=True,
-        substation_description_displayed=True)
+        substation_description_displayed=True,
+        layout_type=NadLayoutType.FORCE_LAYOUT
+        )
     
     spars=sld_parameters if sld_parameters is not None else SldParameters(use_name=use_name, nodes_infos=True)
 
@@ -101,10 +105,21 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         vl_id= str(event.selected_vl)
         select_vl_and_activate_sld_tab(vl_id)
 
-    def go_to_vl_from_nad(event: any):
+    nad_actions=None
+
+    def select_nad_node(event: any):
+        nonlocal current_nad_metadata
         vl_id= str(event.selected_node['equipment_id'])
-        if sel_ctx.is_in_vls(vl_id):
-            select_vl_and_activate_sld_tab(vl_id)
+        if vl_id in sel_ctx.vls.index:
+            if nad_actions.value == 'SLD':
+                select_vl_and_activate_sld_tab(vl_id)
+            else:
+                if nad_widget.current_nad_metadata != '':
+                    current_nad_metadata=nad_widget.current_nad_metadata
+                if nad_actions.value == '+':
+                    update_nad_diagram(sel_ctx.get_selected(), vl_action=vl_id, action=1)
+                elif nad_actions.value == '-':
+                    update_nad_diagram(sel_ctx.get_selected(), vl_action=vl_id, action=2)
 
     def compute_sld_data(el):
         if el is not None:
@@ -215,22 +230,66 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     history.observe(on_selected_history, names='value')
 
-    def compute_nad_data(el, depth=0):
+    # removes a VL node from a VL list
+    def remove_vl_node(vl_list, vl_to_remove):
+        if vl_to_remove in vl_list:
+            new_list=vl_list.copy()
+            new_list.remove(vl_to_remove)
+            return new_list
+        else:
+            return vl_list
+
+    # adds to a VL list the list of nodes centered on the node to be expanded (with the same depth)
+    def expand_on_vl_node(network, vl_list, vl_to_expand_from, depth):
+        vls_centered_on_selected_node = network.get_network_area_diagram_displayed_voltage_levels(voltage_level_ids=vl_to_expand_from, depth=depth)
+        new_list=list(set(vl_list) | set(vls_centered_on_selected_node))
+        return new_list
+    
+    def extract_positions_dataframe_from_nad_metadata(nad_metadata):
+        nodes_df = pd.DataFrame(nad_metadata['nodes'])
+        tnodes_df = pd.DataFrame(nad_metadata['textNodes'])
+        merged_df = pd.merge(nodes_df, tnodes_df, on='equipmentId', how='left', suffixes=('_nodes', '_tnodes'))
+        result_df = merged_df[['equipmentId', 'x', 'y', 'shiftX', 'shiftY', 'connectionShiftX', 'connectionShiftY']]
+        result_df.set_index('equipmentId', inplace=True)
+        result_df.index.name = 'id'
+        return result_df
+
+    def extract_positions_dataframe_from_nad_metadata_json(json_nad_metadata):
+        return None if json_nad_metadata == None  else extract_positions_dataframe_from_nad_metadata(json.loads(json_nad_metadata))
+    
+    def compute_nad_data(el, depth=0, vllist=None, metadata=None, vl_action=None, action=0):
+        new_vllist=None
         if el is not None:
-            nad_data=network.get_network_area_diagram(voltage_level_ids=el, 
-                                                      depth=depth, high_nominal_voltage_bound=high_nominal_voltage_bound, 
-                                                      low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
+            if action == 1:
+                new_vllist=expand_on_vl_node(network, vllist, vl_action, 1)
+            elif action == 2:
+                new_vllist=remove_vl_node(vllist, vl_action)
+                if len(new_vllist) == 0:
+                    new_vllist=vllist
+            else:
+                new_vllist=network.get_network_area_diagram_displayed_voltage_levels(voltage_level_ids=el, depth=depth)
+
+            nm=extract_positions_dataframe_from_nad_metadata_json(metadata)
+            nad_data=network.get_network_area_diagram(voltage_level_ids=new_vllist, 
+                                                      high_nominal_voltage_bound=high_nominal_voltage_bound, 
+                                                      low_nominal_voltage_bound=low_nominal_voltage_bound, 
+                                                      nad_parameters=npars,
+                                                      fixed_positions=nm)
         else:
             nad_data=EMPTY_SVG
-        return nad_data
+        return nad_data, new_vllist
 
-    current_nad_data = compute_nad_data(None)
+
+    current_nad_data, current_nad_vl_list = compute_nad_data(None)
+    current_nad_metadata = ''
 
     def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False, keep_viewbox=False):
         nonlocal nad_widget
         if nad_widget==None:
             nad_widget=display_nad(new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout)
-            nad_widget.on_select_node(lambda event : go_to_vl_from_nad(event))
+            nad_widget.on_select_node(lambda event : select_nad_node(event))
+            nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
+            nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())
         else:
             update_nad(nad_widget,new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout, keep_viewbox=keep_viewbox)
 
@@ -252,8 +311,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         vl_input.disabled=False
         in_progress_widget.value=PROGRESS_EMPTY_SVG
 
-    def update_nad_diagram(el):
-        nonlocal current_nad_data, nad_displayed_vl_id
+    def update_nad_diagram(el, vl_action=None, action=0):
+        nonlocal current_nad_data, nad_displayed_vl_id, current_nad_metadata, current_nad_vl_list
         if nad_widget != None:
             update_nad_widget('', enable_callbacks=False, grayout=True, keep_viewbox=True)
             display(nad_widget)
@@ -264,7 +323,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 map_widget.set_enable_callbacks(False)
                 display(map_widget)
         try:
-            current_nad_data=compute_nad_data(el, selected_depth)
+            if action == 0:
+                current_nad_data,current_nad_vl_list=compute_nad_data(el, selected_depth)
+            else:
+                current_nad_data,current_nad_vl_list=compute_nad_data(el, selected_depth, current_nad_vl_list, 
+                                                                         current_nad_metadata, vl_action, action)
+            current_nad_metadata=current_nad_data.metadata
             update_nad_widget(current_nad_data, enable_callbacks=True, grayout=False)
             nad_displayed_vl_id=el
         finally:
@@ -289,8 +353,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     left_panel = widgets.VBox([vl_input, found, history], 
                               layout=widgets.Layout(width='100%', height='100%', display='flex', flex_flow='column'))
+    
+    nad_actions = widgets.ToggleButtons(options=[ 'SLD', '+', '-'], value='SLD', 
+                                        tooltips=['Open SLD tab on VL (SHIFT+CLICK)', 'Expand NAD on VL node (SHIFT+CLICK)', 'Remove VL node from NAD (SHIFT+CLICK)'], 
+                                        disabled=False)
+    nad_actions.style.button_width = '45px'
+    nad_actions.style.button_height = '15px'
 
-    nad_top_section = widgets.HBox([nadslider, in_progress_widget],layout=widgets.Layout(justify_content='space-between')) 
+    nad_top_section = widgets.HBox([nadslider, nad_actions, in_progress_widget],layout=widgets.Layout(justify_content='space-between')) 
     right_panel_nad = widgets.VBox([nad_top_section, nad_widget])
     right_panel_sld = widgets.VBox([spacer_label,sld_widget])
     right_panel_map = widgets.VBox([spacer_label, map_widget])

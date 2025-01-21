@@ -15,6 +15,7 @@ interface NadWidgetModel {
     selected_node: any;
     moved_node: any;
     moved_text_node: any;
+    current_nad_metadata: String;
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
@@ -77,6 +78,8 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
+    let nad_viewer:any =null;
+
     function render_diagram(
         model: any,
         diagram_svg: string,
@@ -94,7 +97,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         el_div.classList.toggle('grayout', is_grayout);
 
-        new NetworkAreaDiagramViewer(
+        nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
             diagram_svg,
             diagram_meta ? JSON.parse(diagram_meta) : null,
@@ -145,6 +148,18 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         const new_el = render_diagram(model, diagram_svg, diagram_meta);
         el.replaceChild(new_el, nodes);
+    });
+
+    model.on('msg:custom', (content) => {
+        if (content.type === 'triggerRetrieveMetadata') {
+            let metad = '';
+            if (nad_viewer != null) {
+                metad=nad_viewer.getJsonMetadata();
+            }
+            model.set('current_nad_metadata', '');
+            model.set('current_nad_metadata', metad);
+            model.save_changes();
+            }
     });
 }
 
