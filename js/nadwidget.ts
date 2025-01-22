@@ -15,7 +15,7 @@ interface NadWidgetModel {
     selected_node: any;
     moved_node: any;
     moved_text_node: any;
-    current_nad_metadata: String;
+    current_nad_metadata: string;
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
@@ -78,7 +78,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
-    let nad_viewer:any =null;
+    let nad_viewer: any = null;
 
     function render_diagram(
         model: any,
@@ -154,12 +154,12 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         if (content.type === 'triggerRetrieveMetadata') {
             let metad = '';
             if (nad_viewer != null) {
-                metad=nad_viewer.getJsonMetadata();
+                metad = nad_viewer.getJsonMetadata();
             }
             model.set('current_nad_metadata', '');
             model.set('current_nad_metadata', metad);
             model.save_changes();
-            }
+        }
     });
 }
 
