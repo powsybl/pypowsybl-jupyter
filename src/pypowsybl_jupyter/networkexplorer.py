@@ -250,6 +250,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         tnodes_df = pd.DataFrame(nad_metadata['textNodes'])
         merged_df = pd.merge(nodes_df, tnodes_df, on='equipmentId', how='left', suffixes=('_nodes', '_tnodes'))
         result_df = merged_df[['equipmentId', 'x', 'y', 'shiftX', 'shiftY', 'connectionShiftX', 'connectionShiftY']]
+        result_df = result_df.rename(columns={'shiftX': 'legend_shift_x', 'shiftY': 'legend_shift_y',
+                                              'connectionShiftX': 'legend_connection_shift_x', 'connectionShiftY': 'legend_connection_shift_y'})
         result_df.set_index('equipmentId', inplace=True)
         result_df.index.name = 'id'
         return result_df
