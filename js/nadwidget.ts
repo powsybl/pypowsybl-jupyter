@@ -10,11 +10,16 @@ import './nadwidget.css';
 
 import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
 
+import { PopupMenu } from './popupmenu';
+
 interface NadWidgetModel {
     diagram_data: any;
     selected_node: any;
+    selected_menu: any;
     moved_node: any;
     moved_text_node: any;
+    current_nad_metadata: string;
+    popup_menu_items: string[];
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
@@ -25,6 +30,15 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         });
         model.save_changes();
         model.send({ event: 'select_node' });
+    };
+
+    const handleSelectMenu = (equipmentId: string, selection: number) => {
+        model.set('selected_menu', {
+            equipment_id: equipmentId,
+            selection: selection,
+        });
+        model.save_changes();
+        model.send({ event: 'select_menu' });
     };
 
     const handleMoveNode = (
@@ -77,6 +91,40 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
+    let nad_viewer: any = null;
+
+    function svgToScreen(
+        container: HTMLElement,
+        x: number,
+        y: number
+    ): { screenX: number; screenY: number } | null {
+        const svgElement = container.querySelector(
+            'svg'
+        ) as SVGGraphicsElement | null;
+
+        if (!svgElement) {
+            console.error('No SVG element found inside the container.');
+            return null;
+        }
+
+        const screenCTM = svgElement.getScreenCTM();
+        if (!screenCTM) {
+            console.error('Failed to get screenCTM for the SVG element.');
+            return null;
+        }
+
+        // Convert coordinates from SVG to screen
+        const point = new DOMPoint(x, y);
+        const transformedPoint = point.matrixTransform(screenCTM);
+
+        const containerRect = container.getBoundingClientRect();
+
+        return {
+            screenX: transformedPoint.x - containerRect.left,
+            screenY: transformedPoint.y - containerRect.top,
+        };
+    }
+
     function render_diagram(
         model: any,
         diagram_svg: string,
@@ -86,6 +134,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
+        const menu_items = model.get('popup_menu_items');
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
@@ -94,7 +143,35 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         el_div.classList.toggle('grayout', is_grayout);
 
-        new NetworkAreaDiagramViewer(
+        let popupMenu: PopupMenu | null = null;
+        let handleMenu = null;
+
+        if (menu_items.length > 0) {
+            popupMenu = new PopupMenu(el_div);
+            handleMenu = (
+                svgId: string,
+                equipmentId: string,
+                equipmentType: string,
+                mousePosition: any
+            ) => {
+                if (equipmentType === 'VOLTAGE_LEVEL') {
+                    const transfPoint = svgToScreen(
+                        el_div,
+                        mousePosition.x,
+                        mousePosition.y
+                    );
+                    let xx = 0;
+                    let yy = 0;
+                    if (transfPoint != null) {
+                        xx = transfPoint.screenX;
+                        yy = transfPoint.screenY;
+                    }
+                    popupMenu?.displayMenu(xx, yy, equipmentId);
+                }
+            };
+        }
+
+        nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
             diagram_svg,
             diagram_meta ? JSON.parse(diagram_meta) : null,
@@ -108,15 +185,38 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             is_enabled_callbacks,
             false,
             null,
-            null
+            null,
+            handleMenu
         );
 
-        // prevents the default jupyter-lab's behavior (it already uses the shift+click combination)
+        // prevents the default jupyter-lab's behavior for this event
         el_div.addEventListener('mousedown', function (event: MouseEvent) {
             if (event.shiftKey) {
                 event.preventDefault();
             }
         });
+
+        if (popupMenu != null) {
+            popupMenu.initializeMenu(
+                model.get('popup_menu_items'),
+                (selection: number, id: string) => {
+                    handleSelectMenu(id, selection);
+                }
+            );
+
+            // prevents the default jupyter-lab's behavior for this event
+            el_div.addEventListener(
+                'contextmenu',
+                function (event: MouseEvent) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            );
+
+            el_div.addEventListener('keydown', function (event: KeyboardEvent) {
+                event.preventDefault();
+            });
+        }
 
         return el_div;
     }
@@ -145,6 +245,18 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         const new_el = render_diagram(model, diagram_svg, diagram_meta);
         el.replaceChild(new_el, nodes);
+    });
+
+    model.on('msg:custom', (content) => {
+        if (content.type === 'triggerRetrieveMetadata') {
+            let metad = '';
+            if (nad_viewer != null) {
+                metad = nad_viewer.getJsonMetadata();
+            }
+            model.set('current_nad_metadata', '');
+            model.set('current_nad_metadata', metad);
+            model.save_changes();
+        }
     });
 }
 
