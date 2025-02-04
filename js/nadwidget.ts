@@ -147,9 +147,16 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         let handleMenu = null;
 
         if (menu_items.length > 0) {
-            popupMenu = new PopupMenu(el_div);
+            popupMenu = new PopupMenu(
+                el_div,
+                menu_items,
+                (selection: number, id: string) => {
+                    handleSelectMenu(id, selection);
+                }
+            );
+
             handleMenu = (
-                svgId: string,
+                _svgId: string,
                 equipmentId: string,
                 equipmentType: string,
                 mousePosition: any
@@ -190,30 +197,20 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         );
 
         // prevents the default jupyter-lab's behavior for this event
-        el_div.addEventListener('mousedown', function (event: MouseEvent) {
+        el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
                 event.preventDefault();
             }
         });
 
         if (popupMenu != null) {
-            popupMenu.initializeMenu(
-                model.get('popup_menu_items'),
-                (selection: number, id: string) => {
-                    handleSelectMenu(id, selection);
-                }
-            );
+            // prevents the default jupyter-lab's behavior for these events
+            el_div.addEventListener('contextmenu', (event: MouseEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
 
-            // prevents the default jupyter-lab's behavior for this event
-            el_div.addEventListener(
-                'contextmenu',
-                function (event: MouseEvent) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-            );
-
-            el_div.addEventListener('keydown', function (event: KeyboardEvent) {
+            el_div.addEventListener('keydown', (event: KeyboardEvent) => {
                 event.preventDefault();
             });
         }

@@ -9,28 +9,26 @@ export type PopupMenuItemCallbackType = (selection: number, id: string) => void;
 
 export class PopupMenu {
     private container: HTMLElement;
+    private items: string[]
+    private menuItemCallback: PopupMenuItemCallbackType | null;
+
     private popupMenu: HTMLElement | null;
     private menuItems: HTMLElement[] = [];
-    private menuItemCallback: PopupMenuItemCallbackType | null;
     private focusedIndex: number = -1;
 
     private id: string = '';
 
-    constructor(container: HTMLElement) {
+    constructor(container: HTMLElement, menuItems: string[], menuItemCallback: PopupMenuItemCallbackType) {
         this.container = container;
+        this.items = menuItems;
+        this.menuItemCallback = menuItemCallback;
         this.popupMenu = null;
-        this.menuItemCallback = null;
 
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.handleKeydown = this.handleKeydown.bind(this);
     }
 
-    initializeMenu(
-        menuItems: string[],
-        menuItemCallback: PopupMenuItemCallbackType
-    ) {
-        this.menuItemCallback = menuItemCallback;
-
+    initializeMenu() {
         this.popupMenu = document.createElement('div');
         this.popupMenu.style.position = 'absolute';
         this.popupMenu.style.display = 'none'; // Menu is by default hidden
@@ -40,7 +38,7 @@ export class PopupMenu {
         this.popupMenu.style.padding = '10px';
         this.popupMenu.style.zIndex = '1000';
 
-        menuItems.forEach((item, index) => {
+        this.items.forEach((item, index) => {
             const menuItem = document.createElement('div');
             menuItem.textContent = item;
             menuItem.style.padding = '5px';
@@ -69,6 +67,9 @@ export class PopupMenu {
     }
 
     displayMenu(x: number, y: number, id: string) {
+        if (this.popupMenu == null) {
+            this.initializeMenu();
+        }
         if (this.popupMenu) {
             if (this.popupMenu.style.display == 'none') {
                 this.popupMenu.style.left = `${x}px`;
