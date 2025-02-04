@@ -9,7 +9,7 @@ export type PopupMenuItemCallbackType = (selection: number, id: string) => void;
 
 export class PopupMenu {
     private container: HTMLElement;
-    private items: string[]
+    private items: string[];
     private menuItemCallback: PopupMenuItemCallbackType | null;
 
     private popupMenu: HTMLElement | null;
@@ -18,7 +18,11 @@ export class PopupMenu {
 
     private id: string = '';
 
-    constructor(container: HTMLElement, menuItems: string[], menuItemCallback: PopupMenuItemCallbackType) {
+    constructor(
+        container: HTMLElement,
+        menuItems: string[],
+        menuItemCallback: PopupMenuItemCallbackType
+    ) {
         this.container = container;
         this.items = menuItems;
         this.menuItemCallback = menuItemCallback;
