@@ -163,7 +163,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             ) => {
                 if (equipmentType === 'VOLTAGE_LEVEL') {
                     const transfPoint = svgToScreen(
-                        el_div,
+                        el_div.querySelector('#svg-container') ?? el_div,
                         mousePosition.x,
                         mousePosition.y
                     );
@@ -193,7 +193,8 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             false,
             null,
             null,
-            handleMenu
+            handleMenu,
+            true
         );
 
         // prevents the default jupyter-lab's behavior for this event
@@ -225,6 +226,12 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
     );
     el.appendChild(diagram_element);
 
+    function updateCurrentMetadataInModel(metadata: string) {
+        model.set('current_nad_metadata', '');
+        model.set('current_nad_metadata', metadata);
+        model.save_changes();
+    }
+
     model.on('change:diagram_data', () => {
         const diagram_data = model.get('diagram_data');
         const keep_viewbox = diagram_data['keep_viewbox'];
@@ -234,10 +241,12 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const nodes = el.querySelectorAll('.svg-nad-viewer-widget')[0];
 
         if (keep_viewbox) {
-            diagram_svg = nodes.querySelector(':scope > svg')?.outerHTML ?? '';
+            const svgContainer = nodes.querySelector('#svg-container');
+            diagram_svg = svgContainer?.querySelector('svg')?.outerHTML ?? '';
         } else {
             diagram_svg = diagram_data['svg_data'];
             diagram_meta = diagram_data['metadata'];
+            updateCurrentMetadataInModel(diagram_meta);
         }
 
         const new_el = render_diagram(model, diagram_svg, diagram_meta);
@@ -250,9 +259,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             if (nad_viewer != null) {
                 metad = nad_viewer.getJsonMetadata();
             }
-            model.set('current_nad_metadata', '');
-            model.set('current_nad_metadata', metad);
-            model.save_changes();
+            updateCurrentMetadataInModel(metad);
         }
     });
 }
