@@ -60,9 +60,3 @@ jobs:
           pip3 uninstall -y pypowsybl_jupyter
           python -m pip install --upgrade -v -e ".[dev]"
           npm run lint
-
-      - name: Upload wheel
-        uses: actions/upload-artifact@v4
-        with:
-          name: pypowsybl_jupyter-wheel
-          path: dist/*.whl
