@@ -108,11 +108,13 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             is_enabled_callbacks,
             false,
             null,
-            null
+            null,
+            null,
+            true
         );
 
-        // prevents the default jupyter-lab's behavior (it already uses the shift+click combination)
-        el_div.addEventListener('mousedown', function (event: MouseEvent) {
+        // prevents the default jupyter-lab's behavior for this event
+        el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
                 event.preventDefault();
             }
@@ -137,7 +139,8 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const nodes = el.querySelectorAll('.svg-nad-viewer-widget')[0];
 
         if (keep_viewbox) {
-            diagram_svg = nodes.querySelector(':scope > svg')?.outerHTML ?? '';
+            const svgContainer = nodes.querySelector('#svg-container');
+            diagram_svg = svgContainer?.querySelector('svg')?.outerHTML ?? '';
         } else {
             diagram_svg = diagram_data['svg_data'];
             diagram_meta = diagram_data['metadata'];
