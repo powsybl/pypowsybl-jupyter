@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 
-from pypowsybl.network import Network, NadParameters, SldParameters, NadLayoutType
+from pypowsybl.network import Network, NadParameters, SldParameters, NadLayoutType, NadProfile
 from .nadwidget import display_nad, update_nad
 from .sldwidget import display_sld, update_sld
 from .networkmapwidget import NetworkMapWidget
@@ -21,7 +21,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
-                     use_line_geodata:bool = False):
+                     use_line_geodata:bool = False, nad_profile: NadProfile = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -37,6 +37,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nad_parameters: layout properties to adjust the svg rendering for the NAD
         sld_parameters: layout properties to adjust the svg rendering for the SLD
         use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
+        nad_profile: property to customize labels and style for the NAD
 
     Examples:
 
@@ -282,7 +283,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                                                       high_nominal_voltage_bound=high_nominal_voltage_bound, 
                                                       low_nominal_voltage_bound=low_nominal_voltage_bound, 
                                                       nad_parameters=npars,
-                                                      fixed_positions=nm)
+                                                      fixed_positions=nm,
+                                                      nad_profile=nad_profile)
         else:
             nad_data=EMPTY_SVG
         return nad_data, new_vllist
