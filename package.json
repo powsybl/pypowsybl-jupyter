@@ -29,7 +29,7 @@
 	"devDependencies": {
 		"@anywidget/types": "^0.1.6",
 		"typescript": "^5.3.3",
-		"esbuild": "^0.20.0",
+		"esbuild": "^0.25.2",
 		"prettier": "^2.8.8",
 		"eslint": "^7.32.0",
         "eslint-config-prettier": "^9.1.0",
