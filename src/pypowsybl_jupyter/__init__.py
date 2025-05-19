@@ -16,6 +16,7 @@ from .nadwidget import (
 from .nadexplorer import nad_explorer
 from .networkexplorer import network_explorer
 from .networkmapwidget import NetworkMapWidget
+from .nadtimeseries import nad_time_series
 
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")

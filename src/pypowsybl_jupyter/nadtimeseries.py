@@ -1,0 +1,170 @@
+# Copyright (c) 2024, RTE (http://www.rte-france.com)
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+#
+
+from pypowsybl.network import Network, NadParameters
+from .nadwidget import display_nad, update_nad
+import pandas as pd
+import ipywidgets as widgets
+
+def nad_time_series(network: Network, voltage_level_ids : list = None, depth: int = 1,time_series_data:pd.DataFrame=None,low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
+    """
+    Creates a nad explorer widget for a network using time series data., built with the nad widget.
+
+    Args:
+        network: the input network
+        time_series_data: a DataFrame containing time series data for the network.
+        voltage_level_ids: the starting list of VL to display. None displays all the network's VLs
+        depth: the diagram depth around the voltage level, controls the size of the sub network
+        low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
+        high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
+        parameters: layout properties to adjust the svg rendering for the nad
+
+    """
+
+    vls = network.get_voltage_levels(attributes=[])
+    nad_widget=None
+
+    selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids 
+    if len(selected_vl)==0:
+        raise ValueError("At least one VL must be selected in the voltage_level_ids list")
+
+    if time_series_data is None:
+        raise ValueError("time_series_data must be provided")
+
+    selected_depth=depth
+
+    # Get unique timestamps and sort them
+    time_steps = sorted(time_series_data['timestamp'].unique())
+    if len(time_steps) == 0:
+        raise ValueError("time_series_data must contain at least one timestamp")
+
+    selected_time_step = time_steps[0]
+
+    npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
+        id_displayed=False,
+        edge_info_along_edge=False,
+        power_value_precision=1,
+        angle_value_precision=0,
+        current_value_precision=1,
+        voltage_value_precision=0,
+        bus_legend=False,
+        substation_description_displayed=True)
+
+    def update_diagram():
+        nonlocal nad_widget
+        if len(selected_vl)>0:
+            # Filter time series data for the current time step
+            current_data = time_series_data[time_series_data['timestamp'] == selected_time_step]
+
+            # If the time series data includes branch_id column, update the network object
+            if 'branch_id' in current_data.columns:
+                # Get all lines in the network to check if branch_id exists
+                lines = network.get_lines()
+
+                # Iterate through the time series data for the current time step
+                for _, row in current_data.iterrows():
+                    branch_id = row.get('branch_id')
+
+                    # Skip if branch_id is not in the time series data or not in the network
+                    if branch_id is None or branch_id not in lines.index:
+                        continue
+
+                    # Prepare update parameters
+                    update_params = {'id': branch_id}
+
+                    # Add branch values to update parameters if they exist in the time series data
+                    # Only update modifiable properties (p1, p2) - i1, i2 are not modifiable
+                    for prop in ['p1', 'p2']:
+                        if prop in row and not pd.isna(row[prop]):
+                            update_params[prop] = row[prop]
+
+                    # Update the line in the network object
+                    if len(update_params) > 1:  # More than just the ID
+                        network.update_lines(**update_params)
+
+            # Generate the diagram with the updated network
+            new_diagram_data = network.get_network_area_diagram(
+                voltage_level_ids=selected_vl, 
+                depth=selected_depth, 
+                high_nominal_voltage_bound=high_nominal_voltage_bound, 
+                low_nominal_voltage_bound=low_nominal_voltage_bound, 
+                nad_parameters=npars
+            )
+
+            if nad_widget==None:
+                nad_widget=display_nad(new_diagram_data)
+            else:
+                update_nad(nad_widget, new_diagram_data)
+
+
+    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
+
+    def on_nadslider_changed(d):
+        nonlocal selected_depth
+        selected_depth=d['new']
+        update_diagram()
+
+    nadslider.observe(on_nadslider_changed, names='value')
+
+
+    time_slider = widgets.SelectionSlider(
+        options=[(str(ts), ts) for ts in time_steps],
+        value=selected_time_step,
+        description='Time:',
+        disabled=False,
+        continuous_update=False,
+        orientation='horizontal',
+        readout=True
+    )
+
+    def on_time_slider_changed(d):
+        nonlocal selected_time_step
+        selected_time_step = d['new']
+        update_diagram()
+
+    time_slider.observe(on_time_slider_changed, names='value')
+
+    vl_input = widgets.Text(
+        value='',
+        placeholder='Voltage level ID',
+        description='Filter',
+        disabled=False,
+        continuous_update=True
+    )
+
+    def on_text_changed(d):
+        nonlocal selected_vl
+        found.options = list(vls[vls.index.str.contains(d['new'], regex=False)].index)
+        selected_vl=[]
+
+
+    vl_input.observe(on_text_changed, names='value')
+
+    found = widgets.SelectMultiple(
+        options=list(vls.index),
+        value=selected_vl,
+        description='Found',
+        disabled=False,
+        layout=widgets.Layout(height='570px')
+    )
+
+    def on_selected(d):
+        nonlocal selected_vl
+        if d['new'] != None:
+            selected_vl=d['new']
+            update_diagram()
+
+    found.observe(on_selected, names='value')
+
+    update_diagram()
+
+    left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
+    right_panel = widgets.VBox([nadslider,time_slider, nad_widget])
+    hbox = widgets.HBox([left_panel, right_panel])
+    hbox.layout.align_items='flex-end'
+
+    return hbox
