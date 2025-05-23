@@ -26,6 +26,7 @@ A 'depth' slider controls the size of the sub network.
 Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level. 
 In the diagram, nodes can be moved interactively by drag&drop (e.g., to change the diagram layout for presentation purposes). However, the new node positions are not currently saved; Therefore, after switching to a new VL and then switching back to the current VL, the original nodes layout would be restored. 
 Please note that the select and move features require versions of PyPowSyBl equal to or greater than v1.8.1.
+Right-clicking a VL node displays a context menu to expand or remove the node from the diagram. Note: Changes to the graph are not saved. They will be lost when a new node is selected or the depth parameter changes.
 
 ## Single Line tab
 

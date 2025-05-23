@@ -39,6 +39,7 @@ display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayo
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
 - enable_callbacks: if True, enable the callbacks for selecting nodes (through a shift+click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
+- popup_menu_items: list of str. When not empty enables a right-click popup menu on the NAD's VL nodes.
 
 
 ```python
@@ -62,6 +63,7 @@ Use these widget's methods to register a callback on a specific event:
 - on_select_node
 - on_move_node
 - on_move_text_node
+- on_select_menu
 
 The [network explorer widget](/user_guide/network_explorer.md) demonstrates the approach.
 
