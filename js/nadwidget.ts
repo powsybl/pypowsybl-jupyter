@@ -11,6 +11,7 @@ import './nadwidget.css';
 import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
 
 import { PopupMenu } from './popupmenu';
+import { PopupInfo } from './popupinfo';
 
 interface NadWidgetModel {
     diagram_data: any;
@@ -20,9 +21,10 @@ interface NadWidgetModel {
     moved_text_node: any;
     current_nad_metadata: string;
     popup_menu_items: string[];
+    hover_enabled: boolean;
 }
 
-function render({ model, el }: RenderProps<NadWidgetModel>) {
+function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
     const handleSelectNode = (equipmentId: string, nodeId: string) => {
         model.set('selected_node', {
             equipment_id: equipmentId,
@@ -93,35 +95,15 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
     let nad_viewer: any = null;
 
-    function svgToScreen(
+    function toWidgetCoordinates(
         container: HTMLElement,
         x: number,
         y: number
-    ): { screenX: number; screenY: number } | null {
-        const svgElement = container.querySelector(
-            'svg'
-        ) as SVGGraphicsElement | null;
-
-        if (!svgElement) {
-            console.error('No SVG element found inside the container.');
-            return null;
-        }
-
-        const screenCTM = svgElement.getScreenCTM();
-        if (!screenCTM) {
-            console.error('Failed to get screenCTM for the SVG element.');
-            return null;
-        }
-
-        // Convert coordinates from SVG to screen
-        const point = new DOMPoint(x, y);
-        const transformedPoint = point.matrixTransform(screenCTM);
-
+    ): { x: number; y: number } {
         const containerRect = container.getBoundingClientRect();
-
         return {
-            screenX: transformedPoint.x - containerRect.left,
-            screenY: transformedPoint.y - containerRect.top,
+            x: x - containerRect.left,
+            y: y - containerRect.top,
         };
     }
 
@@ -135,6 +117,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
         const menu_items = model.get('popup_menu_items');
+        const is_hover_enabled = model.get('hover_enabled');
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
@@ -162,21 +145,41 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
                 mousePosition: any
             ) => {
                 if (equipmentType === 'VOLTAGE_LEVEL') {
-                    const transfPoint = svgToScreen(
+                    const mousePos = toWidgetCoordinates(
                         el_div.querySelector('#svg-container') ?? el_div,
                         mousePosition.x,
                         mousePosition.y
                     );
-                    let xx = 0;
-                    let yy = 0;
-                    if (transfPoint != null) {
-                        xx = transfPoint.screenX;
-                        yy = transfPoint.screenY;
-                    }
-                    popupMenu?.displayMenu(xx, yy, equipmentId);
+
+                    popupMenu?.displayMenu(mousePos.x, mousePos.y, equipmentId);
                 }
             };
         }
+
+        let popupInfo: PopupInfo | null = null;
+
+        const handleInfo = (
+            shouldDisplay: boolean,
+            mousePosition: any,
+            elementId: string,
+            elementType: string
+        ) => {
+            let mousePos = null;
+            if (mousePosition) {
+                mousePos = toWidgetCoordinates(
+                    el_div.querySelector('#svg-container') ?? el_div,
+                    mousePosition.x,
+                    mousePosition.y
+                );
+            }
+
+            popupInfo?.handleHover(
+                shouldDisplay,
+                mousePos,
+                elementId,
+                elementType
+            );
+        };
 
         nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
@@ -192,7 +195,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             is_enabled_callbacks,
             false,
             null,
-            null,
+            is_hover_enabled ? handleInfo : null,
             handleMenu,
             true
         );
@@ -215,6 +218,18 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
                 event.preventDefault();
             });
         }
+
+        popupInfo = new PopupInfo(el_div, async (id: string, type: string) => {
+            try {
+                const [retInfo, _buffers] = await experimental.invoke(
+                    '_get_on_hover_info',
+                    { id: id, type: type }
+                );
+                return retInfo as string;
+            } catch (e) {
+                return `Error retrieving hover info: ${e}`;
+            }
+        });
 
         return el_div;
     }

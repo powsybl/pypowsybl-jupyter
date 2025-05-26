@@ -20,6 +20,10 @@ import pandas as pd
 
 from pypowsybl.network import Network, get_extensions_names
 
+from typing import Callable
+
+OnHoverFuncType = Callable[[str], str]
+
 class NetworkMapWidget(anywidget.AnyWidget):
     """
     Creates a Network map widget, displaying substations and lines for a network. The widget allows zooming and panning the map, and filtering based on nominal voltages.
@@ -32,7 +36,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         use_line_geodata: When False (default) the widget does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
         nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
         dark_mode: When True, sets the widget's display theme to dark (default is False).
-
+        on_hover_func: a callback function that is invoked when hovering on the network equipments. Currently, the map viewer component supports lines. The function parameters is the line id; It must return an HTML string. None disables the hovering feature.
 
     Returns:
         A jupyter widget with the network map, allowing to zoom and pan the map, and filtering based on nominal voltages.
@@ -66,8 +70,10 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
     dark_mode = traitlets.Bool().tag(sync=True)
 
+    hover_enabled = traitlets.Bool().tag(sync=True)
+
     def __init__(self, network:Network, sub_id:str = None, use_name:bool = True, display_lines:bool = True, use_line_geodata:bool = False, nominal_voltages_top_tiers_filter = -1, 
-                 dark_mode:bool = False, **kwargs):
+                 dark_mode:bool = False, on_hover_func: OnHoverFuncType = None, **kwargs):
         super().__init__(**kwargs)
 
         (lmap, lpos, smap, spos, vl_subs, sub_vls, subs_ids, tlmap, hlmap) = self.extract_map_data(network, display_lines, use_line_geodata)
@@ -88,6 +94,9 @@ class NetworkMapWidget(anywidget.AnyWidget):
 
         self._on_selectvl_handlers = CallbackDispatcher()
         super().on_msg(self._handle_pw_msg)
+
+        self._on_hover_func = on_hover_func
+        self.hover_enabled = on_hover_func is not None        
 
     def _handle_pw_msg(self, _, content, buffers):
         if content.get('event', '') == 'select_vl':
@@ -255,3 +264,13 @@ class NetworkMapWidget(anywidget.AnyWidget):
         if nvls_top_tiers != -1  :
             nvls_filtered = nvls_filtered[:nvls_top_tiers]
         return nvls_filtered
+    
+    @anywidget.experimental.command
+    def _get_on_hover_info(self, msg, buffers):
+        retval = ''
+        if self._on_hover_func is not None:
+            try:
+                retval = self._on_hover_func(msg['id'])
+            except Exception as err:
+                retval = f'ERROR {repr(err)}'
+        return retval, buffers

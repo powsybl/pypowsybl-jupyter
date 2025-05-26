@@ -8,7 +8,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import { createRender, useModelState, useModel } from '@anywidget/react';
+import { createRender, useModelState, useModel, useExperimental } from '@anywidget/react';
 import { NetworkMap, GeoData, MapEquipments } from '@powsybl/network-viewer';
 import VoltageLevelChoice from './voltage-level-choice';
 import NominalVoltageFilter from './nominal-voltage-filter';
@@ -100,6 +100,7 @@ const render = createRender(() => {
     const networkMapRef = useRef();
 
     let model = useModel();
+    let experimental = useExperimental();
 
     const [spos] = useModelState('spos');
     const [lpos] = useModelState('lpos');
@@ -128,6 +129,8 @@ const render = createRender(() => {
     });
 
     const [dark_mode] = useModelState('dark_mode');
+
+    const [is_hover_enabled] = useModelState('hover_enabled');
 
     useEffect(() => {
         let initDataTask = new Promise((resolve, reject) => {
@@ -239,6 +242,93 @@ const render = createRender(() => {
         );
     }
 
+    async function getPopupContent(elementId) {
+        try {
+            const [retInfo, _buffers] = await experimental.invoke(
+                '_get_on_hover_info',
+                { id: elementId }
+            );
+            return retInfo;
+        } catch (e) {
+            return `Error retrieving hover info: ${e}`;
+        }
+    }
+
+    const [hoverLineData, setHoverLineData] = useState(null);
+    const lastLineId = useRef(null);
+    const debounceTimer = useRef(null);
+
+    const debounceDelay = 300;
+
+    const renderPopup = (popupData, isStale) =>
+        isStale || popupData === null ? (
+            ''
+        ) : (
+            <div
+                style={{
+                    position: 'relative',
+                    top: '0px',
+                    left: '10px',
+                    display: 'block',
+                    backgroundColor: 'white',
+                    border: '1px solid black',
+                    padding: '5px',
+                    pointerEvents: 'none',
+                    fontFamily: 'sans-serif',
+                    fontSize: '12px',
+                    zIndex: '999',
+                }}
+            >
+                <div
+                    dangerouslySetInnerHTML={{
+                        __html: popupData,
+                    }}
+                />
+            </div>
+        );
+
+    // cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+        };
+    }, []);
+
+    const renderLinePopover = useCallback(
+        (lineId, ref) => {
+            if (debounceTimer.current) {
+                clearTimeout(debounceTimer.current);
+            }
+
+            const isStale = lineId === lastLineId.current && ref === null;
+
+            if (lineId === lastLineId.current) {
+                return renderPopup(hoverLineData, isStale);
+            }
+
+            debounceTimer.current = setTimeout(() => {
+                lastLineId.current = lineId;
+                getPopupContent(lineId)
+                    .then((data) => {
+                        if (lineId === lastLineId.current) {
+                            setHoverLineData(data);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error loading data: ', error);
+                        if (lineId === lastLineId.current) {
+                            setHoverLineData('Error loading data');
+                        }
+                    });
+            }, debounceDelay);
+
+            return renderPopup(null, false);
+        },
+        [hoverLineData]
+    );
+
     const renderMap = () => (
         <NetworkMap
             ref={networkMapRef}
@@ -258,6 +348,7 @@ const render = createRender(() => {
             mapLibrary={'cartonolabel'}
             mapTheme={dark_mode ? 'dark' : 'light'}
             filteredNominalVoltages={filteredNominalVoltages}
+            renderPopover={is_hover_enabled ? renderLinePopover : null}
         />
     );
 

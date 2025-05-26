@@ -14,12 +14,16 @@ import pathlib
 
 import anywidget
 import traitlets
+from anywidget.experimental import command
 
 from ipywidgets import (
     CallbackDispatcher
 )
 
 from .util import _get_svg_string, _get_svg_metadata
+from typing import Callable
+
+OnHoverFuncType = Callable[[str, str], str]
 
 class SldWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "sldwidget.js"
@@ -30,14 +34,17 @@ class SldWidget(anywidget.AnyWidget):
     clicked_switch = traitlets.Dict().tag(sync=True)
     clicked_feeder = traitlets.Dict().tag(sync=True)
     clicked_bus = traitlets.Dict().tag(sync=True)
+    hover_enabled = traitlets.Bool().tag(sync=True)
     
-    def __init__(self, **kwargs):
+    def __init__(self, on_hover_func: OnHoverFuncType, **kwargs):
         super().__init__(**kwargs)
         self._on_nextvl_handlers = CallbackDispatcher()
         self._on_switch_handlers = CallbackDispatcher()
         self._on_feeder_handlers = CallbackDispatcher()
         self._on_bus_handlers = CallbackDispatcher()
         super().on_msg(self._handle_svgsld_msg)
+        self._on_hover_func = on_hover_func
+        self.hover_enabled = on_hover_func is not None
 
     def _handle_svgsld_msg(self, _, content, buffers):
         if content.get('event', '') == 'click_nextvl':
@@ -77,7 +84,17 @@ class SldWidget(anywidget.AnyWidget):
     def on_bus(self, callback, remove=False):
         self._on_bus_handlers.register_callback(callback, remove=remove)
 
-def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
+    @anywidget.experimental.command
+    def _get_on_hover_info(self, msg, buffers):
+        retval = ''
+        if self._on_hover_func is not None:
+            try:
+                retval = self._on_hover_func(msg['id'], msg['type'])
+            except Exception as err:
+                retval = f'ERROR {repr(err)}'
+        return retval, buffers
+
+def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False, on_hover_func: OnHoverFuncType = None) -> SldWidget:
     """
     Displays an SLD's SVG with support for panning and zooming.
 
@@ -85,6 +102,7 @@ def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -
         svg: the input SVG, as str or class providing an svg and metadata representation.
         enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
         invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+        on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters are the equipment id and type; It must return an HTML string. Currently, the SLD viewer component supports lines and two winding transformers. None disables the hovering feature.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -98,7 +116,7 @@ def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -
 
     svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
     svg_value=_get_svg_string(svg)
-    return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata, "invalid_lf": invalid_lf})
+    return SldWidget(diagram_data= {"value": svg_value, "value_meta": svg_metadata, "invalid_lf": invalid_lf}, on_hover_func = on_hover_func)
 
 def update_sld(sldwidget, svg, keep_viewbox: bool = False, enable_callbacks: bool = False, invalid_lf: bool = False):
     """
