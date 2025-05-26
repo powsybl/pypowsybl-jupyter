@@ -77,13 +77,12 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                     update_params = {'id': branch_id}
 
                     # Add branch values to update parameters if they exist in the time series data
-                    # Only update modifiable properties (p1, p2) - i1, i2 are not modifiable
                     for prop in ['p1', 'p2']:
                         if prop in row and not pd.isna(row[prop]):
                             update_params[prop] = row[prop]
 
                     # Update the line in the network object
-                    if len(update_params) > 1:  # More than just the ID
+                    if len(update_params) > 1:
                         network.update_lines(**update_params)
 
             # Generate the diagram with the updated network
@@ -94,8 +93,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                 low_nominal_voltage_bound=low_nominal_voltage_bound, 
                 nad_parameters=npars
             )
-
-            if nad_widget==None:
+            if nad_widget is None:
                 nad_widget=display_nad(new_diagram_data)
             else:
                 update_nad(nad_widget, new_diagram_data)
