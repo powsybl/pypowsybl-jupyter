@@ -22,9 +22,12 @@ interface NadWidgetModel {
     current_nad_metadata: string;
     popup_menu_items: string[];
     hover_enabled: boolean;
+    branch_states: any[];
 }
 
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
+    let nad_viewer: NetworkAreaDiagramViewer | null = null;
+
     const handleSelectNode = (
         equipmentId: string,
         nodeId: string,
@@ -96,8 +99,6 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         model.save_changes();
         model.send({ event: 'move_text_node' });
     };
-
-    let nad_viewer: any = null;
 
     function toWidgetCoordinates(
         container: HTMLElement,
@@ -279,6 +280,15 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
                 metad = nad_viewer.getJsonMetadata();
             }
             updateCurrentMetadataInModel(metad);
+        }
+    });
+
+    model.on('change:branch_states', () => {
+        if (nad_viewer) {
+            const branch_states = model.get('branch_states');
+            if (branch_states && branch_states.length > 0) {
+                nad_viewer.setBranchStates(branch_states);
+            }
         }
     });
 }
