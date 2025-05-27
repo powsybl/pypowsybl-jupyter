@@ -100,11 +100,12 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                                                                 nad_parameters=npars)
             if nad_widget is None:
                 nad_widget = display_nad(new_diagram_data, enable_callbacks=True, invalid_lf=False, grayout=False)
-                branch_states = prepare_branch_states(selected_time_step)
-                if branch_states:
-                    nad_widget.set_branch_states(branch_states)
             else:
                 update_nad(nad_widget, new_diagram_data, enable_callbacks=True)
+
+            branch_states = prepare_branch_states(selected_time_step)
+            if branch_states:
+                nad_widget.set_branch_states(branch_states)
 
 
     nadslider = widgets.IntSlider(
@@ -216,7 +217,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     def on_text_changed(d):
         nonlocal selected_vl
         found.options = list(vls[vls.index.str.contains(d['new'], regex=False)].index)
-
 
     vl_input.observe(on_text_changed, names='value')
 
