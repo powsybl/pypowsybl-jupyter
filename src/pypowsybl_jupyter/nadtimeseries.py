@@ -73,6 +73,8 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                 'branchId': branch_id,
                 'value1': float(row.get('p1', 0)),  # Ensure numeric values
                 'value2': float(row.get('p2', 0)),  # Ensure numeric values
+                'connected1': row.get('connected1', True),
+                'connected2': row.get('connected2', True),
             }
             branch_states.append(branch_state)
 
