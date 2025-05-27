@@ -98,7 +98,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                                                                 high_nominal_voltage_bound=high_nominal_voltage_bound,
                                                                 low_nominal_voltage_bound=low_nominal_voltage_bound,
                                                                 nad_parameters=npars)
-
             if nad_widget is None:
                 nad_widget = display_nad(new_diagram_data, enable_callbacks=True, invalid_lf=False, grayout=False)
                 branch_states = prepare_branch_states(selected_time_step)
@@ -106,9 +105,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                     nad_widget.set_branch_states(branch_states)
             else:
                 update_nad(nad_widget, new_diagram_data, enable_callbacks=True)
-                branch_states = prepare_branch_states(selected_time_step)
-                if branch_states:
-                    nad_widget.set_branch_states(branch_states)
+
 
     nadslider = widgets.IntSlider(
         value=selected_depth,  # Initialize with the selected depth
@@ -136,7 +133,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
         value=selected_time_step,
         description='Time:',
         disabled=False,
-        continuous_update=False,
+        continuous_update=True,
         orientation='horizontal',
         readout=True
     )
@@ -144,7 +141,9 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     def on_time_slider_changed(d):
         nonlocal selected_time_step
         selected_time_step = d['new']
-        update_diagram()
+        branch_states = prepare_branch_states(selected_time_step)
+        if branch_states:
+            nad_widget.set_branch_states(branch_states)
 
     time_slider.observe(on_time_slider_changed, names='value')
 
@@ -240,9 +239,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     update_diagram()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
-
-    if nad_widget is None:
-        update_diagram()
 
     # Create a horizontal box for playback controls (play button)
     playback_controls = widgets.HBox([play_button])
