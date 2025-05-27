@@ -28,7 +28,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     vls = network.get_voltage_levels(attributes=[])
     nad_widget=None
 
-    selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids 
+    selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids
     if len(selected_vl)==0:
         raise ValueError("At least one VL must be selected in the voltage_level_ids list")
 
@@ -37,7 +37,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     selected_depth=depth
 
-    # Get unique timestamps and sort them
     time_steps = sorted(time_series_data['timestamp'].unique())
     if len(time_steps) == 0:
         raise ValueError("time_series_data must contain at least one timestamp")
@@ -54,49 +53,54 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
         bus_legend=False,
         substation_description_displayed=True)
 
+    def prepare_branch_states(time_step):
+        """
+        Prepare branch states data for the selected time step.
+        This function extracts the branch data for the given time step and formats it
+        for the network-viewer API.
+        """
+        time_step_data = time_series_data[time_series_data['timestamp'] == time_step]
+
+        branch_states = []
+        for _, row in time_step_data.iterrows():
+            if 'branch_id' not in row:
+                print(f"Warning: 'branch_id' not found in row: {row}")
+                continue
+
+            branch_id = row['branch_id']
+
+            branch_state = {
+                'branchId': branch_id,
+                'value1': float(row.get('p1', 0)),  # Ensure numeric values
+                'value2': float(row.get('p2', 0)),  # Ensure numeric values
+            }
+            branch_states.append(branch_state)
+
+        if not branch_states:
+            print(f"Warning: No branch states found for time step {time_step}")
+
+        return branch_states
+
     def update_diagram():
         nonlocal nad_widget
         if len(selected_vl)>0:
-            # Filter time series data for the current time step
-            current_data = time_series_data[time_series_data['timestamp'] == selected_time_step]
+            new_diagram_data = network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth,
+                                                                high_nominal_voltage_bound=high_nominal_voltage_bound,
+                                                                low_nominal_voltage_bound=low_nominal_voltage_bound,
+                                                                nad_parameters=npars)
 
-            # If the time series data includes branch_id column, update the network object
-            if 'branch_id' in current_data.columns:
-                # Get all lines in the network to check if branch_id exists
-                lines = network.get_lines()
-
-                # Iterate through the time series data for the current time step
-                for _, row in current_data.iterrows():
-                    branch_id = row.get('branch_id')
-
-                    # Skip if branch_id is not in the time series data or not in the network
-                    if branch_id is None or branch_id not in lines.index:
-                        continue
-
-                    # Prepare update parameters
-                    update_params = {'id': branch_id}
-
-                    # Add branch values to update parameters if they exist in the time series data
-                    for prop in ['p1', 'p2']:
-                        if prop in row and not pd.isna(row[prop]):
-                            update_params[prop] = row[prop]
-
-                    # Update the line in the network object
-                    if len(update_params) > 1:
-                        network.update_lines(**update_params)
-
-            # Generate the diagram with the updated network
-            new_diagram_data = network.get_network_area_diagram(
-                voltage_level_ids=selected_vl, 
-                depth=selected_depth, 
-                high_nominal_voltage_bound=high_nominal_voltage_bound, 
-                low_nominal_voltage_bound=low_nominal_voltage_bound, 
-                nad_parameters=npars
-            )
             if nad_widget is None:
-                nad_widget=display_nad(new_diagram_data)
+                nad_widget = display_nad(new_diagram_data, enable_callbacks=True, invalid_lf=False, grayout=False)
+                branch_states = prepare_branch_states(selected_time_step)
+                if branch_states:
+                    nad_widget.set_branch_states(branch_states)
             else:
-                update_nad(nad_widget, new_diagram_data)
+                update_nad(nad_widget, new_diagram_data, enable_callbacks=True)
+                # Apply branch states after updating the diagram
+                branch_states = prepare_branch_states(selected_time_step)
+                if branch_states:
+                    nad_widget.set_branch_states(branch_states)
+
 
 
     nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
@@ -161,7 +165,12 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     update_diagram()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
-    right_panel = widgets.VBox([nadslider,time_slider, nad_widget])
+
+    if nad_widget is None:
+        update_diagram()
+
+    right_panel = widgets.VBox([nadslider, time_slider, nad_widget])
+
     hbox = widgets.HBox([left_panel, right_panel])
     hbox.layout.align_items='flex-end'
 
