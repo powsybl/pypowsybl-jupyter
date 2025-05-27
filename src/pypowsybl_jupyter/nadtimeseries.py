@@ -9,6 +9,9 @@ from pypowsybl.network import Network, NadParameters
 from .nadwidget import display_nad, update_nad
 import pandas as pd
 import ipywidgets as widgets
+import threading
+import time
+
 
 def nad_time_series(network: Network, voltage_level_ids : list = None, depth: int = 1,time_series_data:pd.DataFrame=None,low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
     """
@@ -43,6 +46,11 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     selected_time_step = time_steps[0]
 
+    # Variables for playback functionality
+    is_playing = False
+    playback_thread = None
+    playback_speed = 1.0  # fixed seconds between time steps
+
     npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
         id_displayed=False,
         edge_info_along_edge=False,
@@ -71,10 +79,10 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
             branch_state = {
                 'branchId': branch_id,
-                'value1': float(row.get('p1', 0)),  # Ensure numeric values
-                'value2': float(row.get('p2', 0)),  # Ensure numeric values
-                'connected1': row.get('connected1', True),
-                'connected2': row.get('connected2', True),
+                'value1': float(row.get('value1', 0)),
+                'value2': float(row.get('value2', 0)),
+                'connected1': bool(row.get('connected1', True)),
+                'connected2': bool(row.get('connected2', True)),
             }
             branch_states.append(branch_state)
 
@@ -98,18 +106,26 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
                     nad_widget.set_branch_states(branch_states)
             else:
                 update_nad(nad_widget, new_diagram_data, enable_callbacks=True)
-                # Apply branch states after updating the diagram
                 branch_states = prepare_branch_states(selected_time_step)
                 if branch_states:
                     nad_widget.set_branch_states(branch_states)
 
-
-
-    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
+    nadslider = widgets.IntSlider(
+        value=selected_depth,  # Initialize with the selected depth
+        min=0, 
+        max=20, 
+        step=1, 
+        description='depth:', 
+        disabled=False, 
+        continuous_update=False, 
+        orientation='horizontal', 
+        readout=True, 
+        readout_format='d'
+    )
 
     def on_nadslider_changed(d):
         nonlocal selected_depth
-        selected_depth=d['new']
+        selected_depth = d['new']
         update_diagram()
 
     nadslider.observe(on_nadslider_changed, names='value')
@@ -132,6 +148,64 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     time_slider.observe(on_time_slider_changed, names='value')
 
+    def playback_function():
+        """
+        Function to automatically advance the time slider during playback.
+        This runs in a separate thread and updates the time slider at regular intervals.
+        """
+        nonlocal is_playing, selected_time_step
+        while is_playing:
+            try:
+                # Get the current index of the time step
+                current_index = time_steps.index(selected_time_step)
+                # Calculate the next index (loop back to 0 if at the end)
+                next_index = (current_index + 1) % len(time_steps)
+                # Update the time slider with the next time step
+                time_slider.value = time_steps[next_index]
+                # Sleep for the specified interval
+                time.sleep(playback_speed)
+            except Exception as e:
+                print(f"Error during playback: {e}")
+                is_playing = False
+                # Update button appearance to reflect that playback has stopped
+                play_button.description = '▶ Play'
+                play_button.icon = 'play'
+                break
+
+    def on_play_button_clicked(b):
+        """
+        Handler for the play/pause button click.
+        Starts or stops the automatic playback of time steps.
+        """
+        nonlocal is_playing, playback_thread
+
+        if is_playing:
+            # Stop playback
+            is_playing = False
+            if playback_thread and playback_thread.is_alive():
+                playback_thread.join()
+            play_button.description = '▶ Play'
+            play_button.icon = 'play'
+        else:
+            # Start playback
+            is_playing = True
+            playback_thread = threading.Thread(target=playback_function)
+            playback_thread.daemon = True  # Thread will exit when main program exits
+            playback_thread.start()
+            play_button.description = '⏸ Pause'
+            play_button.icon = 'pause'
+
+    # Create the play/pause button
+    play_button = widgets.Button(
+        description='▶ Play',
+        disabled=False,
+        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+        tooltip='Play/Pause automatic time step advancement',
+        icon='play'  # Font-awesome icon name
+    )
+    play_button.on_click(on_play_button_clicked)
+
+
     vl_input = widgets.Text(
         value='',
         placeholder='Voltage level ID',
@@ -143,7 +217,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     def on_text_changed(d):
         nonlocal selected_vl
         found.options = list(vls[vls.index.str.contains(d['new'], regex=False)].index)
-        selected_vl=[]
 
 
     vl_input.observe(on_text_changed, names='value')
@@ -171,9 +244,27 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     if nad_widget is None:
         update_diagram()
 
-    right_panel = widgets.VBox([nadslider, time_slider, nad_widget])
+    # Create a horizontal box for playback controls (play button)
+    playback_controls = widgets.HBox([play_button])
+
+    # Create a vertical box for all time-related controls
+    time_controls = widgets.VBox([time_slider, playback_controls])
+
+    right_panel = widgets.VBox([nadslider, time_controls, nad_widget])
 
     hbox = widgets.HBox([left_panel, right_panel])
     hbox.layout.align_items='flex-end'
+
+    # Define a cleanup function to stop the playback thread when the widget is closed
+    def cleanup():
+        nonlocal is_playing, playback_thread
+        if is_playing:
+            is_playing = False
+            if playback_thread and playback_thread.is_alive():
+                playback_thread.join(timeout=1.0)  # Wait for thread to finish with timeout
+
+    # Register the cleanup function to be called when the widget is closed
+    import atexit
+    atexit.register(cleanup)
 
     return hbox
