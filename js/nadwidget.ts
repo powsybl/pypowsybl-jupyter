@@ -112,6 +112,15 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         };
     }
 
+    const applyBranchStates = () => {
+        if (nad_viewer) {
+            const branch_states = model.get('branch_states');
+            if (branch_states && branch_states.length > 0) {
+                nad_viewer.setBranchStates(branch_states);
+            }
+        }
+    };
+
     function render_diagram(
         model: any,
         diagram_svg: string,
@@ -205,7 +214,11 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             true
         );
 
-        // prevents the default jupyter-lab's behavior for this event
+        setTimeout(() => {
+            applyBranchStates();
+        }, 0);
+
+        // prevents the default jupyter-lab's behavior
         el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
                 event.preventDefault();
@@ -284,12 +297,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
     });
 
     model.on('change:branch_states', () => {
-        if (nad_viewer) {
-            const branch_states = model.get('branch_states');
-            if (branch_states && branch_states.length > 0) {
-                nad_viewer.setBranchStates(branch_states);
-            }
-        }
+        applyBranchStates();
     });
 }
 
