@@ -15,11 +15,13 @@ import time
 
 def nad_time_series(network: Network, voltage_level_ids : list = None, depth: int = 1,time_series_data:pd.DataFrame=None,low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
     """
-    Creates a nad explorer widget for a network using time series data., built with the nad widget.
+    Creates a nad explorer widget for a network using time series data, built with the nad widget.
 
     Args:
         network: the input network
         time_series_data: a DataFrame containing time series data for the network.
+                         Must contain columns: 'timestamp', 'branch_id', 'value1', 'value2',
+                         'connected1', 'connected2'
         voltage_level_ids: the starting list of VL to display. None displays all the network's VLs
         depth: the diagram depth around the voltage level, controls the size of the sub network
         low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
@@ -31,14 +33,14 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     vls = network.get_voltage_levels(attributes=[])
     nad_widget=None
 
-    selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids
-    if len(selected_vl)==0:
+    selected_vl = list(vls.index) if voltage_level_ids is None else voltage_level_ids
+    if len(selected_vl) == 0:
         raise ValueError("At least one VL must be selected in the voltage_level_ids list")
 
     if time_series_data is None:
         raise ValueError("time_series_data must be provided")
 
-    selected_depth=depth
+    selected_depth = depth
 
     time_steps = sorted(time_series_data['timestamp'].unique())
     if len(time_steps) == 0:
@@ -52,14 +54,14 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     playback_speed = 1.0  # fixed seconds between time steps
 
     npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
-        id_displayed=False,
-        edge_info_along_edge=False,
-        power_value_precision=1,
-        angle_value_precision=0,
-        current_value_precision=1,
-        voltage_value_precision=0,
-        bus_legend=False,
-        substation_description_displayed=True)
+                                                                    id_displayed=False,
+                                                                    edge_info_along_edge=False,
+                                                                    power_value_precision=1,
+                                                                    angle_value_precision=0,
+                                                                    current_value_precision=1,
+                                                                    voltage_value_precision=0,
+                                                                    bus_legend=False,
+                                                                    substation_description_displayed=True)
 
     def prepare_branch_states(time_step):
         """
@@ -93,7 +95,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     def update_diagram():
         nonlocal nad_widget
-        if len(selected_vl)>0:
+        if len(selected_vl) > 0:
             new_diagram_data = network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth,
                                                                 high_nominal_voltage_bound=high_nominal_voltage_bound,
                                                                 low_nominal_voltage_bound=low_nominal_voltage_bound,
@@ -107,17 +109,16 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
             if branch_states:
                 nad_widget.set_branch_states(branch_states)
 
-
     nadslider = widgets.IntSlider(
         value=selected_depth,  # Initialize with the selected depth
-        min=0, 
-        max=20, 
-        step=1, 
-        description='depth:', 
-        disabled=False, 
-        continuous_update=False, 
-        orientation='horizontal', 
-        readout=True, 
+        min=0,
+        max=20,
+        step=1,
+        description='depth:',
+        disabled=False,
+        continuous_update=False,
+        orientation='horizontal',
+        readout=True,
         readout_format='d'
     )
 
@@ -199,12 +200,11 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     play_button = widgets.Button(
         description='▶ Play',
         disabled=False,
-        button_style='',  # 'success', 'info', 'warning', 'danger' or ''
+        button_style='',
         tooltip='Play/Pause automatic time step advancement',
-        icon='play'  # Font-awesome icon name
+        icon='play'
     )
     play_button.on_click(on_play_button_clicked)
-
 
     vl_input = widgets.Text(
         value='',
@@ -236,6 +236,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     found.observe(on_selected, names='value')
 
+    # Initialize the diagram
     update_diagram()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
@@ -249,7 +250,7 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
     right_panel = widgets.VBox([nadslider, time_controls, nad_widget])
 
     hbox = widgets.HBox([left_panel, right_panel])
-    hbox.layout.align_items='flex-end'
+    hbox.layout.align_items = 'flex-end'
 
     # Define a cleanup function to stop the playback thread when the widget is closed
     def cleanup():

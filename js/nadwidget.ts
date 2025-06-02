@@ -79,6 +79,16 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.save_changes();
         model.send({ event: 'move_text_node' });
     };
+
+    const applyBranchStates = () => {
+        if (viewer) {
+            const branch_states = model.get('branch_states');
+            if (branch_states && branch_states.length > 0) {
+                viewer.setBranchStates(branch_states);
+            }
+        }
+    };
+
     function render_diagram(
         model: any,
         diagram_svg: string,
@@ -112,6 +122,10 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             null,
             null
         );
+
+        setTimeout(() => {
+            applyBranchStates();
+        }, 0);
 
         // prevents the default jupyter-lab's behavior (it already uses the shift+click combination)
         el_div.addEventListener('mousedown', function (event: MouseEvent) {
@@ -150,12 +164,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
     });
 
     model.on('change:branch_states', () => {
-        if (viewer) {
-            const branch_states = model.get('branch_states');
-            if (branch_states && branch_states.length > 0) {
-                viewer.setBranchStates(branch_states);
-            }
-        }
+        applyBranchStates();
     });
 }
 
