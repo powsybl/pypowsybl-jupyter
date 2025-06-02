@@ -4,7 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 #
-import datetime
 
 from pypowsybl.network import Network, NadParameters
 from .nadwidget import display_nad, update_nad
