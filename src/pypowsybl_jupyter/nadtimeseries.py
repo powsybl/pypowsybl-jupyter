@@ -4,14 +4,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 #
+import datetime
 
 from pypowsybl.network import Network, NadParameters
 from .nadwidget import display_nad, update_nad
 import pandas as pd
 import ipywidgets as widgets
-import threading
-import time
-
 
 def nad_time_series(network: Network, voltage_level_ids : list = None, depth: int = 1,time_series_data:pd.DataFrame=None,low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
     """
@@ -137,7 +135,8 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
         disabled=False,
         continuous_update=True,
         orientation='horizontal',
-        readout=True
+        readout=True,
+        layout=widgets.Layout(width='50%')
     )
 
     def on_time_slider_changed(d):
@@ -148,63 +147,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
             nad_widget.set_branch_states(branch_states)
 
     time_slider.observe(on_time_slider_changed, names='value')
-
-    def playback_function():
-        """
-        Function to automatically advance the time slider during playback.
-        This runs in a separate thread and updates the time slider at regular intervals.
-        """
-        nonlocal is_playing, selected_time_step
-        while is_playing:
-            try:
-                # Get the current index of the time step
-                current_index = time_steps.index(selected_time_step)
-                # Calculate the next index (loop back to 0 if at the end)
-                next_index = (current_index + 1) % len(time_steps)
-                # Update the time slider with the next time step
-                time_slider.value = time_steps[next_index]
-                # Sleep for the specified interval
-                time.sleep(playback_speed)
-            except Exception as e:
-                print(f"Error during playback: {e}")
-                is_playing = False
-                # Update button appearance to reflect that playback has stopped
-                play_button.description = '▶ Play'
-                play_button.icon = 'play'
-                break
-
-    def on_play_button_clicked(b):
-        """
-        Handler for the play/pause button click.
-        Starts or stops the automatic playback of time steps.
-        """
-        nonlocal is_playing, playback_thread
-
-        if is_playing:
-            # Stop playback
-            is_playing = False
-            if playback_thread and playback_thread.is_alive():
-                playback_thread.join()
-            play_button.description = '▶ Play'
-            play_button.icon = 'play'
-        else:
-            # Start playback
-            is_playing = True
-            playback_thread = threading.Thread(target=playback_function)
-            playback_thread.daemon = True  # Thread will exit when main program exits
-            playback_thread.start()
-            play_button.description = '⏸ Pause'
-            play_button.icon = 'pause'
-
-    # Create the play/pause button
-    play_button = widgets.Button(
-        description='▶ Play',
-        disabled=False,
-        button_style='',
-        tooltip='Play/Pause automatic time step advancement',
-        icon='play'
-    )
-    play_button.on_click(on_play_button_clicked)
 
     vl_input = widgets.Text(
         value='',
@@ -241,27 +183,9 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
 
-    # Create a horizontal box for playback controls (play button)
-    playback_controls = widgets.HBox([play_button])
-
-    # Create a vertical box for all time-related controls
-    time_controls = widgets.VBox([time_slider, playback_controls])
-
-    right_panel = widgets.VBox([nadslider, time_controls, nad_widget])
+    right_panel = widgets.VBox([nadslider, time_slider, nad_widget])
 
     hbox = widgets.HBox([left_panel, right_panel])
     hbox.layout.align_items = 'flex-end'
-
-    # Define a cleanup function to stop the playback thread when the widget is closed
-    def cleanup():
-        nonlocal is_playing, playback_thread
-        if is_playing:
-            is_playing = False
-            if playback_thread and playback_thread.is_alive():
-                playback_thread.join(timeout=1.0)  # Wait for thread to finish with timeout
-
-    # Register the cleanup function to be called when the widget is closed
-    import atexit
-    atexit.register(cleanup)
 
     return hbox
