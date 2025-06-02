@@ -10,16 +10,21 @@ import './nadwidget.css';
 
 import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
 
+import { PopupMenu } from './popupmenu';
+
 interface NadWidgetModel {
     diagram_data: any;
     selected_node: any;
+    selected_menu: any;
     moved_node: any;
     moved_text_node: any;
+    current_nad_metadata: string;
+    popup_menu_items: string[];
     branch_states: any[];
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
-    let viewer: NetworkAreaDiagramViewer | null = null;
+    let nad_viewer: NetworkAreaDiagramViewer | null = null;
 
     const handleSelectNode = (equipmentId: string, nodeId: string) => {
         model.set('selected_node', {
@@ -28,6 +33,15 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         });
         model.save_changes();
         model.send({ event: 'select_node' });
+    };
+
+    const handleSelectMenu = (equipmentId: string, selection: number) => {
+        model.set('selected_menu', {
+            equipment_id: equipmentId,
+            selection: selection,
+        });
+        model.save_changes();
+        model.send({ event: 'select_menu' });
     };
 
     const handleMoveNode = (
@@ -80,11 +94,43 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
+    function svgToScreen(
+        container: HTMLElement,
+        x: number,
+        y: number
+    ): { screenX: number; screenY: number } | null {
+        const svgElement = container.querySelector(
+            'svg'
+        ) as SVGGraphicsElement | null;
+
+        if (!svgElement) {
+            console.error('No SVG element found inside the container.');
+            return null;
+        }
+
+        const screenCTM = svgElement.getScreenCTM();
+        if (!screenCTM) {
+            console.error('Failed to get screenCTM for the SVG element.');
+            return null;
+        }
+
+        // Convert coordinates from SVG to screen
+        const point = new DOMPoint(x, y);
+        const transformedPoint = point.matrixTransform(screenCTM);
+
+        const containerRect = container.getBoundingClientRect();
+
+        return {
+            screenX: transformedPoint.x - containerRect.left,
+            screenY: transformedPoint.y - containerRect.top,
+        };
+    }
+
     const applyBranchStates = () => {
-        if (viewer) {
+        if (nad_viewer) {
             const branch_states = model.get('branch_states');
             if (branch_states && branch_states.length > 0) {
-                viewer.setBranchStates(branch_states);
+                nad_viewer.setBranchStates(branch_states);
             }
         }
     };
@@ -98,6 +144,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
+        const menu_items = model.get('popup_menu_items');
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
@@ -106,7 +153,42 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
         el_div.classList.toggle('grayout', is_grayout);
 
-        viewer = new NetworkAreaDiagramViewer(
+        let popupMenu: PopupMenu | null = null;
+        let handleMenu = null;
+
+        if (menu_items.length > 0) {
+            popupMenu = new PopupMenu(
+                el_div,
+                menu_items,
+                (selection: number, id: string) => {
+                    handleSelectMenu(id, selection);
+                }
+            );
+
+            handleMenu = (
+                _svgId: string,
+                equipmentId: string,
+                equipmentType: string,
+                mousePosition: any
+            ) => {
+                if (equipmentType === 'VOLTAGE_LEVEL') {
+                    const transfPoint = svgToScreen(
+                        el_div.querySelector('#svg-container') ?? el_div,
+                        mousePosition.x,
+                        mousePosition.y
+                    );
+                    let xx = 0;
+                    let yy = 0;
+                    if (transfPoint != null) {
+                        xx = transfPoint.screenX;
+                        yy = transfPoint.screenY;
+                    }
+                    popupMenu?.displayMenu(xx, yy, equipmentId);
+                }
+            };
+        }
+
+        nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
             diagram_svg,
             diagram_meta ? JSON.parse(diagram_meta) : null,
@@ -120,19 +202,33 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             is_enabled_callbacks,
             false,
             null,
-            null
+            null,
+            handleMenu,
+            true
         );
 
         setTimeout(() => {
             applyBranchStates();
         }, 0);
 
-        // prevents the default jupyter-lab's behavior (it already uses the shift+click combination)
-        el_div.addEventListener('mousedown', function (event: MouseEvent) {
+        // prevents the default jupyter-lab's behavior for this event
+        el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
                 event.preventDefault();
             }
         });
+
+        if (popupMenu != null) {
+            // prevents the default jupyter-lab's behavior for these events
+            el_div.addEventListener('contextmenu', (event: MouseEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+
+            el_div.addEventListener('keydown', (event: KeyboardEvent) => {
+                event.preventDefault();
+            });
+        }
 
         return el_div;
     }
@@ -144,6 +240,12 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
     );
     el.appendChild(diagram_element);
 
+    function updateCurrentMetadataInModel(metadata: string) {
+        model.set('current_nad_metadata', '');
+        model.set('current_nad_metadata', metadata);
+        model.save_changes();
+    }
+
     model.on('change:diagram_data', () => {
         const diagram_data = model.get('diagram_data');
         const keep_viewbox = diagram_data['keep_viewbox'];
@@ -153,14 +255,26 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const nodes = el.querySelectorAll('.svg-nad-viewer-widget')[0];
 
         if (keep_viewbox) {
-            diagram_svg = nodes.querySelector(':scope > svg')?.outerHTML ?? '';
+            const svgContainer = nodes.querySelector('#svg-container');
+            diagram_svg = svgContainer?.querySelector('svg')?.outerHTML ?? '';
         } else {
             diagram_svg = diagram_data['svg_data'];
             diagram_meta = diagram_data['metadata'];
+            updateCurrentMetadataInModel(diagram_meta);
         }
 
         const new_el = render_diagram(model, diagram_svg, diagram_meta);
         el.replaceChild(new_el, nodes);
+    });
+
+    model.on('msg:custom', (content) => {
+        if (content.type === 'triggerRetrieveMetadata') {
+            let metad = '';
+            if (nad_viewer != null) {
+                metad = nad_viewer.getJsonMetadata();
+            }
+            updateCurrentMetadataInModel(metad);
+        }
     });
 
     model.on('change:branch_states', () => {
