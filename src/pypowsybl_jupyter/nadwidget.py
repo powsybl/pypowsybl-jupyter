@@ -103,7 +103,7 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
             display_nad(network.get_network_area_diagram())
     """
     svg_value=_get_svg_string(svg)
-    svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
+    svg_metadata = _get_svg_metadata(svg)
     return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout},
                      popup_menu_items=popup_menu_items)
 
@@ -127,5 +127,5 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool 
     """    
 
     svg_value=_get_svg_string(svg)
-    svg_metadata = "" if not enable_callbacks else _get_svg_metadata(svg)
+    svg_metadata = _get_svg_metadata(svg)
     nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout, "keep_viewbox": keep_viewbox}
