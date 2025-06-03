@@ -45,11 +45,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     selected_time_step = time_steps[0]
 
-    # Variables for playback functionality
-    is_playing = False
-    playback_thread = None
-    playback_speed = 1.0  # fixed seconds between time steps
-
     npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
                                                                     id_displayed=False,
                                                                     edge_info_along_edge=False,
@@ -177,7 +172,6 @@ def nad_time_series(network: Network, voltage_level_ids : list = None, depth: in
 
     found.observe(on_selected, names='value')
 
-    # Initialize the diagram
     update_diagram()
 
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
