@@ -19,6 +19,7 @@ from ipywidgets import (
 )
 
 from .util import _get_svg_string, _get_svg_metadata
+from typing import List
 
 class NadWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "nadwidget.js"
@@ -26,14 +27,18 @@ class NadWidget(anywidget.AnyWidget):
     
     diagram_data  = traitlets.Dict().tag(sync=True)
     selected_node = traitlets.Dict().tag(sync=True)
+    selected_menu = traitlets.Dict().tag(sync=True)
     moved_node = traitlets.Dict().tag(sync=True)
     moved_text_node = traitlets.Dict().tag(sync=True)
+    current_nad_metadata = traitlets.Unicode().tag(sync=True)
+    popup_menu_items = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._on_select_node_handler = CallbackDispatcher()
         self._on_move_node_handler = CallbackDispatcher()
         self._on_move_text_node_handler = CallbackDispatcher()
+        self._on_select_menu_handler = CallbackDispatcher()
         super().on_msg(self._handle_nadwidget_msgs)
 
     def _handle_nadwidget_msgs(self, _, content, buffers):
@@ -43,6 +48,8 @@ class NadWidget(anywidget.AnyWidget):
             self.on_move_node_msg()
         elif content.get('event', '') == 'move_text_node':
             self.on_move_text_node_msg()
+        elif content.get('event', '') == 'select_menu':
+            self.on_select_menu_msg()
 
     # select node
     def on_select_node_msg(self):
@@ -50,6 +57,13 @@ class NadWidget(anywidget.AnyWidget):
 
     def on_select_node(self, callback, remove=False):
         self._on_select_node_handler.register_callback(callback, remove=remove)
+
+    # select menu
+    def on_select_menu_msg(self):
+        self._on_select_menu_handler(self)
+
+    def on_select_menu(self, callback, remove=False):
+        self._on_select_menu_handler.register_callback(callback, remove=remove)
 
     # move node
     def on_move_node_msg(self):
@@ -65,7 +79,10 @@ class NadWidget(anywidget.AnyWidget):
     def on_move_text_node(self, callback, remove=False):
         self._on_move_text_node_handler.register_callback(callback, remove=remove)
 
-def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget:
+    def trigger_update_metadata(self):
+        self.send({'type': 'triggerRetrieveMetadata'})
+    
+def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False, popup_menu_items: List[str] = []) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
 
@@ -74,6 +91,7 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
         invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
         enable_callbacks: if True, enable the callbacks for moving and selecting nodes in the diagram. Please note that this feature is working with versions of PyPowSyBl equal or greater than v1.8.1.
         grayout: if True, changes the diagram elements' color to gray.
+        popup_menu_items: list of str. When not empty enables a right-click popup menu on the NAD's VL nodes.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
@@ -86,7 +104,8 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
     """
     svg_value=_get_svg_string(svg)
     svg_metadata = _get_svg_metadata(svg)
-    return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout})
+    return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "enable_callbacks": enable_callbacks, "grayout": grayout},
+                     popup_menu_items=popup_menu_items)
 
 def update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False, keep_viewbox: bool = False):
     """

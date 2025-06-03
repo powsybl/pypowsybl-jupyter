@@ -26,6 +26,7 @@ A 'depth' slider controls the size of the sub network.
 Selecting a VL's node (through SHIFT+CLICK) will activate the SLD panel on the corresponding voltage level. 
 In the diagram, nodes can be moved interactively by drag&drop (e.g., to change the diagram layout for presentation purposes). However, the new node positions are not currently saved; Therefore, after switching to a new VL and then switching back to the current VL, the original nodes layout would be restored. 
 Please note that the select and move features require versions of PyPowSyBl equal to or greater than v1.8.1.
+Right-clicking a VL node displays a context menu to expand or remove the node from the diagram. Note: Changes to the graph are not saved. They will be lost when a new node is selected or the depth parameter changes.
 
 ## Single Line tab
 
@@ -54,7 +55,7 @@ A further click on an entry in the list will navigate the explorer to the corres
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False):
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False, nad_profile: NadProfile = None):
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
@@ -66,3 +67,4 @@ network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, de
 - nad_parameters: layout properties to adjust the svg rendering for the NAD
 - sld_parameters: layout properties to adjust the svg rendering for the SLD
 - use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
+- nad_profile: property to customize labels and style for the NAD
