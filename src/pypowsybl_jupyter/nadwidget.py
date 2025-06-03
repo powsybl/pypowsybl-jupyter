@@ -32,7 +32,6 @@ class NadWidget(anywidget.AnyWidget):
     moved_text_node = traitlets.Dict().tag(sync=True)
     current_nad_metadata = traitlets.Unicode().tag(sync=True)
     popup_menu_items = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
-
     branch_states = traitlets.List().tag(sync=True)
 
     def __init__(self, **kwargs):
