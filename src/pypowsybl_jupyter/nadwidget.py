@@ -24,7 +24,7 @@ from typing import List
 class NadWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "nadwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "nadwidget.css"
-    
+
     diagram_data  = traitlets.Dict().tag(sync=True)
     selected_node = traitlets.Dict().tag(sync=True)
     selected_menu = traitlets.Dict().tag(sync=True)
@@ -32,7 +32,8 @@ class NadWidget(anywidget.AnyWidget):
     moved_text_node = traitlets.Dict().tag(sync=True)
     current_nad_metadata = traitlets.Unicode().tag(sync=True)
     popup_menu_items = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
-    
+    branch_states = traitlets.List().tag(sync=True)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._on_select_node_handler = CallbackDispatcher()
@@ -79,9 +80,12 @@ class NadWidget(anywidget.AnyWidget):
     def on_move_text_node(self, callback, remove=False):
         self._on_move_text_node_handler.register_callback(callback, remove=remove)
 
+    def set_branch_states(self, branch_states_data):
+        self.branch_states = branch_states_data
+
     def trigger_update_metadata(self):
         self.send({'type': 'triggerRetrieveMetadata'})
-    
+
 def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False, popup_menu_items: List[str] = []) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
