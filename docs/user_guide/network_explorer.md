@@ -55,7 +55,7 @@ A further click on an entry in the list will navigate the explorer to the corres
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False, nad_profile: NadProfile = None):
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None)
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
@@ -68,3 +68,51 @@ network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, de
 - sld_parameters: layout properties to adjust the svg rendering for the SLD
 - use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
 - nad_profile: property to customize labels and style for the NAD
+- on_hover: when True, the hovering is enabled
+- on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type; It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe; To exemplify, the default function is listed below. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation.
+
+### on_hover_func default function
+```python
+    def format_to_html_table(row, id, type):
+        table = (
+            row.to_frame()
+            .style.set_caption(f"{type}: {id}")
+            .set_table_styles(
+                [
+                    {
+                        "selector": "caption",
+                        "props": "caption-side: top; font-weight: bold; background-color: #f8f8f8; border-bottom: 1px solid #ddd; width: fit-content; white-space: nowrap;",
+                    },
+                    {
+                        "selector": "th",
+                        "props": "text-align: left; font-weight: bold; background-color: #f8f8f8;",
+                    },
+                    {
+                        "selector": "td",
+                        "props": "text-align: left;",
+                    },
+                ]
+            )
+            .format(precision=3, thousands=".", decimal=",")
+            .set_table_attributes('border="0"')
+            .hide(axis="columns")
+            .to_html()
+        )
+        return table
+
+    def get_hovering_equipment_info(id, type):
+        if type == 'LINE':
+            return format_to_html_table(network.get_lines().loc[id], id, type)
+        elif type == 'HVDC_LINE':
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)
+        elif type in [ 'PHASE_SHIFT_TRANSFORMER', 'TWO_WINDINGS_TRANSFORMER']:
+            return format_to_html_table(network.get_2_windings_transformers().loc[id], id, type)
+        elif type == 'THREE_WINDINGS_TRANSFORMER':
+            return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
+        elif type == 'DANGLING_LINE': 
+            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        elif type == 'TIE_LINE':
+            return format_to_html_table(network.get_tie_lines().loc[id], id, type)
+        return f"Equipment of type '{type}' with id '{id}'"
+
+```

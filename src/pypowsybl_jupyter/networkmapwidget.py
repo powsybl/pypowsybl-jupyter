@@ -36,7 +36,7 @@ class NetworkMapWidget(anywidget.AnyWidget):
         use_line_geodata: When False (default) the widget does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
         nominal_voltages_top_tiers_filter: filters the elements in the map based on the network's top nominal voltages. N displays the top n nominal voltages; -1 (default) displays all.
         dark_mode: When True, sets the widget's display theme to dark (default is False).
-        on_hover_func: a callback function that is invoked when hovering on the network equipments. Currently, the map viewer component supports lines. The function parameters is the line id; It must return an HTML string. None disables the hovering feature.
+        on_hover_func: a callback function that is invoked when hovering on the network equipments. The function parameters is the line id; It must return an HTML string. None disables the hovering feature. Note that currently the map viewer component supports hovering on lines.
 
     Returns:
         A jupyter widget with the network map, allowing to zoom and pan the map, and filtering based on nominal voltages.

@@ -102,7 +102,7 @@ def display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False, o
         svg: the input SVG, as str or class providing an svg and metadata representation.
         enable_callbacks: if True, enable the callbacks for navigation arrows, feeders and switches.
         invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-        on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters are the equipment id and type; It must return an HTML string. Currently, the SLD viewer component supports lines and two winding transformers. None disables the hovering feature.
+        on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters are the equipment id and type; It must return an HTML string. None disables the hovering feature. Note that currently the SLD viewer component supports hovering on lines and two winding transformers.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.

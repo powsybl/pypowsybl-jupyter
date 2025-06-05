@@ -109,6 +109,7 @@ def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, g
         grayout: if True, changes the diagram elements' color to gray.
         popup_menu_items: list of str. When not empty enables a right-click popup menu on the NAD's VL nodes.
         on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters are the equipment id and type; It must return an HTML string. Currently, the NAD viewer component supports lines, HVDC lines and two winding transformers. None disables the hovering feature.
+        on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters are the equipment id and type; It must return an HTML string. None disables the hovering feature. Note that currently the NAD viewer component supports hovering on lines, HVDC lines and two winding transformers.
 
     Returns:
         A jupyter widget allowing to zoom and pan the SVG.
