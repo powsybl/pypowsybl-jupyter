@@ -139,7 +139,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
             try {
                 const [retInfo, _buffers] = await experimental.invoke(
                     '_get_on_hover_info',
-                    { id: id, type: type }
+                    { id: id ?? null, type: type }
                 );
                 return retInfo as string;
             } catch (e) {
