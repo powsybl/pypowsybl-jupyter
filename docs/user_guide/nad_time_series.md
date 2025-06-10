@@ -12,12 +12,12 @@ import pandas as pd
 from pypowsybl_jupyter import nad_time_series
 
 # Create a network
-network = pn.create_ieee57()
+network = pn.create_ieee118()
 
 # Prepare time series data
 time_series_data = pd.DataFrame({
     'timestamp': ['2024-01-01 00:00', '2024-01-01 01:00', '2024-01-01 02:00'],
-    'branch_id': ['LINE_1', 'LINE_1', 'LINE_1'],
+    'branch_id': ['L1-2-1', 'L1-2-1', 'L1-2-1'],
     'value1': [150.5, 165.2, 140.8],
     'value2': [148.3, 162.1, 138.9],
     'connected1': [True, True, True],
@@ -44,13 +44,13 @@ The time_series_data DataFrame must contain the following columns:
 
 - timestamp: Time points for the data 
 - branch_id: Identifier for the network branch
-- value1: First value for the branch 
-- value2: Second value for the branch 
+- value1: branch side 1 float value 
+- value2: branch side 2 float value 
 - connected1: Boolean indicating if side 1 is connected
 - connected2: Boolean indicating if side 2 is connected
 ## Widget API
 
-Other than the target network, the NAD explorer can be customized using additional parameters:
+Other than the target network, the NAD Time Series widget can be customized using additional parameters:
 
 ```python
 nad_time_series(network: Network, 
