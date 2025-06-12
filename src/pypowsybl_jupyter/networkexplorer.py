@@ -163,17 +163,37 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def get_hovering_equipment_info(id, type):
         if type == 'LINE':
             return format_to_html_table(network.get_lines().loc[id], id, type)
-        elif type == 'HVDC_LINE':
-            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)
         elif type in [ 'PHASE_SHIFT_TRANSFORMER', 'TWO_WINDINGS_TRANSFORMER']:
             return format_to_html_table(network.get_2_windings_transformers().loc[id], id, type)
-        elif type == 'THREE_WINDINGS_TRANSFORMER':
+        elif type == 'LOAD':
+            return format_to_html_table(network.get_loads().loc[id], id, type)
+        elif type == 'GENERATOR':
+            return format_to_html_table(network.get_generators().loc[id], id, type)
+        elif type == 'CAPACITOR':
+            return format_to_html_table(network.get_shunt_compensators().loc[id], id, type)
+        elif type in [ 'THREE_WINDINGS_TRANSFORMER', 'THREE_WINDINGS_TRANSFORMER_LEG']:
             return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
-        elif type == 'DANGLING_LINE': 
-            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        elif type == 'STATIC_VAR_COMPENSATOR':
+            return format_to_html_table(network.get_static_var_compensators().loc[id], id, type)
+        elif type == 'INDUCTOR':
+            return format_to_html_table(network.get_shunt_compensators().loc[id], id, type)
+        elif type in [ 'DISCONNECTOR', 'BREAKER', 'LOAD_BREAK_SWITCH' ]:
+            return format_to_html_table(network.get_switches().loc[id], id, type)
         elif type == 'TIE_LINE':
             return format_to_html_table(network.get_tie_lines().loc[id], id, type)
-        return f"Equipment of type '{type}' with id '{id}'"
+        elif type == 'DANGLING_LINE':
+            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        elif type == 'HVDC_LINE':
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)			
+        elif type == 'BUSBAR_SECTION':
+            bsections=network.get_busbar_sections()
+            if not bsections.empty and id in bsections.index:
+                return format_to_html_table(bsections.loc[id], id, type)    
+            else:
+                bbvb=network.get_bus_breaker_view_buses()
+                if not bbvb.empty and id in bbvb.index:
+                    return format_to_html_table(bbvb.loc[id], id, f'{type} (bus breaker view)')    
+        return f"Equipment of type '{type}' with id '{id}'"    
 
     hovering_function = None
     if on_hover == True:
