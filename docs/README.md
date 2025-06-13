@@ -1,6 +1,6 @@
 # README
 
-These are the documentation sources for //TODOaddRepositoryName features.
+These are the documentation sources for the pypowsybl-jupyter features.
 
 Please keep them up to date with your developments.  
 They are published on powsybl.readthedocs.io/ and pull requests are built and previewed automatically.
