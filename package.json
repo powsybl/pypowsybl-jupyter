@@ -24,7 +24,7 @@
 		"lint": "eslint . --ext js,ts,jsx --max-warnings 0"
 	},
 	"dependencies": {
-		"@powsybl/network-viewer": "1.8.0"
+		"@powsybl/network-viewer": "1.9.0"
 	},
 	"devDependencies": {
 		"@anywidget/types": "^0.1.6",

@@ -111,12 +111,6 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         vl_id= str(event.selected_vl)
         select_vl_and_activate_sld_tab(vl_id)
 
-    def select_nad_node(event: any):
-        nonlocal current_nad_metadata
-        vl_id= str(event.selected_node['equipment_id'])
-        if vl_id in sel_ctx.vls.index:
-            select_vl_and_activate_sld_tab(vl_id)
-
     def select_nad_menu(event: any):
         nonlocal current_nad_metadata
         vl_id= str(event.selected_menu['equipment_id'])
@@ -377,7 +371,6 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 popup_menu_items=["Open in SLD tab", "Expand", "Remove"],
                 on_hover_func=hovering_function,
             )
-            nad_widget.on_select_node(lambda event : select_nad_node(event))
             nad_widget.on_select_menu(lambda event : select_nad_menu(event))
             nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
             nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())

@@ -25,7 +25,11 @@ interface NadWidgetModel {
 }
 
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
-    const handleSelectNode = (equipmentId: string, nodeId: string) => {
+    const handleSelectNode = (
+        equipmentId: string,
+        nodeId: string,
+        _mousePosition: any
+    ) => {
         model.set('selected_node', {
             equipment_id: equipmentId,
             node_id: nodeId,
