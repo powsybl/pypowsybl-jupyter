@@ -23,7 +23,11 @@ interface NadWidgetModel {
 }
 
 function render({ model, el }: RenderProps<NadWidgetModel>) {
-    const handleSelectNode = (equipmentId: string, nodeId: string) => {
+    const handleSelectNode = (
+        equipmentId: string,
+        nodeId: string,
+        _mousePosition: any
+    ) => {
         model.set('selected_node', {
             equipment_id: equipmentId,
             node_id: nodeId,
@@ -93,35 +97,15 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
 
     let nad_viewer: any = null;
 
-    function svgToScreen(
+    function toWidgetCoordinates(
         container: HTMLElement,
         x: number,
         y: number
-    ): { screenX: number; screenY: number } | null {
-        const svgElement = container.querySelector(
-            'svg'
-        ) as SVGGraphicsElement | null;
-
-        if (!svgElement) {
-            console.error('No SVG element found inside the container.');
-            return null;
-        }
-
-        const screenCTM = svgElement.getScreenCTM();
-        if (!screenCTM) {
-            console.error('Failed to get screenCTM for the SVG element.');
-            return null;
-        }
-
-        // Convert coordinates from SVG to screen
-        const point = new DOMPoint(x, y);
-        const transformedPoint = point.matrixTransform(screenCTM);
-
+    ): { x: number; y: number } {
         const containerRect = container.getBoundingClientRect();
-
         return {
-            screenX: transformedPoint.x - containerRect.left,
-            screenY: transformedPoint.y - containerRect.top,
+            x: x - containerRect.left,
+            y: y - containerRect.top,
         };
     }
 
@@ -162,18 +146,13 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
                 mousePosition: any
             ) => {
                 if (equipmentType === 'VOLTAGE_LEVEL') {
-                    const transfPoint = svgToScreen(
+                    const mousePos = toWidgetCoordinates(
                         el_div.querySelector('#svg-container') ?? el_div,
                         mousePosition.x,
                         mousePosition.y
                     );
-                    let xx = 0;
-                    let yy = 0;
-                    if (transfPoint != null) {
-                        xx = transfPoint.screenX;
-                        yy = transfPoint.screenY;
-                    }
-                    popupMenu?.displayMenu(xx, yy, equipmentId);
+
+                    popupMenu?.displayMenu(mousePos.x, mousePos.y, equipmentId);
                 }
             };
         }
