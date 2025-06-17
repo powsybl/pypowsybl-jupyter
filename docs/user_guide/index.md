@@ -12,5 +12,4 @@ nad_explorer.md
 sld_widget.md
 nad_widget.md
 network_map_widget.md
-nad_time_series.md
 ```
