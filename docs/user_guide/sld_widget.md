@@ -35,12 +35,13 @@ update_sld(sld, network.get_single_line_diagram(vl1))
 ## Widget API
 
 ```python
-display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False) -> SldWidget:
+display_sld(svg, enable_callbacks: bool = False, invalid_lf: bool = False, on_hover_func: OnHoverFuncType = None) -> SldWidget:
 ```
 
 - svg: the input SVG, as str or class providing an svg and metadata representation.
 - enable_callbacks: if true, enable the callbacks for navigation arrows, feeders and switches.
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
+- on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type; It must return an HTML string. None disables the hovering feature.
 
 
 ```python

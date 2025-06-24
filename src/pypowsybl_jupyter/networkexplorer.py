@@ -16,12 +16,15 @@ from IPython.display import display
 import ipywidgets as widgets
 import json
 import pandas as pd
+from typing import Callable
+
+OnHoverFuncType = Callable[[str, str], str]
 
 def network_explorer(network: Network, vl_id : str = None, use_name:bool = True, depth: int = 1,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
-                     use_line_geodata:bool = False, nad_profile: NadProfile = None):
+                     use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -38,6 +41,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         sld_parameters: layout properties to adjust the svg rendering for the SLD
         use_line_geodata: When False (default) the network map tab does not use the network's line geodata extensions; Each line is drawn as a straight line connecting two substations.
         nad_profile: property to customize labels and style for the NAD
+        on_hover: when True, the hovering is enabled
+        on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type. It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation. Please read what are the equipment types supported by the different diagram widget (the NAD, the SLD and the network-map), in their detailed documentation.
 
     Examples:
 
@@ -106,12 +111,6 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         vl_id= str(event.selected_vl)
         select_vl_and_activate_sld_tab(vl_id)
 
-    def select_nad_node(event: any):
-        nonlocal current_nad_metadata
-        vl_id= str(event.selected_node['equipment_id'])
-        if vl_id in sel_ctx.vls.index:
-            select_vl_and_activate_sld_tab(vl_id)
-
     def select_nad_menu(event: any):
         nonlocal current_nad_metadata
         vl_id= str(event.selected_menu['equipment_id'])
@@ -128,6 +127,78 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 elif selected_action == 2:
                     update_nad_diagram(sel_ctx.get_selected(), vl_action=vl_id, action=2)
 
+    def format_to_html_table(row, id, type):
+        table = (
+            row.to_frame()
+            .style.set_caption(f"{type}: {id}")
+            .set_table_styles(
+                [
+                    {
+                        "selector": "caption",
+                        "props": "caption-side: top; font-weight: bold; background-color: #f8f8f8; border-bottom: 1px solid #ddd; width: fit-content; white-space: nowrap;",
+                    },
+                    {
+                        "selector": "th",
+                        "props": "text-align: left; font-weight: bold; background-color: #f8f8f8;",
+                    },
+                    {
+                        "selector": "td",
+                        "props": "text-align: left;",
+                    },
+                ]
+            )
+            .format(precision=3, thousands=".", decimal=",")
+            .set_table_attributes('border="0"')
+            .hide(axis="columns")
+            .to_html()
+        )
+        return table
+
+    def get_hovering_equipment_info(id, type):
+        if type == 'LINE':
+            return format_to_html_table(network.get_lines().loc[id], id, type)
+        elif type in [ 'PHASE_SHIFT_TRANSFORMER', 'TWO_WINDINGS_TRANSFORMER']:
+            return format_to_html_table(network.get_2_windings_transformers().loc[id], id, type)
+        elif type == 'LOAD':
+            return format_to_html_table(network.get_loads().loc[id], id, type)
+        elif type == 'GENERATOR':
+            return format_to_html_table(network.get_generators().loc[id], id, type)
+        elif type in [ 'CAPACITOR', 'INDUCTOR' ]:
+            return format_to_html_table(network.get_shunt_compensators().loc[id], id, type)
+        elif type in [ 'THREE_WINDINGS_TRANSFORMER', 'THREE_WINDINGS_TRANSFORMER_LEG']:
+            return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
+        elif type == 'STATIC_VAR_COMPENSATOR':
+            return format_to_html_table(network.get_static_var_compensators().loc[id], id, type)
+        elif type in [ 'DISCONNECTOR', 'BREAKER', 'LOAD_BREAK_SWITCH', 'GROUND_DISCONNECTION' ]:
+            return format_to_html_table(network.get_switches().loc[id], id, type)
+        elif type == 'TIE_LINE':
+            return format_to_html_table(network.get_tie_lines().loc[id], id, type)
+        elif type == 'DANGLING_LINE':
+            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        # for LCC and VSC converter station the id is the HVDC line's id, not the converter's id 
+        # (since we cannot retrieve the converterar, we are displaying the HVDC line's details)
+        elif type in [ 'LCC_CONVERTER_STATION', 'VSC_CONVERTER_STATION' ]:
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, 'HDVC_LINE (' + type + ')')
+        elif type == 'HVDC_LINE':
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)
+        elif type == 'BATTERY':
+            return format_to_html_table(network.get_batteries().loc[id], id, type)
+        elif type == 'GROUND':
+            return format_to_html_table(network.get_grounds().loc[id], id, type)
+        elif type == 'BUSBAR_SECTION':
+            bsections=network.get_busbar_sections()
+            if not bsections.empty and id in bsections.index:
+                return format_to_html_table(bsections.loc[id], id, type)    
+            else:
+                bbvb=network.get_bus_breaker_view_buses()
+                if not bbvb.empty and id in bbvb.index:
+                    return format_to_html_table(bbvb.loc[id], id, f'{type} (bus breaker view)')
+        return f"Equipment of type '{type}' with id '{id}'"    
+
+    hovering_function = None
+    if on_hover == True:
+        hovering_function = on_hover_func if on_hover_func is not None else get_hovering_equipment_info
+
     def compute_sld_data(el):
         if el is not None:
             sld_data=network.get_single_line_diagram(el, spars)
@@ -140,7 +211,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def update_sld_widget(sld_diagram_data, kv: bool = False, enable_callbacks=True):
         nonlocal sld_widget
         if sld_widget==None:
-            sld_widget=display_sld(sld_diagram_data, enable_callbacks=enable_callbacks)
+            sld_widget=display_sld(sld_diagram_data, enable_callbacks=enable_callbacks, on_hover_func=hovering_function)
             sld_widget.on_nextvl(lambda event: go_to_vl(event))
             sld_widget.on_switch(lambda event: toggle_switch(event))
 
@@ -156,7 +227,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nonlocal map_widget
         if el is not None:
             if map_widget==None:
-                map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter)
+                map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter,
+                                            on_hover_func=None if hovering_function is None else lambda x: hovering_function(x, 'LINE'))
                 map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
             else:
                 map_widget.center_on_voltage_level(el)
@@ -298,8 +370,13 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False, keep_viewbox=False):
         nonlocal nad_widget
         if nad_widget==None:
-            nad_widget=display_nad(new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout, popup_menu_items=['Open in SLD tab', 'Expand', 'Remove'])
-            nad_widget.on_select_node(lambda event : select_nad_node(event))
+            nad_widget = display_nad(
+                new_diagram_data,
+                enable_callbacks=enable_callbacks,
+                grayout=grayout,
+                popup_menu_items=["Open in SLD tab", "Expand", "Remove"],
+                on_hover_func=hovering_function,
+            )
             nad_widget.on_select_menu(lambda event : select_nad_menu(event))
             nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
             nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())
