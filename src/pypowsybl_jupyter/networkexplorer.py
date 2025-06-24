@@ -169,16 +169,22 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
         elif type == 'STATIC_VAR_COMPENSATOR':
             return format_to_html_table(network.get_static_var_compensators().loc[id], id, type)
-        elif type in [ 'DISCONNECTOR', 'BREAKER', 'LOAD_BREAK_SWITCH' ]:
+        elif type in [ 'DISCONNECTOR', 'BREAKER', 'LOAD_BREAK_SWITCH', 'GROUND_DISCONNECTION' ]:
             return format_to_html_table(network.get_switches().loc[id], id, type)
         elif type == 'TIE_LINE':
             return format_to_html_table(network.get_tie_lines().loc[id], id, type)
         elif type == 'DANGLING_LINE':
             return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        # for LCC and VSC converter station the id is the HVDC line's id, not the converter's id 
+        # (since we cannot retrieve the converterar, we are displaying the HVDC line's details)
+        elif type in [ 'LCC_CONVERTER_STATION', 'VSC_CONVERTER_STATION' ]:
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, 'HDVC_LINE (' + type + ')')
         elif type == 'HVDC_LINE':
-            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)			
+            return format_to_html_table(network.get_hvdc_lines().loc[id], id, type)
         elif type == 'BATTERY':
-            return format_to_html_table(network.get_batteries().loc[id], id, type)			
+            return format_to_html_table(network.get_batteries().loc[id], id, type)
+        elif type == 'GROUND':
+            return format_to_html_table(network.get_grounds().loc[id], id, type)
         elif type == 'BUSBAR_SECTION':
             bsections=network.get_busbar_sections()
             if not bsections.empty and id in bsections.index:
