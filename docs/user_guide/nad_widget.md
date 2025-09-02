@@ -40,6 +40,7 @@ display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayo
 - enable_callbacks: if True, enable the callbacks for selecting nodes (through a click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 - popup_menu_items: list of str. When not empty enables a right-click popup menu on the NAD's VL nodes.
+- on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type; It must return an HTML string. None disables the hovering feature. Note that currently the NAD viewer component supports hovering on lines, HVDC lines and two winding transformers.
 
 
 ```python

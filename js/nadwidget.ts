@@ -11,6 +11,7 @@ import './nadwidget.css';
 import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
 
 import { PopupMenu } from './popupmenu';
+import { PopupInfo } from './popupinfo';
 
 interface NadWidgetModel {
     diagram_data: any;
@@ -20,9 +21,10 @@ interface NadWidgetModel {
     moved_text_node: any;
     current_nad_metadata: string;
     popup_menu_items: string[];
+    hover_enabled: boolean;
 }
 
-function render({ model, el }: RenderProps<NadWidgetModel>) {
+function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
     const handleSelectNode = (
         equipmentId: string,
         nodeId: string,
@@ -119,6 +121,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
         const is_grayout = diagram_data['grayout'];
         const is_enabled_callbacks = diagram_data['enable_callbacks'];
         const menu_items = model.get('popup_menu_items');
+        const is_hover_enabled = model.get('hover_enabled');
 
         const el_div = document.createElement('div');
         el_div.classList.add('svg-nad-viewer-widget');
@@ -157,6 +160,31 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             };
         }
 
+        let popupInfo: PopupInfo | null = null;
+
+        const handleInfo = (
+            shouldDisplay: boolean,
+            mousePosition: any,
+            elementId: string,
+            elementType: string
+        ) => {
+            let mousePos = null;
+            if (mousePosition) {
+                mousePos = toWidgetCoordinates(
+                    el_div.querySelector('#svg-container') ?? el_div,
+                    mousePosition.x,
+                    mousePosition.y
+                );
+            }
+
+            popupInfo?.handleHover(
+                shouldDisplay,
+                mousePos,
+                elementId,
+                elementType
+            );
+        };
+
         nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
             diagram_svg,
@@ -171,7 +199,7 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
             is_enabled_callbacks,
             false,
             null,
-            null,
+            is_hover_enabled ? handleInfo : null,
             handleMenu,
             true
         );
@@ -194,6 +222,18 @@ function render({ model, el }: RenderProps<NadWidgetModel>) {
                 event.preventDefault();
             });
         }
+
+        popupInfo = new PopupInfo(el_div, async (id: string, type: string) => {
+            try {
+                const [retInfo, _buffers] = await experimental.invoke(
+                    '_get_on_hover_info',
+                    { id: id, type: type }
+                );
+                return retInfo as string;
+            } catch (e) {
+                return `Error retrieving hover info: ${e}`;
+            }
+        });
 
         return el_div;
     }
