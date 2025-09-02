@@ -37,7 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "anywidget",
+    "anywidget==0.9.18",
     "pypowsybl>=1.11.0",
 ]
 
