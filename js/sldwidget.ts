@@ -11,6 +11,8 @@ import { SingleLineDiagramViewer } from '@powsybl/network-viewer';
 
 import './sldwidget.css';
 
+import { PopupInfo } from './popupinfo';
+
 /* Specifies attributes defined with traitlets in ../src/pypowsybl_jupyter/__init__.py */
 interface SldWidgetModel {
     diagram_data: any;
@@ -18,13 +20,26 @@ interface SldWidgetModel {
     clicked_switch: any;
     clicked_feeder: any;
     clicked_bus: any;
+    hover_enabled: boolean;
 }
 
 function initialize({ model }: Initialize<SldWidgetModel>) {
     /* (optional) model initialization logic */
 }
 
-function render({ model, el }: RenderProps<SldWidgetModel>) {
+function toWidgetCoordinates(
+    container: HTMLElement,
+    x: number,
+    y: number
+): { x: number; y: number } {
+    const containerRect = container.getBoundingClientRect();
+    return {
+        x: x - containerRect.left,
+        y: y - containerRect.top,
+    };
+}
+
+function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
     const handleNextVl = (id: string) => {
         model.set('clicked_nextvl', id);
         model.save_changes();
@@ -55,12 +70,7 @@ function render({ model, el }: RenderProps<SldWidgetModel>) {
         model.send({ event: 'click_bus' });
     };
 
-    const handleTogglePopover = (
-        shouldDisplay: boolean,
-        anchorEl: any,
-        equipmentId: string,
-        equipmentType: string
-    ) => {};
+    let popupInfo: PopupInfo | null = null;
 
     function render_diagram(model: any, viewDataPre: string): any {
         const diagram_data = model.get('diagram_data');
@@ -72,6 +82,36 @@ function render({ model, el }: RenderProps<SldWidgetModel>) {
         el_div.classList.add('svg-sld-viewer-widget');
 
         el_div.classList.toggle('invalid-lf', is_invalid_lf);
+
+        const is_hover_enabled = model.get('hover_enabled');
+
+        const handleTogglePopover = (
+            shouldDisplay: boolean,
+            anchorEl: any,
+            equipmentId: string,
+            equipmentType: string
+        ) => {
+            let mousePos = null;
+
+            if (anchorEl) {
+                const bb = anchorEl as HTMLAnchorElement;
+                const mousePosition = bb.getBoundingClientRect();
+
+                mousePos = toWidgetCoordinates(
+                    el_div.querySelector('#svg-container') ?? el_div,
+                    mousePosition.x,
+                    mousePosition.y
+                );
+
+                mousePos = { x: mousePos.x + 10, y: mousePos.y + 10 };
+            }
+            popupInfo?.handleHover(
+                shouldDisplay,
+                mousePos,
+                equipmentId,
+                equipmentType
+            );
+        };
 
         new SingleLineDiagramViewer(
             el_div,
@@ -87,13 +127,26 @@ function render({ model, el }: RenderProps<SldWidgetModel>) {
             metadata ? handleFeeder : null, //callback on the feeders
             metadata ? handleBus : null, //callback on the buses
             'lightblue', //arrows color
-            handleTogglePopover //callback on the togglePopOver
+            is_hover_enabled ? handleTogglePopover : null //callback on the togglePopOver
         );
 
         if (diagram_data['keep_viewbox']) {
             const outerSvgElement = el_div.querySelector('svg');
             outerSvgElement?.setAttribute('viewBox', viewDataPre);
         }
+
+        popupInfo = new PopupInfo(el_div, async (id: string, type: string) => {
+            try {
+                const [retInfo, _buffers] = await experimental.invoke(
+                    '_get_on_hover_info',
+                    { id: id ?? null, type: type }
+                );
+                return retInfo as string;
+            } catch (e) {
+                return `Error retrieving hover info: ${e}`;
+            }
+        });
+
         return el_div;
     }
 
