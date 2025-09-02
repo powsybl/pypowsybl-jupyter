@@ -23,14 +23,14 @@ Pan and zoom features are available for the diagram.
 ## Time Series Visualization
 
 Optionally, the parameter `time_series_data` enables visualizing how branch states evolve over time via an interactive slider. 
-The following code,to be executed in a notebook, demonstrates this feature:
+The following code, to be executed in a notebook, demonstrates this feature:
 
 ```python
 import pypowsybl.network as pn
 import pandas as pd
 from pypowsybl_jupyter import nad_explorer
 
-#Create a network
+# Create a network
 network = pn.create_ieee118()
 
 # Prepare time series data (the branch_id of this example concerns only the voltage level "VL1")
@@ -62,15 +62,14 @@ The time_series_data DataFrame must contain the following columns:
 Other than the target network, the NAD explorer can be customized using additional parameters:
 
 ```python
-nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1,time_series_data:pd.DataFrame=None,low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
+nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
 ```
 
 - network: the input network
-- voltage_level_ids: the starting  list of VL to display. None displays all the network's VLs
+- voltage_level_ids: the starting list of VL to display. None displays all the network's VLs
 - depth: the diagram depth around the voltage level, controls the size of the sub network
 - time_series_data: a DataFrame containing time series data for the network.
 - low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
 - high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
 - parameters: layout properties to adjust the svg rendering for the nad
-
 

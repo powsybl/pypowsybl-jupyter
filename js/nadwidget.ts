@@ -218,7 +218,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             applyBranchStates();
         }, 0);
 
-        // prevents the default jupyter-lab's behavior
+        // prevents the default jupyter-lab's behavior for this event
         el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
                 event.preventDefault();

@@ -86,6 +86,9 @@ class NadWidget(anywidget.AnyWidget):
     def on_move_text_node(self, callback, remove=False):
         self._on_move_text_node_handler.register_callback(callback, remove=remove)
 
+    def set_branch_states(self, branch_states_data):
+        self.branch_states = branch_states_data
+
     def trigger_update_metadata(self):
         self.send({'type': 'triggerRetrieveMetadata'})
 
@@ -98,9 +101,6 @@ class NadWidget(anywidget.AnyWidget):
             except Exception as err:
                 retval = f'ERROR {repr(err)}'
         return retval, buffers
-
-    def set_branch_states(self, branch_states_data):
-        self.branch_states = branch_states_data
 
 def display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False, popup_menu_items: List[str] = [], on_hover_func: OnHoverFuncType = None) -> NadWidget:
     """
