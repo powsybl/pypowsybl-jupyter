@@ -148,7 +148,7 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
         time_slider = widgets.SelectionSlider(
             options=[(str(ts), ts) for ts in time_steps],
             value=selected_time_step,
-            description='Time:',
+            description='time:',
             disabled=False,
             continuous_update=True,
             orientation='horizontal',
