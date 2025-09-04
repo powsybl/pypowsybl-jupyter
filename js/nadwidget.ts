@@ -22,9 +22,12 @@ interface NadWidgetModel {
     current_nad_metadata: string;
     popup_menu_items: string[];
     hover_enabled: boolean;
+    branch_states: any[];
 }
 
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
+    let nad_viewer: NetworkAreaDiagramViewer | null = null;
+
     const handleSelectNode = (
         equipmentId: string,
         nodeId: string,
@@ -97,8 +100,6 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
-    let nad_viewer: any = null;
-
     function toWidgetCoordinates(
         container: HTMLElement,
         x: number,
@@ -110,6 +111,15 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             y: y - containerRect.top,
         };
     }
+
+    const applyBranchStates = () => {
+        if (nad_viewer) {
+            const branch_states = model.get('branch_states');
+            if (branch_states && branch_states.length > 0) {
+                nad_viewer.setBranchStates(branch_states);
+            }
+        }
+    };
 
     function render_diagram(
         model: any,
@@ -204,6 +214,10 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             true
         );
 
+        setTimeout(() => {
+            applyBranchStates();
+        }, 0);
+
         // prevents the default jupyter-lab's behavior for this event
         el_div.addEventListener('mousedown', (event: MouseEvent) => {
             if (event.shiftKey) {
@@ -280,6 +294,10 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             }
             updateCurrentMetadataInModel(metad);
         }
+    });
+
+    model.on('change:branch_states', () => {
+        applyBranchStates();
     });
 }
 
