@@ -129,7 +129,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         const diagram_data = model.get('diagram_data');
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
-        const is_enabled_callbacks = diagram_data['enable_callbacks'];
+        const is_drag_enabled = diagram_data['drag_enabled'];
         const menu_items = model.get('popup_menu_items');
         const is_hover_enabled = model.get('hover_enabled');
 
@@ -206,7 +206,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             handleMoveNode,
             handleMoveTextNode,
             handleSelectNode,
-            is_enabled_callbacks,
+            is_drag_enabled,
             false,
             null,
             is_hover_enabled ? handleInfo : null,

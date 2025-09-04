@@ -367,12 +367,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     current_nad_data = compute_nad_data()
     current_nad_metadata = ''
 
-    def update_nad_widget(new_diagram_data, enable_callbacks=True, grayout=False, keep_viewbox=False):
+    def update_nad_widget(new_diagram_data, drag_enabled=True, grayout=False, keep_viewbox=False):
         nonlocal nad_widget
         if nad_widget==None:
             nad_widget = display_nad(
                 new_diagram_data,
-                enable_callbacks=enable_callbacks,
+                drag_enabled=drag_enabled,
                 grayout=grayout,
                 popup_menu_items=["Open in SLD tab", "Expand", "Remove"],
                 on_hover_func=hovering_function,
@@ -381,7 +381,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
             nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())
         else:
-            update_nad(nad_widget,new_diagram_data, enable_callbacks=enable_callbacks, grayout=grayout, keep_viewbox=keep_viewbox)
+            update_nad(nad_widget,new_diagram_data, drag_enabled=drag_enabled, grayout=grayout, keep_viewbox=keep_viewbox)
 
     in_progress_widget=widgets.HTML(value=PROGRESS_EMPTY_SVG, 
                                     layout=widgets.Layout(width='30', justify_content='flex-end', margin='0px 20px 0px 0px'))
@@ -414,7 +414,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         if el == nad_displayed_vl_id and compare_lists(current_nad_vl_list, new_nad_vl_list):
             return
         if nad_widget != None:
-            update_nad_widget('', enable_callbacks=False, grayout=True, keep_viewbox=True)
+            update_nad_widget('', drag_enabled=False, grayout=True, keep_viewbox=True)
             display(nad_widget)
             enable_in_progress()
             update_sld_widget(current_sld_data, True, enable_callbacks=False)
@@ -431,7 +431,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 current_nad_data=compute_nad_data(new_nad_vl_list, current_nad_metadata)
             current_nad_metadata=current_nad_data.metadata
             current_nad_vl_list=new_nad_vl_list    
-            update_nad_widget(current_nad_data, enable_callbacks=True, grayout=False)
+            update_nad_widget(current_nad_data, drag_enabled=True, grayout=False)
             nad_displayed_vl_id=el
         finally:
             update_sld_widget(current_sld_data, True, enable_callbacks=True)

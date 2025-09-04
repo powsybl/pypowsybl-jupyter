@@ -32,25 +32,25 @@ update_nad(nad, network.get_network_area_diagram(voltage_level_ids=vlid, depth=0
 ## Widget API
 
 ```python
-display_nad(svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False) -> NadWidget
+display_nad(svg, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False) -> NadWidget
 ```
 
 - svg: the input SVG, as str or class providing an svg and metadata representation
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
+- drag_enabled: if True, enable the dragging for moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 - popup_menu_items: list of str. When not empty enables a right-click popup menu on the NAD's VL nodes.
 - on_hover_func: a callback function that is invoked when hovering on equipments. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type; It must return an HTML string. None disables the hovering feature. Note that currently the NAD viewer component supports hovering on lines, HVDC lines and two winding transformers.
 
 
 ```python
-update_nad(nadwidget, svg, invalid_lf: bool = False, enable_callbacks: bool = False, grayout:  bool = False)
+update_nad(nadwidget, svg, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False)
 ```
 
 - nadwidget: the existing widget to update
 - svg: the input NAD's SVG
 - invalid_lf: when True the opacity style for some of the displayed info's (e.g., active and reactive power) is decreased, making them barely visible in the diagram.
-- enable_callbacks: if True, enable the callbacks for selecting nodes (through a click on a node) and moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
+- drag_enabled: if True, enable the dragging for moving nodes. Please note that this feature is working with versions of PyPowSyBl equal to or greater than v1.8.1.
 - grayout: if True, changes the diagram elements' color to gray.
 - keep_viewbox: if True, keeps the current diagram content, including pan and zoom settings.
 
@@ -76,7 +76,7 @@ Example: the code below activates a callback when a node is selected (through a 
 def select_node_callback_demo(event):
         print('Clicked node with ID: ' + str(event.selected_node['equipment_id']))
 
-nad_widget=display_nad(network.get_network_area_diagram(depth=4), enable_callbacks=True)
+nad_widget=display_nad(network.get_network_area_diagram(depth=4), drag_enabled=True)
 nad_widget.on_select_node(select_node_callback_demo)
 display(nad_widget)
 ```
