@@ -17,3 +17,33 @@
 	stroke: #7d7f7c;
 	animation-play-state: paused;
 }
+
+
+.nad-zoom-2200 .nad-edge-infos {
+    display: none
+}
+
+.nad-zoom-2500 .nad-edge-infos {
+    display: none
+}
+
+.nad-zoom-3000 .nad-edge-infos {
+    display: none
+}
+
+.nad-zoom-4000 .nad-edge-infos {
+    display: none
+}
+
+.nad-zoom-9000 :is(.nad-edge-infos, .nad-label-box, .nad-text-edges) {
+    display: none
+}
+
+.nad-zoom-12000 :is(.nad-edge-infos, .nad-label-box, .nad-text-edges) {
+    display: none
+}
+
+.nad-zoom-20000 :is(.nad-edge-infos, .nad-label-box, .nad-text-edges) {
+    display: none
+}
+

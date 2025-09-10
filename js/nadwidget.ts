@@ -218,7 +218,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             handleMoveTextNode,
             handleSelectNode,
             is_drag_enabled,
-            false,
+            true,
             null,
             is_hover_enabled ? handleInfo : null,
             handleMenu,
