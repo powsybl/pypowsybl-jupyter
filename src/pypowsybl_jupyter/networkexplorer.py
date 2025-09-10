@@ -17,6 +17,7 @@ import ipywidgets as widgets
 import json
 import pandas as pd
 from typing import Callable
+from pandas import DataFrame
 
 OnHoverFuncType = Callable[[str, str], str]
 
@@ -24,7 +25,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
-                     use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None):
+                     use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None,
+                     fixed_nad_positions: DataFrame = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -164,7 +166,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             return format_to_html_table(network.get_loads().loc[id], id, type)
         elif type == 'GENERATOR':
             return format_to_html_table(network.get_generators().loc[id], id, type)
-        elif type in [ 'CAPACITOR', 'INDUCTOR' ]:
+        elif type in [ 'CAPACITOR', 'INDUCTOR', 'SHUNT_COMPENSATOR_INDUCTOR', 'SHUNT_COMPENSATOR_CAPACITOR']:
             return format_to_html_table(network.get_shunt_compensators().loc[id], id, type)
         elif type in [ 'THREE_WINDINGS_TRANSFORMER', 'THREE_WINDINGS_TRANSFORMER_LEG']:
             return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
@@ -194,7 +196,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 bbvb=network.get_bus_breaker_view_buses()
                 if not bbvb.empty and id in bbvb.index:
                     return format_to_html_table(bbvb.loc[id], id, f'{type} (bus breaker view)')
-        return f"Equipment of type '{type}' with id '{id}'"    
+        return '';
 
     hovering_function = None
     if on_hover == True:
@@ -360,9 +362,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 new_vllist=network.get_network_area_diagram_displayed_voltage_levels(voltage_level_ids=el, depth=depth)
         return new_vllist
 
-    def compute_nad_data(vllist=None, metadata=None):
+    def compute_nad_data(vllist=None, fixed_positions=None, metadata=None):
         if vllist is not None:
-            nm=extract_positions_dataframe_from_nad_metadata_json(metadata)
+            if fixed_positions is not None:
+                nm = fixed_positions
+            else:
+                nm = extract_positions_dataframe_from_nad_metadata_json(metadata)
             nad_data=network.get_network_area_diagram(voltage_level_ids=vllist, 
                                                       high_nominal_voltage_bound=high_nominal_voltage_bound, 
                                                       low_nominal_voltage_bound=low_nominal_voltage_bound, 
@@ -437,11 +442,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 display(map_widget)
         try:
             if action == 0:
-                current_nad_data=compute_nad_data(new_nad_vl_list)
+                if fixed_nad_positions is not None and not fixed_nad_positions.empty:
+                    current_nad_data=compute_nad_data(new_nad_vl_list, fixed_nad_positions)
+                else:
+                    current_nad_data=compute_nad_data(new_nad_vl_list)
                 if nad_widget != None:
                     nad_widget.current_nad_metadata=current_nad_metadata
             else:
-                current_nad_data=compute_nad_data(new_nad_vl_list, current_nad_metadata)
+                current_nad_data=compute_nad_data(new_nad_vl_list, None, current_nad_metadata)
             current_nad_metadata=current_nad_data.metadata
             current_nad_vl_list=new_nad_vl_list    
             update_nad_widget(current_nad_data, injections_hidden=injections_hidden, drag_enabled=True, grayout=False)

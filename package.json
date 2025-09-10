@@ -24,24 +24,24 @@
 		"lint": "eslint . --ext js,ts,jsx --max-warnings 0"
 	},
 	"dependencies": {
-		"@powsybl/network-viewer": "1.10.1"
+		"@powsybl/network-viewer": "file:../powsybl-network-viewer/powsybl-network-viewer-1.11.0-dev.0.tgz"
 	},
 	"devDependencies": {
-		"@anywidget/types": "^0.1.6",
-		"typescript": "^5.3.3",
-		"esbuild": "^0.25.2",
-		"prettier": "^2.8.8",
-		"eslint": "^7.32.0",
-        "eslint-config-prettier": "^9.1.0",
-        "eslint-plugin-prettier": "^4.2.1",
-		"@typescript-eslint/eslint-plugin": "^6.21.0",
 		"@anywidget/react": "^0.0.7",
-        "@emotion/styled": "^11.14.0",
-        "@mui/icons-material": "^5.16.14",
-        "@mui/material": "^5.16.14",
-        "@mui/system": "^5.16.14",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "react-intl": "^7.1.6"
+		"@anywidget/types": "^0.1.6",
+		"@emotion/styled": "^11.14.0",
+		"@mui/icons-material": "^5.16.14",
+		"@mui/material": "^5.16.14",
+		"@mui/system": "^5.16.14",
+		"@typescript-eslint/eslint-plugin": "^6.21.0",
+		"esbuild": "^0.25.2",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^4.2.1",
+		"prettier": "^2.8.8",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1",
+		"react-intl": "^7.1.6",
+		"typescript": "^5.3.3"
 	}
 }

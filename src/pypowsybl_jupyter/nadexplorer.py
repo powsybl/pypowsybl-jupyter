@@ -5,12 +5,17 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 
-from pypowsybl.network import Network, NadParameters
-from .nadwidget import display_nad, update_nad
-import pandas as pd
 import ipywidgets as widgets
+import pandas as pd
+from pandas import DataFrame
+from pypowsybl.network import Network, NadParameters
 
-def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None):
+from .nadwidget import display_nad, update_nad
+
+def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 1,
+                 time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1,
+                 high_nominal_voltage_bound: float = -1, parameters: NadParameters = None,
+                 fixed_nad_positions: DataFrame = None):
     """
     Creates a basic nad explorer widget for a network, built with the nad widget.
 
@@ -33,10 +38,10 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     """
 
     vls = network.get_voltage_levels(attributes=[])
-    nad_widget=None
+    nad_widget = None
 
-    selected_vl = list(vls.index) if voltage_level_ids  is None else voltage_level_ids 
-    if len(selected_vl)==0:
+    selected_vl = list(vls.index) if voltage_level_ids is None else voltage_level_ids
+    if len(selected_vl) == 0:
         raise ValueError("At least one VL must be selected in the voltage_level_ids list")
 
     if time_series_data is not None:
@@ -46,18 +51,17 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
 
         selected_time_step = time_steps[0]
 
-
-    selected_depth=depth
+    selected_depth = depth
 
     npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
-        id_displayed=False,
-        edge_info_along_edge=False,
-        power_value_precision=1,
-        angle_value_precision=0,
-        current_value_precision=1,
-        voltage_value_precision=0,
-        bus_legend=False,
-        substation_description_displayed=True)
+                                                                    id_displayed=False,
+                                                                    edge_info_along_edge=True,
+                                                                    power_value_precision=1,
+                                                                    angle_value_precision=0,
+                                                                    current_value_precision=1,
+                                                                    voltage_value_precision=0,
+                                                                    bus_legend=True,
+                                                                    substation_description_displayed=True)
 
     def prepare_branch_states(time_step):
         """
@@ -91,25 +95,27 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
 
     def update_diagram():
         nonlocal nad_widget
-        if len(selected_vl)>0:
-            new_diagram_data=network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth, high_nominal_voltage_bound=high_nominal_voltage_bound, low_nominal_voltage_bound=low_nominal_voltage_bound, nad_parameters=npars)
-            if nad_widget==None:
-                nad_widget=display_nad(new_diagram_data)
+        if len(selected_vl) > 0:
+            new_diagram_data = network.get_network_area_diagram(voltage_level_ids=selected_vl, depth=selected_depth,
+                                                                high_nominal_voltage_bound=high_nominal_voltage_bound,
+                                                                low_nominal_voltage_bound=low_nominal_voltage_bound,
+                                                                nad_parameters=npars, fixed_positions=fixed_nad_positions)
+            if nad_widget == None:
+                nad_widget = display_nad(new_diagram_data, drag_enabled=True)
             else:
-                update_nad(nad_widget,new_diagram_data)
+                update_nad(nad_widget, new_diagram_data, drag_enabled=True)
 
             if time_series_data is not None:
                 branch_states = prepare_branch_states(selected_time_step)
                 if branch_states:
                     nad_widget.set_branch_states(branch_states)
 
-
-
-    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False, continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
+    nadslider = widgets.IntSlider(value=selected_depth, min=0, max=20, step=1, description='depth:', disabled=False,
+                                  continuous_update=False, orientation='horizontal', readout=True, readout_format='d')
 
     def on_nadslider_changed(d):
         nonlocal selected_depth
-        selected_depth=d['new']
+        selected_depth = d['new']
         update_diagram()
 
     nadslider.observe(on_nadslider_changed, names='value')
@@ -121,15 +127,14 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
         disabled=False,
         continuous_update=True
     )
-    
+
     def on_text_changed(d):
         nonlocal selected_vl
         found.options = list(vls[vls.index.str.contains(d['new'], regex=False)].index)
-        selected_vl=[]
-        
+        selected_vl = []
 
     vl_input.observe(on_text_changed, names='value')
-    
+
     found = widgets.SelectMultiple(
         options=list(vls.index),
         value=selected_vl,
@@ -141,10 +146,10 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     def on_selected(d):
         nonlocal selected_vl
         if d['new'] != None:
-            selected_vl=d['new']
+            selected_vl = d['new']
             update_diagram()
 
-    if time_series_data is not None :
+    if time_series_data is not None:
         time_slider = widgets.SelectionSlider(
             options=[(str(ts), ts) for ts in time_steps],
             value=selected_time_step,
@@ -172,9 +177,9 @@ def nad_explorer(network: Network, voltage_level_ids : list = None, depth: int =
     left_panel = widgets.VBox([widgets.Label('Voltage levels'), vl_input, found])
     if time_series_data is not None:
         right_panel = widgets.VBox([nadslider, time_slider, nad_widget])
-    else :
+    else:
         right_panel = widgets.VBox([nadslider, nad_widget])
     hbox = widgets.HBox([left_panel, right_panel])
-    hbox.layout.align_items='flex-end'
-    
+    hbox.layout.align_items = 'flex-end'
+
     return hbox
