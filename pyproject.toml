@@ -8,7 +8,7 @@ Homepage = "https://github.com/powsybl/pypowsybl-jupyter"
 [project]
 name = "pypowsybl_jupyter"
 description = "Widgets for pypowsybl in Jupyter notebooks"
-version = "1.2.0.dev0"
+version = "1.3.0.dev0"
 
 readme = "README.md"
 license = "MPL-2.0"
