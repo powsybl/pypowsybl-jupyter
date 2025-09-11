@@ -23,6 +23,7 @@ interface NadWidgetModel {
     popup_menu_items: string[];
     hover_enabled: boolean;
     branch_states: any[];
+    hidden_injections: boolean;
 }
 
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
@@ -121,6 +122,13 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         }
     };
 
+    const applyInjectionsDismissed = () => {
+        if (nad_viewer) {
+            const dismissInjections = nad_viewer.container.classList.contains('hide-injections');
+            nad_viewer.redrawVoltageLevelNodes(dismissInjections);
+        }
+    };
+
     function render_diagram(
         model: any,
         diagram_svg: string,
@@ -129,6 +137,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         const diagram_data = model.get('diagram_data');
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
+        const is_injections_hidden = diagram_data['injections_hidden'];
         const is_drag_enabled = diagram_data['drag_enabled'];
         const menu_items = model.get('popup_menu_items');
         const is_hover_enabled = model.get('hover_enabled');
@@ -139,6 +148,8 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         el_div.classList.toggle('invalid-lf', is_invalid_lf);
 
         el_div.classList.toggle('grayout', is_grayout);
+
+        el_div.classList.toggle('hide-injections', is_injections_hidden);
 
         let popupMenu: PopupMenu | null = null;
         let handleMenu = null;
@@ -216,6 +227,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
 
         setTimeout(() => {
             applyBranchStates();
+            applyInjectionsDismissed();
         }, 0);
 
         // prevents the default jupyter-lab's behavior for this event
@@ -288,7 +300,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
 
     model.on('msg:custom', (content) => {
         if (content.type === 'triggerRetrieveMetadata') {
-            let metad = '';
+            let metad: string | null = '';
             if (nad_viewer != null) {
                 metad = nad_viewer.getJsonMetadata();
             }
@@ -298,6 +310,13 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
 
     model.on('change:branch_states', () => {
         applyBranchStates();
+    });
+
+    model.on('change:hidden_injections', () => {
+        if (nad_viewer) {
+            nad_viewer.container.classList.toggle('hide-injections');
+        }
+        applyInjectionsDismissed();
     });
 }
 

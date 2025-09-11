@@ -37,6 +37,7 @@ class NadWidget(anywidget.AnyWidget):
     popup_menu_items = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(sync=True)
     hover_enabled = traitlets.Bool().tag(sync=True)
     branch_states = traitlets.List().tag(sync=True)
+    hidden_injections = traitlets.Bool(default_value=True).tag(sync=True)
 
     def __init__(self, on_hover_func: OnHoverFuncType, **kwargs):
         super().__init__(**kwargs)
@@ -89,6 +90,9 @@ class NadWidget(anywidget.AnyWidget):
     def set_branch_states(self, branch_states_data):
         self.branch_states = branch_states_data
 
+    def set_hidden_injections(self, hidden_injections):
+        self.hidden_injections = hidden_injections
+
     def trigger_update_metadata(self):
         self.send({'type': 'triggerRetrieveMetadata'})
 
@@ -102,7 +106,7 @@ class NadWidget(anywidget.AnyWidget):
                 retval = f'ERROR {repr(err)}'
         return retval, buffers
 
-def display_nad(svg, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False, popup_menu_items: List[str] = [], on_hover_func: OnHoverFuncType = None) -> NadWidget:
+def display_nad(svg, injections_hidden: bool = True, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False, popup_menu_items: List[str] = [], on_hover_func: OnHoverFuncType = None) -> NadWidget:
     """
     Displays a NAD's SVG with support for panning and zooming.
 
@@ -126,10 +130,10 @@ def display_nad(svg, invalid_lf: bool = False, drag_enabled: bool = False, grayo
     """
     svg_value=_get_svg_string(svg)
     svg_metadata = _get_svg_metadata(svg)
-    return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "drag_enabled": drag_enabled, "grayout": grayout},
+    return NadWidget(diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "drag_enabled": drag_enabled, "grayout": grayout, "injections_hidden": injections_hidden},
                      popup_menu_items=popup_menu_items, on_hover_func = on_hover_func)
 
-def update_nad(nadwidget, svg, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False, keep_viewbox: bool = False):
+def update_nad(nadwidget, svg, injections_hidden: bool = True, invalid_lf: bool = False, drag_enabled: bool = False, grayout:  bool = False, keep_viewbox: bool = False):
     """
     Updates an existing NAD widget with a new SVG content
 
@@ -150,4 +154,4 @@ def update_nad(nadwidget, svg, invalid_lf: bool = False, drag_enabled: bool = Fa
 
     svg_value=_get_svg_string(svg)
     svg_metadata = _get_svg_metadata(svg)
-    nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "drag_enabled": drag_enabled, "grayout": grayout, "keep_viewbox": keep_viewbox}
+    nadwidget.diagram_data= {"svg_data": svg_value, "metadata": svg_metadata, "invalid_lf": invalid_lf, "drag_enabled": drag_enabled, "grayout": grayout, "keep_viewbox": keep_viewbox, "injections_hidden": injections_hidden}

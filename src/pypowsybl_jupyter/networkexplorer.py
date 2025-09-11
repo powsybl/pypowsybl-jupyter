@@ -58,6 +58,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     map_widget=None
 
     selected_depth=depth
+    injections_hidden=True
 
     npars = nad_parameters if nad_parameters is not None else NadParameters(edge_name_displayed=False,
         id_displayed=not use_name,
@@ -244,6 +245,15 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
 
     nadslider.observe(on_nadslider_changed, names='value')
 
+    nad_injections_hide = widgets.Checkbox(value=True, description='Hide injections', style={'description_width': 'initial'})
+
+    def on_nad_injections_hide_changed(d):
+        nonlocal injections_hidden
+        injections_hidden=d['new']
+        nad_widget.set_hidden_injections(injections_hidden)
+
+    nad_injections_hide.observe(on_nad_injections_hide_changed, names='value')
+
     vl_input = widgets.Text(
         value='',
         placeholder='Voltage level Name' if use_name else 'Voltage level Id',
@@ -367,11 +377,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     current_nad_data = compute_nad_data()
     current_nad_metadata = ''
 
-    def update_nad_widget(new_diagram_data, drag_enabled=True, grayout=False, keep_viewbox=False):
+    def update_nad_widget(new_diagram_data, injections_hidden=True, drag_enabled=True, grayout=False, keep_viewbox=False):
         nonlocal nad_widget
         if nad_widget==None:
             nad_widget = display_nad(
                 new_diagram_data,
+                injections_hidden=injections_hidden,
                 drag_enabled=drag_enabled,
                 grayout=grayout,
                 popup_menu_items=["Open in SLD tab", "Expand", "Remove"],
@@ -381,7 +392,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
             nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())
         else:
-            update_nad(nad_widget,new_diagram_data, drag_enabled=drag_enabled, grayout=grayout, keep_viewbox=keep_viewbox)
+            update_nad(nad_widget,new_diagram_data, injections_hidden=injections_hidden, drag_enabled=drag_enabled, grayout=grayout, keep_viewbox=keep_viewbox)
 
     in_progress_widget=widgets.HTML(value=PROGRESS_EMPTY_SVG, 
                                     layout=widgets.Layout(width='30', justify_content='flex-end', margin='0px 20px 0px 0px'))
@@ -391,6 +402,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         found.disabled=True
         history.disabled=True
         nadslider.disabled=True
+        nad_injections_hide.disabled=True
         vl_input.disabled=True
         display(vl_input)
 
@@ -398,6 +410,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         found.disabled=False
         history.disabled=False
         nadslider.disabled=False
+        nad_injections_hide.disabled=False
         vl_input.disabled=False
         in_progress_widget.value=PROGRESS_EMPTY_SVG
 
@@ -414,7 +427,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         if el == nad_displayed_vl_id and compare_lists(current_nad_vl_list, new_nad_vl_list):
             return
         if nad_widget != None:
-            update_nad_widget('', drag_enabled=False, grayout=True, keep_viewbox=True)
+            update_nad_widget('', injections_hidden=injections_hidden, drag_enabled=False, grayout=True, keep_viewbox=True)
             display(nad_widget)
             enable_in_progress()
             update_sld_widget(current_sld_data, True, enable_callbacks=False)
@@ -431,7 +444,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 current_nad_data=compute_nad_data(new_nad_vl_list, current_nad_metadata)
             current_nad_metadata=current_nad_data.metadata
             current_nad_vl_list=new_nad_vl_list    
-            update_nad_widget(current_nad_data, drag_enabled=True, grayout=False)
+            update_nad_widget(current_nad_data, injections_hidden=injections_hidden, drag_enabled=True, grayout=False)
             nad_displayed_vl_id=el
         finally:
             update_sld_widget(current_sld_data, True, enable_callbacks=True)
@@ -456,7 +469,10 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
     left_panel = widgets.VBox([vl_input, found, history], 
                               layout=widgets.Layout(width='100%', height='100%', display='flex', flex_flow='column'))
 
-    nad_top_section = widgets.HBox([nadslider, in_progress_widget],layout=widgets.Layout(justify_content='space-between')) 
+    if (npars.injections_added):
+        nad_top_section = widgets.HBox([nad_injections_hide, nadslider, in_progress_widget],layout=widgets.Layout(justify_content='space-between'))
+    else:
+        nad_top_section = widgets.HBox([nadslider, in_progress_widget],layout=widgets.Layout(justify_content='space-between'))
     right_panel_nad = widgets.VBox([nad_top_section, nad_widget])
     right_panel_sld = widgets.VBox([spacer_label,sld_widget])
     right_panel_map = widgets.VBox([spacer_label, map_widget])
