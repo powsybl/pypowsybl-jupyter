@@ -51,9 +51,6 @@ features = ["dev"]
 [tool.hatch.build]
 only-packages = true
 artifacts = ["src/pypowsybl_jupyter/static/*"]
-include = [
-  "LICENSE"
-]
 
 [tool.hatch.build.hooks.jupyter-builder]
 build-function = "hatch_jupyter_builder.npm_builder"
