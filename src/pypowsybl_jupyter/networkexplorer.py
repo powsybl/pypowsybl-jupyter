@@ -193,7 +193,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 bbvb=network.get_bus_breaker_view_buses()
                 if not bbvb.empty and id in bbvb.index:
                     return format_to_html_table(bbvb.loc[id], id, f'{type} (bus breaker view)')
-        return f"Equipment of type '{type}' with id '{id}'"    
+        return '';
 
     hovering_function = None
     if on_hover == True:
