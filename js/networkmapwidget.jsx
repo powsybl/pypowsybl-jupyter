@@ -22,12 +22,12 @@ import NominalVoltageFilter from './nominal-voltage-filter';
 import './networkmapwidget.css';
 
 import {
+    Box,
     createTheme,
+    LinearProgress,
     ThemeProvider,
     StyledEngineProvider,
-} from '@mui/material/styles';
-import { Box } from '@mui/system';
-import LinearProgress from '@mui/material/LinearProgress';
+} from '@mui/material';
 
 const INITIAL_ZOOM = 0;
 const LABELS_ZOOM_THRESHOLD = 9;
@@ -65,8 +65,6 @@ const darkTheme = createTheme({
     selectedRow: {
         background: '#545C5B',
     },
-    mapboxStyle: 'mapbox://styles/mapbox/dark-v9',
-    aggrid: 'ag-theme-alpine-dark',
 });
 
 const lightTheme = createTheme({
@@ -84,8 +82,6 @@ const lightTheme = createTheme({
     selectedRow: {
         background: '#8E9C9B',
     },
-    mapboxStyle: 'mapbox://styles/mapbox/light-v9',
-    aggrid: 'ag-theme-alpine',
 });
 
 class WidgetMapEquipments extends MapEquipments {
