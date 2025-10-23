@@ -8,7 +8,10 @@
 import type { RenderProps } from '@anywidget/types';
 import './nadwidget.css';
 
-import { NetworkAreaDiagramViewer } from '@powsybl/network-viewer';
+import {
+    NetworkAreaDiagramViewer,
+    NadViewerParametersOptions,
+} from '@powsybl/network-viewer';
 
 import { PopupMenu } from './popupmenu';
 import { PopupInfo } from './popupinfo';
@@ -195,23 +198,25 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             );
         };
 
+        const nadViewerParametersOptions: NadViewerParametersOptions = {
+            minWidth: 800,
+            minHeight: 600,
+            maxWidth: 800,
+            maxHeight: 600,
+            enableDragInteraction: is_drag_enabled,
+            addButtons: true,
+            onMoveNodeCallback: handleMoveNode,
+            onMoveTextNodeCallback: handleMoveTextNode,
+            onSelectNodeCallback: handleSelectNode,
+            onToggleHoverCallback: is_hover_enabled ? handleInfo : null,
+            onRightClickCallback: handleMenu,
+        };
+
         nad_viewer = new NetworkAreaDiagramViewer(
             el_div,
             diagram_svg,
             diagram_meta ? JSON.parse(diagram_meta) : null,
-            800,
-            600,
-            800,
-            600,
-            handleMoveNode,
-            handleMoveTextNode,
-            handleSelectNode,
-            is_drag_enabled,
-            false,
-            null,
-            is_hover_enabled ? handleInfo : null,
-            handleMenu,
-            true
+            nadViewerParametersOptions
         );
 
         setTimeout(() => {
@@ -290,7 +295,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         if (content.type === 'triggerRetrieveMetadata') {
             let metad = '';
             if (nad_viewer != null) {
-                metad = nad_viewer.getJsonMetadata();
+                metad = nad_viewer.getJsonMetadata() || '';
             }
             updateCurrentMetadataInModel(metad);
         }
