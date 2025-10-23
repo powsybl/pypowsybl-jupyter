@@ -56,12 +56,12 @@ def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 
 
     npars = parameters if parameters is not None else NadParameters(edge_name_displayed=False,
         id_displayed=False,
-        edge_info_along_edge=False,
+        edge_info_along_edge=True,
         power_value_precision=1,
         angle_value_precision=0,
         current_value_precision=1,
         voltage_value_precision=0,
-        bus_legend=False,
+        bus_legend=True,
         substation_description_displayed=True)
 
     def prepare_branch_states(time_step):
@@ -102,9 +102,9 @@ def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 
                                                                 low_nominal_voltage_bound=low_nominal_voltage_bound,
                                                                 nad_parameters=npars, fixed_positions=fixed_nad_positions)
             if nad_widget == None:
-                nad_widget = display_nad(new_diagram_data)
+                nad_widget = display_nad(new_diagram_data, drag_enabled=True)
             else:
-                update_nad(nad_widget, new_diagram_data)
+                update_nad(nad_widget, new_diagram_data, drag_enabled=True)
 
             if time_series_data is not None:
                 branch_states = prepare_branch_states(selected_time_step)
