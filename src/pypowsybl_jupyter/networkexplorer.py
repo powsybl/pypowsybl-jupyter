@@ -45,6 +45,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nad_profile: property to customize labels and style for the NAD
         on_hover: when True, the hovering is enabled
         on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type. It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation. Please read what are the equipment types supported by the different diagram widget (the NAD, the SLD and the network-map), in their detailed documentation.
+        fixed_nad_positions: positions dataframe to layout the voltage levels in the NAD
 
     Examples:
 

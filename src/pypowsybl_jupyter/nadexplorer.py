@@ -29,6 +29,7 @@ def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 
         low_nominal_voltage_bound: low bound to filter voltage level according to nominal voltage
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
         parameters: layout properties to adjust the svg rendering for the nad
+        fixed_nad_positions: positions dataframe to layout the voltage levels in the diagram
 
     Examples:
 
