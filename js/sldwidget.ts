@@ -40,7 +40,7 @@ function toWidgetCoordinates(
 }
 
 function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
-    const handleNextVl = (id: string) => {
+    const handleNextVl = (id: string, _event: MouseEvent) => {
         model.set('clicked_nextvl', id);
         model.save_changes();
         model.send({ event: 'click_nextvl' });
