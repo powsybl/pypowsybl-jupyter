@@ -166,7 +166,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             return format_to_html_table(network.get_loads().loc[id], id, type)
         elif type == 'GENERATOR':
             return format_to_html_table(network.get_generators().loc[id], id, type)
-        elif type in [ 'CAPACITOR', 'INDUCTOR' ]:
+        elif type in [ 'CAPACITOR', 'INDUCTOR', 'SHUNT_COMPENSATOR_INDUCTOR', 'SHUNT_COMPENSATOR_CAPACITOR']:
             return format_to_html_table(network.get_shunt_compensators().loc[id], id, type)
         elif type in [ 'THREE_WINDINGS_TRANSFORMER', 'THREE_WINDINGS_TRANSFORMER_LEG']:
             return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
