@@ -54,7 +54,7 @@ A further click on an entry in the list will navigate the explorer to the corres
 Other than the target network, the Network explorer can be customized using additional parameters:
 
 ```python
-network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None)
+network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, depth: int = 1, high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1, nad_parameters: NadParameters = None, sld_parameters: SldParameters = None, use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None, fixed_nad_positions: DataFrame = None)
 ```
 
 - vl_id: the starting VL to display. If None, display the first VL from network.get_voltage_levels()
@@ -69,6 +69,7 @@ network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, de
 - nad_profile: property to customize labels and style for the NAD
 - on_hover: when True, the hovering is enabled
 - on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type; It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe; To exemplify, the default function is listed below. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation.
+- fixed_nad_positions: positions dataframe to layout the voltage levels in the NAD. The fixed positions dataframe is fully described in [Pypowsybl Network visualization guide](inv:pypowsybl:*:*#user_guide/network_visualization).
 
 ### on_hover_func default function
 ```python
