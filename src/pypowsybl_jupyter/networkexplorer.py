@@ -17,6 +17,7 @@ import ipywidgets as widgets
 import json
 import pandas as pd
 from typing import Callable
+from pandas import DataFrame
 
 OnHoverFuncType = Callable[[str, str], str]
 
@@ -24,7 +25,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                      high_nominal_voltage_bound: float = -1, low_nominal_voltage_bound: float = -1,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
-                     use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None):
+                     use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None,
+                     fixed_nad_positions: DataFrame = None):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -43,6 +45,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         nad_profile: property to customize labels and style for the NAD
         on_hover: when True, the hovering is enabled
         on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type. It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation. Please read what are the equipment types supported by the different diagram widget (the NAD, the SLD and the network-map), in their detailed documentation.
+        fixed_nad_positions: positions dataframe to layout the voltage levels in the NAD
 
     Examples:
 
@@ -353,9 +356,12 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 new_vllist=network.get_network_area_diagram_displayed_voltage_levels(voltage_level_ids=el, depth=depth)
         return new_vllist
 
-    def compute_nad_data(vllist=None, metadata=None):
+    def compute_nad_data(vllist=None, fixed_positions=None, metadata=None):
         if vllist is not None:
-            nm=extract_positions_dataframe_from_nad_metadata_json(metadata)
+            if fixed_positions is not None:
+                nm = fixed_positions
+            else:
+                nm = extract_positions_dataframe_from_nad_metadata_json(metadata)
             nad_data=network.get_network_area_diagram(voltage_level_ids=vllist, 
                                                       high_nominal_voltage_bound=high_nominal_voltage_bound, 
                                                       low_nominal_voltage_bound=low_nominal_voltage_bound, 
@@ -427,11 +433,14 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 display(map_widget)
         try:
             if action == 0:
-                current_nad_data=compute_nad_data(new_nad_vl_list)
+                if fixed_nad_positions is not None and not fixed_nad_positions.empty:
+                    current_nad_data=compute_nad_data(new_nad_vl_list, fixed_nad_positions)
+                else:
+                    current_nad_data=compute_nad_data(new_nad_vl_list)
                 if nad_widget != None:
                     nad_widget.current_nad_metadata=current_nad_metadata
             else:
-                current_nad_data=compute_nad_data(new_nad_vl_list, current_nad_metadata)
+                current_nad_data=compute_nad_data(new_nad_vl_list, None, current_nad_metadata)
             current_nad_metadata=current_nad_data.metadata
             current_nad_vl_list=new_nad_vl_list    
             update_nad_widget(current_nad_data, drag_enabled=True, grayout=False)
