@@ -8,12 +8,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
-import {
-    createRender,
-    useModelState,
-    useModel,
-    useExperimental,
-} from '@anywidget/react';
+import { createRender, useModelState, useModel, useExperimental } from '@anywidget/react';
 
 import { NetworkMap, GeoData, MapEquipments } from '@powsybl/network-viewer';
 import VoltageLevelChoice from './voltage-level-choice';
@@ -21,13 +16,7 @@ import NominalVoltageFilter from './nominal-voltage-filter';
 
 import './networkmapwidget.css';
 
-import {
-    Box,
-    createTheme,
-    LinearProgress,
-    ThemeProvider,
-    StyledEngineProvider,
-} from '@mui/material';
+import { Box, createTheme, LinearProgress, ThemeProvider, StyledEngineProvider } from '@mui/material';
 
 const INITIAL_ZOOM = 0;
 const LABELS_ZOOM_THRESHOLD = 9;
@@ -119,9 +108,7 @@ const render = createRender(() => {
     const [enable_callbacks] = useModelState('enable_callbacks');
 
     const targetSubId = params['subId'];
-    const [centerOnSubId, setCenterOnSubId] = useState(
-        targetSubId === null ? null : { to: targetSubId }
-    );
+    const [centerOnSubId, setCenterOnSubId] = useState(targetSubId === null ? null : { to: targetSubId });
 
     const [mapDataReady, setMapDataReady] = useState(false);
 
@@ -161,10 +148,7 @@ const render = createRender(() => {
         }
     }, [params]);
 
-    const [
-        choiceVoltageLevelsSubstationId,
-        setChoiceVoltageLevelsSubstationId,
-    ] = useState(null);
+    const [choiceVoltageLevelsSubstationId, setChoiceVoltageLevelsSubstationId] = useState(null);
 
     const [position, setPosition] = useState([-1, -1]);
 
@@ -187,18 +171,13 @@ const render = createRender(() => {
 
     let choiceVoltageLevelsSubstation = null;
     if (choiceVoltageLevelsSubstationId) {
-        choiceVoltageLevelsSubstation = equipmentData.edata?.getSubstation(
-            choiceVoltageLevelsSubstationId
-        );
+        choiceVoltageLevelsSubstation = equipmentData.edata?.getSubstation(choiceVoltageLevelsSubstationId);
     }
 
-    const chooseVoltageLevelForSubstation = useCallback(
-        (idSubstation, x, y) => {
-            setChoiceVoltageLevelsSubstationId(idSubstation);
-            setPosition([x, y]);
-        },
-        []
-    );
+    const chooseVoltageLevelForSubstation = useCallback((idSubstation, x, y) => {
+        setChoiceVoltageLevelsSubstationId(idSubstation);
+        setPosition([x, y]);
+    }, []);
 
     const useNameOrId = () => {
         const useName = use_name;
@@ -206,9 +185,7 @@ const render = createRender(() => {
             (infos) => {
                 if (infos != null) {
                     const name = infos.name;
-                    return useName && name != null && name.trim() !== ''
-                        ? name
-                        : infos?.id;
+                    return useName && name != null && name.trim() !== '' ? name : infos?.id;
                 }
                 return null;
             },
@@ -229,8 +206,7 @@ const render = createRender(() => {
         );
     }
 
-    const [filteredNominalVoltages, setFilteredNominalVoltages] =
-        useState(nvls);
+    const [filteredNominalVoltages, setFilteredNominalVoltages] = useState(nvls);
 
     function renderNominalVoltageFilter() {
         return (
@@ -246,10 +222,7 @@ const render = createRender(() => {
 
     async function getPopupContent(elementId) {
         try {
-            const [retInfo, _buffers] = await experimental.invoke(
-                '_get_on_hover_info',
-                { id: elementId }
-            );
+            const [retInfo, _buffers] = await experimental.invoke('_get_on_hover_info', { id: elementId });
             return retInfo;
         } catch (e) {
             return `Error retrieving hover info: ${e}`;
@@ -344,9 +317,7 @@ const render = createRender(() => {
             onSubstationClick={(vlId) => {
                 propagate_selectedvl_event(vlId);
             }}
-            onSubstationClickChooseVoltageLevel={
-                chooseVoltageLevelForSubstation
-            }
+            onSubstationClickChooseVoltageLevel={chooseVoltageLevelForSubstation}
             mapLibrary={'cartonolabel'}
             mapTheme={dark_mode ? 'dark' : 'light'}
             filteredNominalVoltages={filteredNominalVoltages}
@@ -365,16 +336,12 @@ const render = createRender(() => {
                             height: 600,
                         }}
                     >
-                        <Box sx={styles.divTemporaryGeoDataLoading}>
-                            {!mapDataReady && <LinearProgress />}
-                        </Box>
+                        <Box sx={styles.divTemporaryGeoDataLoading}>{!mapDataReady && <LinearProgress />}</Box>
 
                         {renderMap()}
-                        {choiceVoltageLevelsSubstationId &&
-                            renderVoltageLevelChoice()}
+                        {choiceVoltageLevelsSubstationId && renderVoltageLevelChoice()}
 
-                        {equipmentData.edata?.substations?.length > 0 &&
-                            renderNominalVoltageFilter()}
+                        {equipmentData.edata?.substations?.length > 0 && renderNominalVoltageFilter()}
                     </div>
                 </ThemeProvider>
             </StyledEngineProvider>

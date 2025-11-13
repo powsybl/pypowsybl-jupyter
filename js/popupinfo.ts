@@ -7,10 +7,7 @@
 
 type Point = { x: number; y: number };
 
-type FetchElementInfoFn = (
-    elementId: string,
-    elementType: string
-) => Promise<string>;
+type FetchElementInfoFn = (elementId: string, elementType: string) => Promise<string>;
 
 export class PopupInfo {
     container: HTMLElement;
@@ -25,11 +22,7 @@ export class PopupInfo {
         requestId: number
     ) => Promise<void>;
 
-    constructor(
-        container: HTMLElement,
-        fetchElementInfo: FetchElementInfoFn,
-        debounceDelay: number = 200
-    ) {
+    constructor(container: HTMLElement, fetchElementInfo: FetchElementInfoFn, debounceDelay: number = 200) {
         this.container = container;
         this.fetchElementInfo = fetchElementInfo;
 
@@ -47,10 +40,7 @@ export class PopupInfo {
 
         this.container.appendChild(this.infoBox);
 
-        this.debouncedShowInfo = this.debounce(
-            this.showInfo.bind(this),
-            debounceDelay
-        );
+        this.debouncedShowInfo = this.debounce(this.showInfo.bind(this), debounceDelay);
     }
 
     debounce<F extends (...args: any[]) => void>(func: F, wait: number): F {
@@ -69,10 +59,7 @@ export class PopupInfo {
         requestId: number
     ): Promise<void> {
         if (requestId === this.lastRequestId) {
-            const text: string = await this.fetchElementInfo(
-                elementId,
-                elementType
-            );
+            const text: string = await this.fetchElementInfo(elementId, elementType);
             this.infoBox.innerHTML = text;
             this.infoBox.style.left = `${mousex + 10}px`;
             this.infoBox.style.top = `${mousey + 10}px`;
@@ -84,21 +71,10 @@ export class PopupInfo {
         }
     }
 
-    handleHover(
-        shouldDisplay: boolean,
-        mousePosition: Point | null,
-        elementId: string,
-        elementType: string
-    ): void {
+    handleHover(shouldDisplay: boolean, mousePosition: Point | null, elementId: string, elementType: string): void {
         this.lastRequestId++;
         if (shouldDisplay && mousePosition) {
-            this.debouncedShowInfo(
-                mousePosition.x,
-                mousePosition.y,
-                elementId,
-                elementType,
-                this.lastRequestId
-            );
+            this.debouncedShowInfo(mousePosition.x, mousePosition.y, elementId, elementType, this.lastRequestId);
         } else {
             this.infoBox.style.display = 'none';
             this.infoBox.textContent = '';

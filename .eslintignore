@@ -1,4 +1,4 @@
 dist/
 node_modules/
 src/pypowsybl_jupyter/static
-
+build-docs/

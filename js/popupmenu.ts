@@ -18,11 +18,7 @@ export class PopupMenu {
 
     private id: string = '';
 
-    constructor(
-        container: HTMLElement,
-        menuItems: string[],
-        menuItemCallback: PopupMenuItemCallbackType
-    ) {
+    constructor(container: HTMLElement, menuItems: string[], menuItemCallback: PopupMenuItemCallbackType) {
         this.container = container;
         this.items = menuItems;
         this.menuItemCallback = menuItemCallback;
@@ -85,10 +81,7 @@ export class PopupMenu {
 
                 // Delay adding the outside click listener to avoid immediate hiding
                 setTimeout(() => {
-                    document.addEventListener(
-                        'mousedown',
-                        this.handleOutsideClick
-                    );
+                    document.addEventListener('mousedown', this.handleOutsideClick);
                     document.addEventListener('keydown', this.handleKeydown);
                 }, 0);
             }
@@ -155,9 +148,7 @@ export class PopupMenu {
     }
 
     focusPreviousMenuItem() {
-        const prevIndex =
-            (this.focusedIndex - 1 + this.menuItems.length) %
-            this.menuItems.length;
+        const prevIndex = (this.focusedIndex - 1 + this.menuItems.length) % this.menuItems.length;
         this.focusMenuItem(prevIndex);
     }
 }
