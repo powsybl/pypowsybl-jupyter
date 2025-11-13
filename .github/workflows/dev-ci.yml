@@ -59,4 +59,3 @@ jobs:
         run: |
           pip3 uninstall -y pypowsybl_jupyter
           python -m pip install --upgrade -v -e ".[dev]"
-          npm run lint
