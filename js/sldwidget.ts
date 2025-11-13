@@ -27,11 +27,7 @@ function initialize({ model }: Initialize<SldWidgetModel>) {
     /* (optional) model initialization logic */
 }
 
-function toWidgetCoordinates(
-    container: HTMLElement,
-    x: number,
-    y: number
-): { x: number; y: number } {
+function toWidgetCoordinates(container: HTMLElement, x: number, y: number): { x: number; y: number } {
     const containerRect = container.getBoundingClientRect();
     return {
         x: x - containerRect.left,
@@ -52,13 +48,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
         model.send({ event: 'click_switch' });
     };
 
-    const handleFeeder = (
-        id: string,
-        feederType: string | null,
-        svgId: string,
-        x: number,
-        y: number
-    ) => {
+    const handleFeeder = (id: string, feederType: string | null, svgId: string, x: number, y: number) => {
         model.set('clicked_feeder', { id: id, feederType: feederType });
         model.save_changes();
         model.send({ event: 'click_feeder' });
@@ -105,12 +95,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
 
                 mousePos = { x: mousePos.x + 10, y: mousePos.y + 10 };
             }
-            popupInfo?.handleHover(
-                shouldDisplay,
-                mousePos,
-                equipmentId,
-                equipmentType
-            );
+            popupInfo?.handleHover(shouldDisplay, mousePos, equipmentId, equipmentType);
         };
 
         new SingleLineDiagramViewer(
@@ -137,10 +122,10 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
 
         popupInfo = new PopupInfo(el_div, async (id: string, type: string) => {
             try {
-                const [retInfo, _buffers] = await experimental.invoke(
-                    '_get_on_hover_info',
-                    { id: id ?? null, type: type }
-                );
+                const [retInfo, _buffers] = await experimental.invoke('_get_on_hover_info', {
+                    id: id ?? null,
+                    type: type,
+                });
                 return retInfo as string;
             } catch (e) {
                 return `Error retrieving hover info: ${e}`;
@@ -155,8 +140,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
 
     model.on('change:diagram_data', () => {
         const nodes = el.querySelectorAll('.svg-sld-viewer-widget')[0];
-        const currViewData =
-            el.querySelector('svg')?.getAttribute('viewBox') || '';
+        const currViewData = el.querySelector('svg')?.getAttribute('viewBox') || '';
         const new_el = render_diagram(model, currViewData);
         el.replaceChild(new_el, nodes);
     });
