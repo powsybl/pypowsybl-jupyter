@@ -13,3 +13,11 @@
 	stroke: #7d7f7c;
 	animation-play-state: paused;
 }
+
+.bend-lines-button-active {
+	border: 2px solid orange !important;
+}
+
+.bend-lines-button-inactive {
+	border: none !important;
+}
