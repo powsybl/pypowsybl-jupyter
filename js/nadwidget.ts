@@ -8,10 +8,7 @@
 import type { RenderProps } from '@anywidget/types';
 import './nadwidget.css';
 
-import {
-    NetworkAreaDiagramViewer,
-    NadViewerParametersOptions,
-} from '@powsybl/network-viewer';
+import { NetworkAreaDiagramViewer, NadViewerParametersOptions } from '@powsybl/network-viewer';
 
 import { PopupMenu } from './popupmenu';
 import { PopupInfo } from './popupinfo';
@@ -31,11 +28,7 @@ interface NadWidgetModel {
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
     let nad_viewer: NetworkAreaDiagramViewer | null = null;
 
-    const handleSelectNode = (
-        equipmentId: string,
-        nodeId: string,
-        _mousePosition: any
-    ) => {
+    const handleSelectNode = (equipmentId: string, nodeId: string, _mousePosition: any) => {
         model.set('selected_node', {
             equipment_id: equipmentId,
             node_id: nodeId,
@@ -103,11 +96,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         model.send({ event: 'move_text_node' });
     };
 
-    function toWidgetCoordinates(
-        container: HTMLElement,
-        x: number,
-        y: number
-    ): { x: number; y: number } {
+    function toWidgetCoordinates(container: HTMLElement, x: number, y: number): { x: number; y: number } {
         const containerRect = container.getBoundingClientRect();
         return {
             x: x - containerRect.left,
@@ -124,11 +113,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         }
     };
 
-    function render_diagram(
-        model: any,
-        diagram_svg: string,
-        diagram_meta: string | null
-    ): any {
+    function render_diagram(model: any, diagram_svg: string, diagram_meta: string | null): any {
         const diagram_data = model.get('diagram_data');
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
@@ -147,20 +132,11 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         let handleMenu = null;
 
         if (menu_items.length > 0) {
-            popupMenu = new PopupMenu(
-                el_div,
-                menu_items,
-                (selection: number, id: string) => {
-                    handleSelectMenu(id, selection);
-                }
-            );
+            popupMenu = new PopupMenu(el_div, menu_items, (selection: number, id: string) => {
+                handleSelectMenu(id, selection);
+            });
 
-            handleMenu = (
-                _svgId: string,
-                equipmentId: string,
-                equipmentType: string,
-                mousePosition: any
-            ) => {
+            handleMenu = (_svgId: string, equipmentId: string, equipmentType: string, mousePosition: any) => {
                 if (equipmentType === 'VOLTAGE_LEVEL') {
                     const mousePos = toWidgetCoordinates(
                         el_div.querySelector('#svg-container') ?? el_div,
@@ -175,12 +151,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
 
         let popupInfo: PopupInfo | null = null;
 
-        const handleInfo = (
-            shouldDisplay: boolean,
-            mousePosition: any,
-            elementId: string,
-            elementType: string
-        ) => {
+        const handleInfo = (shouldDisplay: boolean, mousePosition: any, elementId: string, elementType: string) => {
             let mousePos = null;
             if (mousePosition) {
                 mousePos = toWidgetCoordinates(
@@ -190,12 +161,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
                 );
             }
 
-            popupInfo?.handleHover(
-                shouldDisplay,
-                mousePos,
-                elementId,
-                elementType
-            );
+            popupInfo?.handleHover(shouldDisplay, mousePos, elementId, elementType);
         };
 
         const nadViewerParametersOptions: NadViewerParametersOptions = {
@@ -244,10 +210,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
 
         popupInfo = new PopupInfo(el_div, async (id: string, type: string) => {
             try {
-                const [retInfo, _buffers] = await experimental.invoke(
-                    '_get_on_hover_info',
-                    { id: id, type: type }
-                );
+                const [retInfo, _buffers] = await experimental.invoke('_get_on_hover_info', { id: id, type: type });
                 return retInfo as string;
             } catch (e) {
                 return `Error retrieving hover info: ${e}`;
