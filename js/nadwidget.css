@@ -13,3 +13,21 @@
 	stroke: #7d7f7c;
 	animation-play-state: paused;
 }
+
+.bend-lines-button-active {
+	border: 2px solid orange !important;
+}
+
+.bend-lines-button-inactive {
+	border: none !important;
+}
+
+.nad-line-point-preview {
+    pointer-events: none;
+}
+
+.nad-line-point-preview rect {
+    fill: rgba(255, 165, 0, 0.7);
+    stroke: orange;
+    stroke-width: 2;
+}
