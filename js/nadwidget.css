@@ -31,3 +31,9 @@
     stroke: orange;
     stroke-width: 2;
 }
+
+#action-buttons-bars button, #zoom-buttons-bars button {
+    border: none;
+}
+g.nad-edge-infos g.nad-active path.nad-arrow-out {visibility: visible}
+g.nad-edge-infos g.nad-active path.nad-arrow-in {visibility: visible}
