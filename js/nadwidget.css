@@ -14,12 +14,8 @@
 	animation-play-state: paused;
 }
 
-.bend-lines-button-active {
-	border: 2px solid orange !important;
-}
-
-.bend-lines-button-inactive {
-	border: none !important;
+.nad-line-points {
+    fill: black;
 }
 
 .nad-line-point-preview {
@@ -30,4 +26,13 @@
     fill: rgba(255, 165, 0, 0.7);
     stroke: orange;
     stroke-width: 2;
+}
+
+#action-buttons-bars button,
+#zoom-buttons-bars button {
+    border: none;
+}
+
+#action-buttons-bars button.button-active {
+    border: 2px solid orange;
 }
