@@ -1,13 +1,6 @@
 name: Dev CI
 
 on:
-  push:
-    branches:
-      - 'main'
-      - 'release-v**'
-      - 'full-sonar-analysis-**'
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
   pull_request:
 
 permissions: {}
@@ -33,7 +26,7 @@ jobs:
           architecture: "x64"
 
       - name: Setup pip cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v4.2.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ~/.cache/pip
           key: pip-3.12-${{ hashFiles('package.json') }}
@@ -45,7 +38,7 @@ jobs:
         id: npm-cache
         run: |
           echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: ${{ steps.npm-cache.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
