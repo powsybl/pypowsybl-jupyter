@@ -176,6 +176,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             onSelectNodeCallback: handleSelectNode,
             onToggleHoverCallback: is_hover_enabled ? handleInfo : null,
             onRightClickCallback: handleMenu,
+            enableAdaptiveTextZoom: true,
         };
 
         nad_viewer = new NetworkAreaDiagramViewer(
