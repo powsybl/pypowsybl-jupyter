@@ -35,6 +35,8 @@
 #action-buttons-bars button, #zoom-buttons-bars button {
     border: none;
 }
+
+/* TODO: remove those 4 workaround rules when customStyle.css is fixed in powsybl-diagram */
 g.nad-edge-infos g.nad-active path.nad-arrow-out {visibility: visible}
 g.nad-edge-infos g.nad-active path.nad-arrow-in {visibility: visible}
 svg > svg > g.nad-edge-infos > g > path.nad-arrow-out {visibility: visible}
