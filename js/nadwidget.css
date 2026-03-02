@@ -14,8 +14,12 @@
 	animation-play-state: paused;
 }
 
-.nad-line-points {
-    fill: black;
+.bend-lines-button-active {
+	border: 2px solid orange !important;
+}
+
+.bend-lines-button-inactive {
+	border: none !important;
 }
 
 .nad-line-point-preview {
@@ -28,11 +32,10 @@
     stroke-width: 2;
 }
 
-#action-buttons-bars button,
-#zoom-buttons-bars button {
+#action-buttons-bars button, #zoom-buttons-bars button {
     border: none;
 }
-
-#action-buttons-bars button.button-active {
-    border: 2px solid orange;
-}
+g.nad-edge-infos g.nad-active path.nad-arrow-out {visibility: visible}
+g.nad-edge-infos g.nad-active path.nad-arrow-in {visibility: visible}
+svg > svg > g.nad-edge-infos > g > path.nad-arrow-out {visibility: visible}
+svg > svg > g.nad-edge-infos > g > path.nad-arrow-in {visibility: visible}
