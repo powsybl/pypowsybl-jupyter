@@ -118,6 +118,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
         const is_invalid_lf = diagram_data['invalid_lf'];
         const is_grayout = diagram_data['grayout'];
         const is_drag_enabled = diagram_data['drag_enabled'];
+        const is_adaptive_text_zoom = diagram_data['adaptive_text_zoom'];
         const menu_items = model.get('popup_menu_items');
         const is_hover_enabled = model.get('hover_enabled');
 
@@ -176,7 +177,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             onSelectNodeCallback: handleSelectNode,
             onToggleHoverCallback: is_hover_enabled ? handleInfo : null,
             onRightClickCallback: handleMenu,
-            enableAdaptiveTextZoom: true,
+            enableAdaptiveTextZoom: is_adaptive_text_zoom,
         };
 
         nad_viewer = new NetworkAreaDiagramViewer(

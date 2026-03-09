@@ -15,7 +15,7 @@ from .nadwidget import display_nad, update_nad
 def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 1,
                  time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1,
                  high_nominal_voltage_bound: float = -1, parameters: NadParameters = None,
-                 fixed_nad_positions: DataFrame = None):
+                 fixed_nad_positions: DataFrame = None, adaptive_text_zoom: bool = True):
     """
     Creates a basic nad explorer widget for a network, built with the nad widget.
 
@@ -30,6 +30,7 @@ def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 
         high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
         parameters: layout properties to adjust the svg rendering for the nad
         fixed_nad_positions: positions dataframe to layout the voltage levels in the diagram
+        adaptive_text_zoom: if True, enable adaptive text zoom.
 
     Examples:
 
@@ -103,9 +104,9 @@ def nad_explorer(network: Network, voltage_level_ids: list = None, depth: int = 
                                                                 low_nominal_voltage_bound=low_nominal_voltage_bound,
                                                                 nad_parameters=npars, fixed_positions=fixed_nad_positions)
             if nad_widget == None:
-                nad_widget = display_nad(new_diagram_data, drag_enabled=True)
+                nad_widget = display_nad(new_diagram_data, drag_enabled=True, adaptive_text_zoom=adaptive_text_zoom)
             else:
-                update_nad(nad_widget, new_diagram_data, drag_enabled=True)
+                update_nad(nad_widget, new_diagram_data, drag_enabled=True, adaptive_text_zoom=adaptive_text_zoom)
 
             if time_series_data is not None:
                 branch_states = prepare_branch_states(selected_time_step)

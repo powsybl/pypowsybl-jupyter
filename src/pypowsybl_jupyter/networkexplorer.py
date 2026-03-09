@@ -26,7 +26,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                      nominal_voltages_top_tiers_filter:int = -1,
                      nad_parameters: NadParameters = None, sld_parameters: SldParameters = None,
                      use_line_geodata:bool = False, nad_profile: NadProfile = None, on_hover:bool = True, on_hover_func: OnHoverFuncType = None,
-                     fixed_nad_positions: DataFrame = None):
+                     fixed_nad_positions: DataFrame = None, adaptive_text_zoom: bool = True):
     """
     Creates a combined NAD and SLD explorer widget for the network. Diagrams are displayed on two different tabs.
     A third tab, 'Network map' displays the network's substations and lines on a map.
@@ -46,6 +46,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         on_hover: when True, the hovering is enabled
         on_hover_func: a callback function that is invoked when hovering on equipments in the NAD, SLD and the network-map tabs. The function parameters (OnHoverFuncType = Callable[[str, str], str]) are the equipment id and type. It must return an HTML string. None, the default, will display in the popup all the attributes available in the edquipment's dataframe. Note that, depending on the specific viewer component (the NAD, the SLD and the network-map), not all the equipments are currently hoverable; more details in their detailed documentation. Please read what are the equipment types supported by the different diagram widget (the NAD, the SLD and the network-map), in their detailed documentation.
         fixed_nad_positions: positions dataframe to layout the voltage levels in the NAD
+        adaptive_text_zoom: if True, enable adaptive text zoom.
 
     Examples:
 
@@ -383,6 +384,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
                 new_diagram_data,
                 drag_enabled=drag_enabled,
                 grayout=grayout,
+                adaptive_text_zoom=adaptive_text_zoom,
                 popup_menu_items=["Open in SLD tab", "Expand", "Remove"],
                 on_hover_func=hovering_function,
             )
@@ -390,7 +392,7 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             nad_widget.on_move_node(lambda event : nad_widget.trigger_update_metadata())
             nad_widget.on_move_text_node(lambda event : nad_widget.trigger_update_metadata())
         else:
-            update_nad(nad_widget,new_diagram_data, drag_enabled=drag_enabled, grayout=grayout, keep_viewbox=keep_viewbox)
+            update_nad(nad_widget,new_diagram_data, drag_enabled=drag_enabled, grayout=grayout, adaptive_text_zoom=adaptive_text_zoom, keep_viewbox=keep_viewbox)
 
     in_progress_widget=widgets.HTML(value=PROGRESS_EMPTY_SVG, 
                                     layout=widgets.Layout(width='30', justify_content='flex-end', margin='0px 20px 0px 0px'))
