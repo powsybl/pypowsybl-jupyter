@@ -1,0 +1,22 @@
+.powsybl-comparator-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.powsybl-comparator-item {
+    flex: 0 0 auto;
+    border: 2px solid lightgrey;
+}
+
+#action-buttons-bars button,
+#zoom-buttons-bars button {
+    border: none;
+}
+
+#action-buttons-bars button.button-active {
+    border: 2px solid orange;
+}
