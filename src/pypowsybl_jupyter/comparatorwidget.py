@@ -12,7 +12,7 @@ import pathlib
 import anywidget
 import traitlets
 from typing import List, Union
-from pypowsybl.network import Network
+from pypowsybl.network import Network, NadParameters, NadProfile
 from .util import _get_svg_string, _get_svg_metadata
 
 MAX_DIAGRAMS = 4
@@ -30,14 +30,23 @@ class ComparatorWidget(anywidget.AnyWidget):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-def network_comparator(networks: List[Network], synchronized: bool = True, width: int = None, height: int = None, display_buttons: bool = True) -> ComparatorWidget:
+def network_comparator(networks: List[Network], profiles: List[NadProfile] = None,
+                       voltage_level_ids: Union[str, List[str]] = None, depth: int = 0,
+                       nad_parameters: NadParameters = None,
+                       width: int = None, height: int = None, display_buttons: bool = True,
+                       synchronized: bool = True) -> ComparatorWidget:
     """
-    Displays multiple network area diagrams (NAD) side-by-side. 
+    Displays multiple network area diagrams (NAD) side-by-side.
     By default zoom and pan actions are synchronized across all diagrams.
-    Maximum 4 diagrams are supported.
+    Maximum {MAX_DIAGRAMS} diagrams are supported.
 
     Args:
         networks: a list of input networks.
+        profiles: an optional list of NadProfile objects, one per network, to customize each NAD. A None entry will not apply a profile to the corresponding network.
+            If provided, the number of profiles must match the number of networks.
+        voltage_level_ids: the voltage level ID, center of the diagram (None for the full diagram).
+        depth: the diagram depth around the voltage level.
+        nad_parameters: layout properties to adjust the svg rendering for the NADs.
         width: width in pixels of each diagram. None (default) means that the width is set based on the number of diagrams.
         height: height in pixels of each diagram. None (default) means that the width is set based on the number of diagrams.
         display_buttons: if True (default), shows the NAD viewer buttons on all diagrams. Set to False to hide all buttons and save space in the viewers.
@@ -56,18 +65,34 @@ def network_comparator(networks: List[Network], synchronized: bool = True, width
         raise ValueError("At least one network must be provided.")
     if len(networks) > MAX_DIAGRAMS:
         raise ValueError(f"Maximum {MAX_DIAGRAMS} networks are supported.")
+    if profiles is not None and len(profiles) != len(networks):
+        raise ValueError(f"profiles length ({len(profiles)}) must match networks length ({len(networks)}).")
+
+    npars = nad_parameters if nad_parameters is not None else NadParameters()        
 
     diagram_data_list = []
-    for network in networks:
+    for i, network in enumerate(networks):
         if not isinstance(network, Network):
-            raise ValueError(f"Input must be a list of Network objects, but got {type(network)}")
-        
-        nad = network.get_network_area_diagram()
+            raise ValueError(
+                f"networks[{i}] must be a Network object, but got {type(network)}"
+            )
+
+        if profiles is not None:
+            profile = profiles[i]
+            if profile is not None and not isinstance(profile, NadProfile):
+                raise ValueError(
+                    f"profiles[{i}] must be a NadProfile or None, but got {type(profile)}"
+                )
+        else:
+            profile = None
+        nad = network.get_network_area_diagram(
+            voltage_level_ids=voltage_level_ids,
+            depth=depth,
+            nad_parameters=npars,
+            nad_profile=profile,
+        )
         svg_value = _get_svg_string(nad)
         svg_metadata = _get_svg_metadata(nad)
-        diagram_data_list.append({
-            "svg_data": svg_value,
-            "metadata": svg_metadata
-        })
+        diagram_data_list.append({"svg_data": svg_value, "metadata": svg_metadata})
 
     return ComparatorWidget(diagrams=diagram_data_list, synchronized=synchronized, width=width, height=height, display_buttons=display_buttons)
