@@ -24,9 +24,9 @@
 		"lint": "eslint . --ext js,ts,jsx --max-warnings 0"
 	},
 	"dependencies": {
-		"@powsybl/network-viewer-core": "3.3.1",
-		"@powsybl/network-map-layers": "3.3.1",
-		"@powsybl/network-viewer": "3.3.1"
+		"@powsybl/network-viewer-core": "3.4.0",
+		"@powsybl/network-map-layers": "3.4.0",
+		"@powsybl/network-viewer": "3.4.0"
 	},
 	"devDependencies": {
 		"@anywidget/types": "^0.1.6",
