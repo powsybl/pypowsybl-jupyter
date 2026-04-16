@@ -15,8 +15,6 @@ from typing import List, Union
 from pypowsybl.network import Network, NadParameters, NadProfile
 from .util import _get_svg_string, _get_svg_metadata
 
-MAX_DIAGRAMS = 4
-
 class ComparatorWidget(anywidget.AnyWidget):
     _esm = pathlib.Path(__file__).parent / "static" / "comparatorwidget.js"
     _css = pathlib.Path(__file__).parent / "static" / "comparatorwidget.css"
@@ -38,7 +36,7 @@ def network_comparator(networks: List[Network], profiles: List[NadProfile] = Non
     """
     Displays multiple network area diagrams (NAD) side-by-side.
     By default zoom and pan actions are synchronized across all diagrams.
-    Maximum {MAX_DIAGRAMS} diagrams are supported.
+    Please note that displaying a large number of synchronized diagrams can lead to slower performance or lag.
 
     Args:
         networks: a list of input networks.
@@ -63,8 +61,6 @@ def network_comparator(networks: List[Network], profiles: List[NadProfile] = Non
     """
     if not networks:
         raise ValueError("At least one network must be provided.")
-    if len(networks) > MAX_DIAGRAMS:
-        raise ValueError(f"Maximum {MAX_DIAGRAMS} networks are supported.")
     if profiles is not None and len(profiles) != len(networks):
         raise ValueError(f"profiles length ({len(profiles)}) must match networks length ({len(networks)}).")
 
