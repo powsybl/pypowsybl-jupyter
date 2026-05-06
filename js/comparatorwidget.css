@@ -20,3 +20,70 @@
 #action-buttons-bars button.button-active {
     border: 2px solid orange;
 }
+
+.inj-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+    text-align: left;
+}
+
+.inj-bar-row .inj-bar-svg {
+    flex: 0 0 auto;
+    overflow: visible;
+}
+
+.inj-bar-row.gen .inj-bar-range {
+    fill: #e5e7eb;
+    stroke: #9ca3af;
+    stroke-width: 0.5;
+}
+
+.inj-bar-row .inj-bar-band {
+    fill: #93c5fd;
+    opacity: 0.85;
+}
+
+.inj-bar-row.load .inj-bar-band {
+    fill: #fca5a5;
+}
+
+.inj-bar-row .inj-bar-marker {
+    stroke: #111827;
+    stroke-width: 1.5;
+}
+
+.inj-bar-row .inj-bar-label {
+    color: #111827;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.inj-bar-row .inj-bar-num {
+    fill: #111827;
+    font-size: 6px;
+    font-family: inherit;
+    dominant-baseline: middle;
+}
+
+.inj-bar-row .inj-bar-num-p {
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.inj-bar-row .inj-bar-num-ext {
+    font-size: 6px;
+    fill: #4b5563;
+}
+
+.inj-bar-row .inj-bar-marker-sfcc {
+    stroke: #f97316;
+    stroke-width: 1.5;
+}
+
+.inj-bar-row .inj-bar-num-sfcc {
+    fill: #f97316;
+    font-size: 7px;
+    font-weight: 600;
+}

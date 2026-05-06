@@ -18,6 +18,10 @@ from .networkexplorer import network_explorer
 from .networkmapwidget import NetworkMapWidget
 from .comparatorwidget import network_comparator
 
+from .injection_details import (
+    parse_uncertain_injections, build_vl_descriptions_df
+)
+
 try:
     __version__ = importlib.metadata.version("pypowsybl_jupyter")
 except importlib.metadata.PackageNotFoundError:
