@@ -10,10 +10,26 @@ import './comparatorwidget.css';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const INJECTION_MARKER_PREFIX = '§I§';
+const DIFF_MARKER_PREFIX = '§D§';
 const INJECTION_BAR_WIDTH = 160;
 const INJECTION_BAR_HEIGHT = 6;
 const INJECTION_H_MARGIN_LEFT = 8;
 const INJECTION_H_MARGIN_RIGHT = 20;
+const INJECTION_LABEL_FONT_SIZE = 9;
+
+interface DiagramData {
+    svg_data: string;
+    metadata: string | null;
+}
+
+interface ComparatorWidgetModel {
+    diagrams: DiagramData[];
+    synchronized: boolean;
+    width: number | null;
+    height: number | null;
+    display_buttons: boolean;
+    inj_bar_scale: number;
+}
 
 type InjectionDetail =
     | {
@@ -33,6 +49,16 @@ type InjectionDetail =
           u_min: number;
           u_max: number;
       };
+
+type GenDiffDetail = {
+    kind: 'GEN_DIFF';
+    id: string;
+    p_n1: number;
+    p_n2: number;
+    delta: number;
+    pmin: number;
+    pmax: number;
+};
 
 function parseInjectionDetailsMarker(raw: string): InjectionDetail | null {
     if (!raw.startsWith(INJECTION_MARKER_PREFIX)) return null;
@@ -67,6 +93,26 @@ function parseInjectionDetailsMarker(raw: string): InjectionDetail | null {
     return null;
 }
 
+function parseGenDiffMarker(raw: string): GenDiffDetail | null {
+    if (!raw.startsWith(DIFF_MARKER_PREFIX)) return null;
+    const spaceIdx = raw.indexOf(' ');
+    const marker = spaceIdx === -1 ? raw : raw.slice(0, spaceIdx);
+    const fields = marker.slice(DIFF_MARKER_PREFIX.length).split('|');
+    if (fields[0] === 'GEN' && fields.length === 7) {
+        const [, id, p_n1S, p_n2S, deltaS, pminS, pmaxS] = fields;
+        return {
+            kind: 'GEN_DIFF',
+            id,
+            p_n1: Number(p_n1S),
+            p_n2: Number(p_n2S),
+            delta: Number(deltaS),
+            pmin: Number(pminS),
+            pmax: Number(pmaxS),
+        };
+    }
+    return null;
+}
+
 function fmtNumber(v: number): string {
     if (!Number.isFinite(v)) return String(v);
     return Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1);
@@ -91,7 +137,7 @@ function makeSvgText(x: number, y: number, anchor: string, cls: string, value: s
     return t;
 }
 
-function buildInjectionRow(u: InjectionDetail): HTMLElement {
+function buildInjectionRow(u: InjectionDetail, inj_bar_scale: number = 1): HTMLElement {
     const [u_min_d, u_max_d] = getDomainInjectionInterval(u);
     const span = u_max_d - u_min_d || 1;
     const scale = (v: number) => ((v - u_min_d) / span) * INJECTION_BAR_WIDTH;
@@ -107,8 +153,8 @@ function buildInjectionRow(u: InjectionDetail): HTMLElement {
 
     const svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('class', 'inj-bar-svg');
-    svg.setAttribute('width', String(viewBoxW));
-    svg.setAttribute('height', String(svgHeight));
+    svg.setAttribute('width', String(viewBoxW * inj_bar_scale));
+    svg.setAttribute('height', String(svgHeight * inj_bar_scale));
     svg.setAttribute('viewBox', `${-INJECTION_H_MARGIN_LEFT} 0 ${viewBoxW} ${svgHeight}`);
 
     if (u.kind === 'GEN') {
@@ -174,6 +220,7 @@ function buildInjectionRow(u: InjectionDetail): HTMLElement {
 
     const label = document.createElement('span');
     label.classList.add('inj-bar-label');
+    label.style.fontSize = `${INJECTION_LABEL_FONT_SIZE * inj_bar_scale}px`;
     label.textContent = `${u.id}`;
 
     row.appendChild(svg);
@@ -182,17 +229,105 @@ function buildInjectionRow(u: InjectionDetail): HTMLElement {
     return row;
 }
 
-function renderInjectionBars(container: HTMLElement): void {
+function buildGenDiffRow(gd: GenDiffDetail, inj_bar_scale: number = 1): HTMLElement {
+    const uMin = Math.min(gd.pmin, gd.p_n1, gd.p_n2);
+    const uMax = Math.max(gd.pmax, gd.p_n1, gd.p_n2);
+    const span = uMax - uMin || 1;
+    const scale = (v: number) => ((v - uMin) / span) * INJECTION_BAR_WIDTH;
+
+    const row = document.createElement('div');
+    row.classList.add('inj-bar-row', 'gen-diff');
+
+    const barTop = 6;
+    const barMid = barTop + INJECTION_BAR_HEIGHT / 2;
+    const textY = 17;
+    const triangleH = 4;
+    const svgHeight = 23;
+    const viewBoxW = INJECTION_BAR_WIDTH + INJECTION_H_MARGIN_LEFT + INJECTION_H_MARGIN_RIGHT;
+
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'inj-bar-svg');
+    svg.setAttribute('width', String(viewBoxW * inj_bar_scale));
+    svg.setAttribute('height', String(svgHeight * inj_bar_scale));
+    svg.setAttribute('viewBox', `${-INJECTION_H_MARGIN_LEFT} 0 ${viewBoxW} ${svgHeight}`);
+
+    // background bar
+    const range = document.createElementNS(SVG_NS, 'rect');
+    range.setAttribute('class', 'inj-bar-range');
+    range.setAttribute('x', String(scale(gd.pmin)));
+    range.setAttribute('y', String(barTop));
+    range.setAttribute('width', String(Math.max(scale(gd.pmax) - scale(gd.pmin), 1)));
+    range.setAttribute('height', String(INJECTION_BAR_HEIGHT));
+    svg.appendChild(range);
+
+    // colored delta bar
+    const bandLeft = Math.min(gd.p_n1, gd.p_n2);
+    const bandRight = Math.max(gd.p_n1, gd.p_n2);
+    if (bandRight > bandLeft) {
+        const band = document.createElementNS(SVG_NS, 'rect');
+        band.setAttribute('class', gd.delta >= 0 ? 'inj-bar-band-diff-pos' : 'inj-bar-band-diff-neg');
+        band.setAttribute('x', String(scale(bandLeft)));
+        band.setAttribute('y', String(barTop));
+        band.setAttribute('width', String(Math.max(scale(bandRight) - scale(bandLeft), 1)));
+        band.setAttribute('height', String(INJECTION_BAR_HEIGHT));
+        svg.appendChild(band);
+    }
+
+    // p_n1 reference marker (vertical segment)
+    const x_n1 = scale(Math.max(uMin, Math.min(uMax, gd.p_n1)));
+    const markerN1 = document.createElementNS(SVG_NS, 'line');
+    markerN1.setAttribute('class', 'inj-bar-marker');
+    markerN1.setAttribute('x1', String(x_n1));
+    markerN1.setAttribute('x2', String(x_n1));
+    markerN1.setAttribute('y1', String(barTop - 1));
+    markerN1.setAttribute('y2', String(barTop + INJECTION_BAR_HEIGHT + 1));
+    svg.appendChild(markerN1);
+
+    // p_n2 marker (triangle)
+    const x_n2 = scale(Math.max(uMin, Math.min(uMax, gd.p_n2)));
+    const triangle = document.createElementNS(SVG_NS, 'polygon');
+    triangle.setAttribute('class', 'inj-bar-marker-n2');
+    triangle.setAttribute(
+        'points',
+        `${x_n2},${barTop} ${x_n2 - triangleH},${barTop - triangleH} ${x_n2 + triangleH},${barTop - triangleH}`
+    );
+    svg.appendChild(triangle);
+
+    svg.appendChild(makeSvgText(x_n1, textY, 'middle', 'inj-bar-num inj-bar-num-p', fmtNumber(gd.p_n1)));
+    svg.appendChild(makeSvgText(x_n2, textY, 'middle', 'inj-bar-num inj-bar-num-n2', fmtNumber(gd.p_n2)));
+    svg.appendChild(makeSvgText(scale(gd.pmin), barMid, 'end', 'inj-bar-num inj-bar-num-ext', fmtNumber(gd.pmin)));
+    svg.appendChild(makeSvgText(scale(gd.pmax), barMid, 'start', 'inj-bar-num inj-bar-num-ext', fmtNumber(gd.pmax)));
+
+    const label = document.createElement('span');
+    label.classList.add('inj-bar-label');
+    label.style.fontSize = `${INJECTION_LABEL_FONT_SIZE * inj_bar_scale}px`;
+    const nameNode = document.createTextNode(gd.id);
+    label.appendChild(nameNode);
+
+    row.appendChild(svg);
+    row.appendChild(label);
+
+    return row;
+}
+
+function renderInjectionBars(container: HTMLElement, inj_bar_scale: number = 1): void {
     const labelBoxes = container.querySelectorAll<HTMLElement>('.nad-label-box');
     labelBoxes.forEach((box) => {
         const divs = box.querySelectorAll<HTMLElement>('div');
         divs.forEach((div) => {
             if (div.dataset.injectionRendered === '1') return;
             const content = div.textContent || '';
-            if (!content.startsWith(INJECTION_MARKER_PREFIX)) return;
-            const u = parseInjectionDetailsMarker(content);
-            if (!u) return;
-            const row = buildInjectionRow(u);
+            let row: HTMLElement | null = null;
+            if (content.startsWith(INJECTION_MARKER_PREFIX)) {
+                const u = parseInjectionDetailsMarker(content);
+                if (u) row = buildInjectionRow(u, inj_bar_scale);
+            } else if (content.startsWith(DIFF_MARKER_PREFIX)) {
+                const u = parseGenDiffMarker(content);
+                if (u) row = buildGenDiffRow(u, inj_bar_scale);
+            }
+
+            if (!row) return;
+
             div.textContent = '';
             div.style.textAlign = 'left';
             div.style.lineHeight = '0';
@@ -202,25 +337,13 @@ function renderInjectionBars(container: HTMLElement): void {
     });
 }
 
-interface DiagramData {
-    svg_data: string;
-    metadata: string | null;
-}
-
-interface ComparatorWidgetModel {
-    diagrams: DiagramData[];
-    synchronized: boolean;
-    width: number | null;
-    height: number | null;
-    display_buttons: boolean;
-}
-
 function render({ model, el }: RenderProps<ComparatorWidgetModel>) {
     const diagrams = model.get('diagrams');
     const synchronized = model.get('synchronized');
     const w = model.get('width');
     const h = model.get('height');
     const displayButtons = model.get('display_buttons');
+    const injBarScale = model.get('inj_bar_scale');
 
     const container = document.createElement('div');
     container.classList.add('powsybl-comparator-container');
@@ -246,16 +369,54 @@ function render({ model, el }: RenderProps<ComparatorWidgetModel>) {
         });
 
         viewers.push(viewer);
-        setTimeout(() => renderInjectionBars(diagramDiv), 0);
+        setTimeout(() => renderInjectionBars(diagramDiv, injBarScale), 0);
     });
 
     if (synchronized && viewers.length > 1) {
+        //synchronize viewbox pan and zoom
         for (let i = 0; i < viewers.length; i++) {
             for (let j = 0; j < viewers.length; j++) {
                 if (i !== j) {
                     viewers[i].syncViewBoxWith(viewers[j]);
                 }
             }
+        }
+
+        //synchronize drag and drop (nodes and text boxes)
+        for (let i = 0; i < viewers.length; i++) {
+            const idx = i;
+            viewers[i].onMoveNodeCallback = (equipmentId, _nodeId, x, y, _xOrig, _yOrig) => {
+                for (let j = 0; j < viewers.length; j++) {
+                    if (j !== idx) {
+                        viewers[j].moveNodeToCoordinates(equipmentId, x, y);
+                    }
+                }
+            };
+            viewers[i].onMoveTextNodeCallback = (
+                equipmentId,
+                _vlNodeId,
+                _textNodeId,
+                shiftX,
+                shiftY,
+                _shiftXOrig,
+                _shiftYOrig,
+                connectionShiftX,
+                connectionShiftY,
+                _connectionShiftXOrig,
+                _connectionShiftYOrig
+            ) => {
+                for (let j = 0; j < viewers.length; j++) {
+                    if (j !== idx) {
+                        viewers[j].moveTextNodeToCoordinates(
+                            equipmentId,
+                            shiftX,
+                            shiftY,
+                            connectionShiftX,
+                            connectionShiftY
+                        );
+                    }
+                }
+            };
         }
     }
 }

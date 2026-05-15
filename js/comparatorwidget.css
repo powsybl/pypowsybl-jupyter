@@ -56,7 +56,6 @@
 
 .inj-bar-row .inj-bar-label {
     color: #111827;
-    font-size: 9px;
     white-space: nowrap;
 }
 
@@ -86,4 +85,31 @@
     fill: #f97316;
     font-size: 7px;
     font-weight: 600;
+}
+
+.inj-bar-row.gen-diff .inj-bar-range {
+    fill: #e5e7eb;
+    stroke: #9ca3af;
+    stroke-width: 0.5;
+}
+
+.inj-bar-row .inj-bar-band-diff-pos {
+    fill: #00ff00;
+    opacity: 0.85;
+}
+
+.inj-bar-row .inj-bar-band-diff-neg {
+    fill: #ff0000;
+    opacity: 0.85;
+}
+
+.inj-bar-row .inj-bar-marker-n2 {
+    fill: #6b7280;
+}
+
+.inj-bar-row .inj-bar-num-n2 {
+    fill: #6b7280;
+    font-size: 7px;
+    font-family: inherit;
+    dominant-baseline: middle;
 }

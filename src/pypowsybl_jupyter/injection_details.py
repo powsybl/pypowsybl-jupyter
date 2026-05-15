@@ -31,6 +31,12 @@ def get_interval(injections: dict, injection_id: str, value: float) -> tuple[flo
         return (u_min, u_max)
 
 
+def _valid_sfcc_pct(value) -> Optional[float]:
+    if value is None or not (0.0 <= value <= 100.0):
+        return None
+    return value
+
+
 def get_bus_injection_details(
     bus_id: str,
     injections: Optional[dict],
@@ -55,7 +61,7 @@ def get_bus_injection_details(
                     "p": gen_p,
                     "uncertainty": get_interval(injections, inj_id, gen_p),
                     "pmin_pmax": (float(gen_row["min_p"]), float(gen_row["max_p"])),
-                    "sfcc_pct": sfcc.get(inj_id) if sfcc is not None else None,
+                    "sfcc_pct": _valid_sfcc_pct(sfcc.get(inj_id)) if sfcc is not None else None,
                 })
                 processed_gen_ids.add(inj_id)
             elif row["type"] == "LOAD":
@@ -79,7 +85,7 @@ def get_bus_injection_details(
                 "p": -row["p"],
                 "uncertainty": None,
                 "pmin_pmax": (float(gen_row["min_p"]), float(gen_row["max_p"])),
-                "sfcc_pct": sfcc[inj_id],
+                "sfcc_pct": _valid_sfcc_pct(sfcc[inj_id]),
             })
 
     return result
@@ -167,3 +173,49 @@ def build_vl_descriptions_df(
                          network.get_generators(),
                          injections_uncertainties,
                          secondary_control)
+
+
+def format_gen_diff(gen_id: str, p_n1: float, p_n2: float, delta_p: float, pmin: float, pmax: float) -> str:
+    return f"§D§GEN|{gen_id}|{p_n1}|{p_n2}|{delta_p}|{pmin}|{pmax}"
+
+
+def build_vl_descriptions_for_gens_diff_df(n1: pp.network.Network, n2: pp.network.Network, epsilon: float = 1e-6) -> pd.DataFrame:
+    gens_n1 = n1.get_generators()
+    gens_n2 = n2.get_generators()
+
+    gen_inj_n1 = n1.get_injections()
+    gen_inj_n1 = gen_inj_n1[gen_inj_n1['type'] == 'GENERATOR']
+
+    gen_inj_n2 = n2.get_injections()
+    gen_inj_n2 = gen_inj_n2[gen_inj_n2['type'] == 'GENERATOR']
+
+    common_ids = set(gens_n1.index) & set(gens_n2.index) & set(gen_inj_n1.index) & set(gen_inj_n2.index)
+
+    buses_df = n1.get_buses()
+    vls_df = n1.get_voltage_levels()
+
+    records = []
+    for vl_id in vls_df.index:
+        records.append({"id": vl_id, "type": "HEADER", "description": vl_id})
+
+        vl_buses = buses_df[buses_df["voltage_level_id"] == vl_id]
+        for bus_id in vl_buses.index:
+            bus_gens = gen_inj_n1[gen_inj_n1['bus_id'] == bus_id]
+            for gen_id, row in bus_gens.iterrows():
+                if gen_id not in common_ids:
+                    continue
+                p_n1 = -row["p"]
+                p_n2 = -gen_inj_n2.loc[gen_id, "p"]
+                if abs(p_n2 - p_n1) <= epsilon:
+                    continue
+                gen_row = gens_n1.loc[gen_id]
+                records.append({
+                    "id": vl_id,
+                    "type": "FOOTER",
+                    "description": format_gen_diff(
+                        gen_id, p_n1, p_n2, p_n2 - p_n1,
+                        float(gen_row["min_p"]), float(gen_row["max_p"])
+                    ),
+                })
+
+    return pd.DataFrame.from_records(data=records, index="id")
