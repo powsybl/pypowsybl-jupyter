@@ -36,3 +36,8 @@
 #action-buttons-bars button.button-active {
     border: 2px solid orange;
 }
+
+.nad-edge-infos path.nad-arrow-out,
+.nad-edge-infos path.nad-arrow-in {
+    visibility: visible !important;
+}
