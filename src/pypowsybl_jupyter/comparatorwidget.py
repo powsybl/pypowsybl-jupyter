@@ -24,15 +24,16 @@ class ComparatorWidget(anywidget.AnyWidget):
     width = traitlets.Int(allow_none=True, default_value=None).tag(sync=True)
     height = traitlets.Int(allow_none=True, default_value=None).tag(sync=True)
     display_buttons = traitlets.Bool(True).tag(sync=True)
+    inj_bar_scale = traitlets.Float(1.0).tag(sync=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-def network_comparator(networks: List[Network], profiles: List[NadProfile] = None,
+def network_comparator(networks: Union[Network, List[Network]], profiles: Union[NadProfile, List[NadProfile]] = None,
                        voltage_level_ids: Union[str, List[str]] = None, depth: int = 0,
                        nad_parameters: NadParameters = None,
                        width: int = None, height: int = None, display_buttons: bool = True,
-                       synchronized: bool = True) -> ComparatorWidget:
+                       synchronized: bool = True, inj_bar_scale: float = 1.0) -> ComparatorWidget:
     """
     Displays multiple network area diagrams (NAD) side-by-side.
     By default zoom and pan actions are synchronized across all diagrams.
@@ -49,6 +50,7 @@ def network_comparator(networks: List[Network], profiles: List[NadProfile] = Non
         height: height in pixels of each diagram. None (default) means that the width is set based on the number of diagrams.
         display_buttons: if True (default), shows the NAD viewer buttons on all diagrams. Set to False to hide all buttons and save space in the viewers.
         synchronized: if True (default), synchronizes zoom and pan across all diagrams.
+        inj_bar_scale: scale factor for injection bars (default 1.0).
 
     Returns:
         A jupyter widget allowing to compare diagrams side-by-side.
@@ -61,8 +63,13 @@ def network_comparator(networks: List[Network], profiles: List[NadProfile] = Non
     """
     if not networks:
         raise ValueError("At least one network must be provided.")
-    if profiles is not None and len(profiles) != len(networks):
-        raise ValueError(f"profiles length ({len(profiles)}) must match networks length ({len(networks)}).")
+    
+    networks = networks if isinstance(networks, list) else [networks]
+                                                            
+    if profiles is not None:
+        profiles = profiles if isinstance(profiles, list) else [profiles]
+        if len(profiles) != len(networks):
+            raise ValueError(f"profiles length ({len(profiles)}) must match networks length ({len(networks)}).")
 
     npars = nad_parameters if nad_parameters is not None else NadParameters()        
 
@@ -91,4 +98,4 @@ def network_comparator(networks: List[Network], profiles: List[NadProfile] = Non
         svg_metadata = _get_svg_metadata(nad)
         diagram_data_list.append({"svg_data": svg_value, "metadata": svg_metadata})
 
-    return ComparatorWidget(diagrams=diagram_data_list, synchronized=synchronized, width=width, height=height, display_buttons=display_buttons)
+    return ComparatorWidget(diagrams=diagram_data_list, synchronized=synchronized, width=width, height=height, display_buttons=display_buttons, inj_bar_scale=inj_bar_scale)
