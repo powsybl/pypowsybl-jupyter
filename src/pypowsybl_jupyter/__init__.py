@@ -19,7 +19,7 @@ from .networkmapwidget import NetworkMapWidget
 from .comparatorwidget import network_comparator
 
 from .injection_details import (
-    parse_uncertain_injections, build_vl_descriptions_df, build_vl_descriptions_for_gens_diff_df
+    parse_uncertain_injections, build_injection_data, build_delta_data
 )
 
 try:

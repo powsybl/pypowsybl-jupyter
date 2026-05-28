@@ -10,6 +10,7 @@
 .powsybl-comparator-item {
     flex: 0 0 auto;
     border: 2px solid lightgrey;
+    position: relative;
 }
 
 #action-buttons-bars button,
@@ -19,6 +20,11 @@
 
 #action-buttons-bars button.button-active {
     border: 2px solid orange;
+}
+
+.powsybl-comparator-container #action-buttons-bars button[title="Enable line bending"],
+.powsybl-comparator-container #action-buttons-bars button[title="Disable line bending"] {
+    display: none !important;
 }
 
 .inj-bar-row {
@@ -94,12 +100,12 @@
 }
 
 .inj-bar-row .inj-bar-band-diff-pos {
-    fill: #00ff00;
+    fill: #22c55e;
     opacity: 0.85;
 }
 
 .inj-bar-row .inj-bar-band-diff-neg {
-    fill: #ff0000;
+    fill: #f59e0b;
     opacity: 0.85;
 }
 
@@ -112,4 +118,80 @@
     font-size: 7px;
     font-family: inherit;
     dominant-baseline: middle;
+}
+
+@keyframes disc-pulse {
+    0%   { transform: scale(1);    opacity: 0.55; }
+    50%  { transform: scale(1.12); opacity: 0.28; }
+    100% { transform: scale(1);    opacity: 0.55; }
+}
+
+.comparator-discs .comp-unc-disc-gen {
+    fill: #3b82f6;
+    stroke: #1e40af;
+    stroke-width: 1.5;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: disc-pulse 2.4s ease-in-out infinite;
+}
+
+.comparator-discs .comp-unc-disc-load {
+    fill: #ef4444;
+    stroke: #991b1b;
+    stroke-width: 1.5;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: disc-pulse 2.4s ease-in-out infinite;
+    animation-delay: -1.2s;
+}
+
+.comparator-discs .comp-sfcc-disc {
+    fill: #f97316;
+    stroke: #c2410c;
+    stroke-width: 1.5;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: disc-pulse 3.6s ease-in-out infinite;
+}
+
+.comparator-discs .comp-delta-disc-pos {
+    fill: #22c55e;
+    stroke: #15803d;
+    stroke-width: 1.5;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: disc-pulse 1.8s ease-in-out infinite;
+}
+
+.comparator-discs .comp-delta-disc-neg {
+    fill: #f59e0b;
+    stroke: #b45309;
+    stroke-width: 1.5;
+    pointer-events: none;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: disc-pulse 1.8s ease-in-out infinite;
+    animation-delay: -0.9s;
+}
+
+.comparator-discs .comp-vl-emphasis-halo {
+    fill: none;
+    stroke: white;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.comparator-discs .comp-vl-emphasis {
+    fill: none;
+    stroke: gold;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    opacity: 0.95;
+    pointer-events: none;
 }
