@@ -76,6 +76,7 @@ interface ComparatorWidgetModel {
     delta_disc_scale: number;
     delta_disc_offset_scale: number;
     show_markers: boolean;
+    animate_discs: boolean;
 }
 
 type InjectionDetail =
@@ -442,7 +443,8 @@ function renderDiscs(
     globalMaxUncertainty: number,
     globalMaxSfccMw: number,
     globalMaxDelta: number,
-    showMarkers: boolean
+    showMarkers: boolean,
+    animateDiscs: boolean
 ): void {
     const innerSvg = viewer.innerSvg;
     if (!innerSvg) return;
@@ -457,7 +459,7 @@ function renderDiscs(
 
     innerSvg.querySelector(':scope > g.comparator-discs')?.remove();
     const discGroup = document.createElementNS(SVG_NS, 'g');
-    discGroup.setAttribute('class', 'comparator-discs');
+    discGroup.setAttribute('class', animateDiscs ? 'comparator-discs' : 'comparator-discs no-disc-animation');
     innerSvg.appendChild(discGroup);
 
     const emphRadius = Math.max(10, networkDiagonal * 0.008);
@@ -707,6 +709,7 @@ function render({ model, el }: RenderProps<ComparatorWidgetModel>) {
     const deltaDiscScale = model.get('delta_disc_scale');
     const deltaDiscOffsetScale = model.get('delta_disc_offset_scale');
     const showMarkers = model.get('show_markers');
+    const animateDiscs = model.get('animate_discs');
     const discsEnabled = uncertaintyDiscs || sfccDiscs || deltaDiscs;
 
     const popupsEnabled = discsEnabled || diagrams.some((d) => d.injection_data != null || d.delta_data != null);
@@ -919,7 +922,8 @@ function render({ model, el }: RenderProps<ComparatorWidgetModel>) {
                     globalMaxUncertainty,
                     globalMaxSfccMw,
                     globalMaxDelta,
-                    showMarkers
+                    showMarkers,
+                    animateDiscs
                 )
             );
         }, 0);

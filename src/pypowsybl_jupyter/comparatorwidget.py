@@ -35,6 +35,7 @@ class ComparatorWidget(anywidget.AnyWidget):
     delta_disc_scale = traitlets.Float(1.0).tag(sync=True)
     delta_disc_offset_scale = traitlets.Float(1.0).tag(sync=True)
     show_markers = traitlets.Bool(False).tag(sync=True)
+    animate_discs = traitlets.Bool(True).tag(sync=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -54,7 +55,8 @@ def network_comparator(networks: Union[Network, List[Network]], profiles: Union[
                        sfcc_discs: bool = False, sfcc_disc_scale: float = 1.0,
                        delta_discs: bool = False, delta_disc_scale: float = 1.0,
                        delta_disc_offset_scale: float = 1.0,
-                       show_markers: bool = False) -> ComparatorWidget:
+                       show_markers: bool = False,
+                       animate_discs: bool = True) -> ComparatorWidget:
     """
     Displays multiple network area diagrams (NAD) side-by-side.
     By default zoom and pan actions are synchronized across all diagrams.
@@ -95,8 +97,9 @@ def network_comparator(networks: Union[Network, List[Network]], profiles: Union[
         delta_disc_offset_scale: scale factor for the horizontal offset between the positive (green)
             and negative (red-ish) delta discs relative to the VL node center. With the default 1.0 the
             spacing is 40% of max disc radius. Values > 1 increase the spacing. A zero value means no offset.
-        show_markers: if True, shows a dashed square emphasis markers on active VLs 
+        show_markers: if True, shows a dashed square emphasis markers on active VLs
             (useful to emphasize a VL, center of a disc, in larger networks). Default False.
+        animate_discs: if True (default), discs pulse with a CSS animation. Set to False to render discs statically.
 
     Returns:
         A jupyter widget allowing to compare diagrams side-by-side.
@@ -195,4 +198,5 @@ def network_comparator(networks: Union[Network, List[Network]], profiles: Union[
         delta_disc_scale=delta_disc_scale,
         delta_disc_offset_scale=delta_disc_offset_scale,
         show_markers=show_markers,
+        animate_discs=animate_discs,
     )

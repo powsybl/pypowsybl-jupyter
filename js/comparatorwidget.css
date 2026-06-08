@@ -178,6 +178,15 @@
     animation-delay: -0.9s;
 }
 
+.comparator-discs.no-disc-animation .comp-unc-disc-gen,
+.comparator-discs.no-disc-animation .comp-unc-disc-load,
+.comparator-discs.no-disc-animation .comp-sfcc-disc,
+.comparator-discs.no-disc-animation .comp-delta-disc-pos,
+.comparator-discs.no-disc-animation .comp-delta-disc-neg {
+    animation: none;
+    opacity: 0.55;
+}
+
 .comparator-discs .comp-vl-emphasis-halo {
     fill: none;
     stroke: white;
