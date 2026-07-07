@@ -62,7 +62,7 @@ The time_series_data DataFrame must contain the following columns:
 Other than the target network, the NAD explorer can be customized using additional parameters:
 
 ```python
-nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None, fixed_nad_positions: DataFrame = None):
+nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, time_series_data: pd.DataFrame = None, low_nominal_voltage_bound: float = -1, high_nominal_voltage_bound: float = -1, parameters: NadParameters = None, fixed_nad_positions: DataFrame = None, adaptive_text_zoom: bool = True):
 ```
 
 - network: the input network
@@ -73,3 +73,4 @@ nad_explorer(network: Network, voltage_level_ids : list = None, depth: int = 1, 
 - high_nominal_voltage_bound: high bound to filter voltage level according to nominal voltage
 - parameters: layout properties to adjust the svg rendering for the nad
 - fixed_nad_positions: positions dataframe to layout the voltage levels in the diagram. The fixed positions dataframe is fully described in [Pypowsybl Network visualization guide](inv:pypowsybl:*:*#user_guide/network_visualization).
+- adaptive_text_zoom: if True, enable adaptive text zoom.
