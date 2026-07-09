@@ -367,6 +367,7 @@ function aggregateDiscData(
         yMin = Infinity,
         yMax = -Infinity;
     for (const node of metadata.nodes) {
+        if (node.invisible) continue;
         nodeMap.set(node.equipmentId, { x: node.x, y: node.y });
         if (node.x < xMin) xMin = node.x;
         if (node.x > xMax) xMax = node.x;
