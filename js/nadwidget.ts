@@ -27,6 +27,7 @@ interface NadWidgetModel {
 
 function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
     let nad_viewer: NetworkAreaDiagramViewer | null = null;
+    let popupInfo: PopupInfo | null = null;
 
     const handleSelectNode = (equipmentId: string, nodeId: string, _mousePosition: any) => {
         model.set('selected_node', {
@@ -149,18 +150,8 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             };
         }
 
-        let popupInfo: PopupInfo | null = null;
-
         const handleInfo = (shouldDisplay: boolean, mousePosition: any, elementId: string, elementType: string) => {
-            let mousePos = null;
-            if (mousePosition) {
-                mousePos = toWidgetCoordinates(
-                    el_div.querySelector('#svg-container') ?? el_div,
-                    mousePosition.x,
-                    mousePosition.y
-                );
-            }
-
+            const mousePos = mousePosition ? { x: mousePosition.x, y: mousePosition.y } : null;
             popupInfo?.handleHover(shouldDisplay, mousePos, elementId, elementType);
         };
 
@@ -250,6 +241,7 @@ function render({ model, el, experimental }: RenderProps<NadWidgetModel>) {
             updateCurrentMetadataInModel(diagram_meta);
         }
 
+        popupInfo?.dispose();
         const new_el = render_diagram(model, diagram_svg, diagram_meta);
         el.replaceChild(new_el, nodes);
     });
