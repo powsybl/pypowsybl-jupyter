@@ -28,7 +28,7 @@ export class PopupInfo {
 
         this.infoBox = document.createElement('div');
 
-        this.infoBox.style.position = 'absolute';
+        this.infoBox.style.position = 'fixed';
         this.infoBox.style.display = 'none';
         this.infoBox.style.backgroundColor = 'white';
         this.infoBox.style.border = '1px solid black';
@@ -38,7 +38,7 @@ export class PopupInfo {
         this.infoBox.style.fontSize = '12px';
         this.infoBox.style.zIndex = '900';
 
-        this.container.appendChild(this.infoBox);
+        document.body.appendChild(this.infoBox);
 
         this.debouncedShowInfo = this.debounce(this.showInfo.bind(this), debounceDelay);
     }
@@ -69,6 +69,10 @@ export class PopupInfo {
                 this.infoBox.style.display = 'none';
             }
         }
+    }
+
+    dispose(): void {
+        this.infoBox.remove();
     }
 
     handleHover(shouldDisplay: boolean, mousePosition: Point | null, elementId: string, elementType: string): void {

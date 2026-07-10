@@ -27,14 +27,6 @@ function initialize({ model }: Initialize<SldWidgetModel>) {
     /* (optional) model initialization logic */
 }
 
-function toWidgetCoordinates(container: HTMLElement, x: number, y: number): { x: number; y: number } {
-    const containerRect = container.getBoundingClientRect();
-    return {
-        x: x - containerRect.left,
-        y: y - containerRect.top,
-    };
-}
-
 function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
     const handleNextVl = (id: string, _event: MouseEvent) => {
         model.set('clicked_nextvl', id);
@@ -86,14 +78,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
             if (anchorEl) {
                 const bb = anchorEl as HTMLAnchorElement;
                 const mousePosition = bb.getBoundingClientRect();
-
-                mousePos = toWidgetCoordinates(
-                    el_div.querySelector('#svg-container') ?? el_div,
-                    mousePosition.x,
-                    mousePosition.y
-                );
-
-                mousePos = { x: mousePos.x + 10, y: mousePos.y + 10 };
+                mousePos = { x: mousePosition.x + 10, y: mousePosition.y + 10 };
             }
             popupInfo?.handleHover(shouldDisplay, mousePos, equipmentId, equipmentType);
         };
@@ -141,6 +126,7 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
     model.on('change:diagram_data', () => {
         const nodes = el.querySelectorAll('.svg-sld-viewer-widget')[0];
         const currViewData = el.querySelector('svg')?.getAttribute('viewBox') || '';
+        popupInfo?.dispose();
         const new_el = render_diagram(model, currViewData);
         el.replaceChild(new_el, nodes);
     });

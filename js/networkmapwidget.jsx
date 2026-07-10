@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
 import { createRender, useModelState, useModel, useExperimental } from '@anywidget/react';
 
@@ -152,6 +153,8 @@ const render = createRender(() => {
 
     const [position, setPosition] = useState([-1, -1]);
 
+    const mouseViewportPos = useRef({ x: 0, y: 0 });
+
     function closeChoiceVoltageLevelMenu() {
         setChoiceVoltageLevelsSubstationId(null);
     }
@@ -235,16 +238,14 @@ const render = createRender(() => {
 
     const debounceDelay = 300;
 
-    const renderPopup = (popupData, isStale) =>
-        isStale || popupData === null ? (
-            ''
-        ) : (
+    const renderPopup = (popupData, isStale) => {
+        if (isStale || popupData === null) return null;
+        return createPortal(
             <div
                 style={{
-                    position: 'relative',
-                    top: '0px',
-                    left: '10px',
-                    display: 'block',
+                    position: 'fixed',
+                    left: mouseViewportPos.current.x + 10,
+                    top: mouseViewportPos.current.y + 10,
                     backgroundColor: 'white',
                     border: '1px solid black',
                     padding: '5px',
@@ -254,13 +255,11 @@ const render = createRender(() => {
                     zIndex: '999',
                 }}
             >
-                <div
-                    dangerouslySetInnerHTML={{
-                        __html: popupData,
-                    }}
-                />
-            </div>
+                <div dangerouslySetInnerHTML={{ __html: popupData }} />
+            </div>,
+            document.body
         );
+    };
 
     // cleanup on unmount
     useEffect(() => {
@@ -334,6 +333,10 @@ const render = createRender(() => {
                             position: 'relative',
                             width: 800,
                             height: 600,
+                        }}
+                        onMouseMove={(e) => {
+                            mouseViewportPos.current.x = e.clientX;
+                            mouseViewportPos.current.y = e.clientY;
                         }}
                     >
                         <Box sx={styles.divTemporaryGeoDataLoading}>{!mapDataReady && <LinearProgress />}</Box>
