@@ -176,8 +176,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
             return format_to_html_table(network.get_switches().loc[id], id, type)
         elif type == 'TIE_LINE':
             return format_to_html_table(network.get_tie_lines().loc[id], id, type)
-        elif type == 'DANGLING_LINE':
-            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        elif type == 'BOUNDARY_LINE':
+            return format_to_html_table(network.get_boundary_lines().loc[id], id, type)
         # for LCC and VSC converter station the id is the HVDC line's id, not the converter's id 
         # (since we cannot retrieve the converterar, we are displaying the HVDC line's details)
         elif type in [ 'LCC_CONVERTER_STATION', 'VSC_CONVERTER_STATION' ]:
@@ -234,7 +234,8 @@ def network_explorer(network: Network, vl_id : str = None, use_name:bool = True,
         if el is not None:
             if map_widget==None:
                 map_widget=NetworkMapWidget(network, use_name=use_name, nominal_voltages_top_tiers_filter = nominal_voltages_top_tiers_filter,
-                                            on_hover_func=None if hovering_function is None else lambda x: hovering_function(x, 'LINE'))
+                                            on_hover_func=None if hovering_function is None else lambda x: hovering_function(x, 'LINE'),
+                                            use_line_geodata = use_line_geodata)
                 map_widget.on_selectvl(lambda event : go_to_vl_from_map(event))
             else:
                 map_widget.center_on_voltage_level(el)

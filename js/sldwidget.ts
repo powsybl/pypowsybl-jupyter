@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //
 
-import type { RenderProps, Initialize } from '@anywidget/types';
+import type { RenderProps, InitializeProps } from '@anywidget/types';
 
 import { SingleLineDiagramViewer } from '@powsybl/network-viewer';
 
@@ -23,7 +23,7 @@ interface SldWidgetModel {
     hover_enabled: boolean;
 }
 
-function initialize({ model }: Initialize<SldWidgetModel>) {
+function initialize({ model: _model }: InitializeProps<SldWidgetModel>) {
     /* (optional) model initialization logic */
 }
 
@@ -42,19 +42,19 @@ function render({ model, el, experimental }: RenderProps<SldWidgetModel>) {
         model.send({ event: 'click_nextvl' });
     };
 
-    const handleSwitch = (id: string, switch_status: boolean, element: any) => {
+    const handleSwitch = (id: string, switch_status: boolean, _element: any) => {
         model.set('clicked_switch', { id: id, switch_status: switch_status });
         model.save_changes();
         model.send({ event: 'click_switch' });
     };
 
-    const handleFeeder = (id: string, feederType: string | null, svgId: string, x: number, y: number) => {
+    const handleFeeder = (id: string, feederType: string | null, _svgId: string, _x: number, _y: number) => {
         model.set('clicked_feeder', { id: id, feederType: feederType });
         model.save_changes();
         model.send({ event: 'click_feeder' });
     };
 
-    const handleBus = (id: string, svgId: string, x: number, y: number) => {
+    const handleBus = (id: string, _svgId: string, _x: number, _y: number) => {
         model.set('clicked_bus', { id: id });
         model.save_changes();
         model.send({ event: 'click_bus' });

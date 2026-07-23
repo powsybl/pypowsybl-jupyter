@@ -130,13 +130,13 @@ class NetworkMapWidget(anywidget.AnyWidget):
         self.dark_mode = dark_mode
 
     def get_tie_lines_info(self, network, vls_with_coords):
-        ties_df=network.get_tie_lines().reset_index()[['id', 'name', 'dangling_line1_id', 'dangling_line2_id']]
-        danglings_df=network.get_dangling_lines().reset_index()[['id', 'name', 'p', 'i', 'voltage_level_id', 'connected']]
+        ties_df=network.get_tie_lines().reset_index()[['id', 'name', 'boundary_line1_id', 'boundary_line2_id']]
+        boundaries_df=network.get_boundary_lines().reset_index()[['id', 'name', 'p', 'i', 'voltage_level_id', 'connected']]
         tie_lines_info=[]
-        if not(ties_df.empty or danglings_df.empty):
-            tie_d_1 = pd.merge(ties_df, danglings_df, left_on='dangling_line1_id', right_on='id', suffixes=('', '_d1'))
-            tie_d_1.rename(columns={'name': 'name_T', 'dangling_line1_id_d1': 'dangling_line1_id_d1_D', 'id_d1': 'd_id1_D'}, inplace=True)
-            tie_d_2 = pd.merge(tie_d_1, danglings_df, left_on='dangling_line2_id', right_on='id', suffixes=('_d1', '_d2'))
+        if not(ties_df.empty or boundaries_df.empty):
+            tie_d_1 = pd.merge(ties_df, boundaries_df, left_on='boundary_line1_id', right_on='id', suffixes=('', '_d1'))
+            tie_d_1.rename(columns={'name': 'name_T', 'boundary_line1_id_d1': 'boundary_line1_id_d1_D', 'id_d1': 'd_id1_D'}, inplace=True)
+            tie_d_2 = pd.merge(tie_d_1, boundaries_df, left_on='boundary_line2_id', right_on='id', suffixes=('_d1', '_d2'))
             tie_res = tie_d_2[['id_d1' ,'name_T', 'voltage_level_id_d1', 'voltage_level_id_d2', 'connected_d1', 'connected_d2', 'p_d1', 'p_d2', 'i_d1', 'i_d2']]
             tie_res = tie_res.fillna(0)
             tie_res.columns = ['id', 'name', 'voltageLevelId1', 'voltageLevelId2', 'terminal1Connected', 'terminal2Connected', 'p1', 'p2', 'i1', 'i2']

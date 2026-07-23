@@ -109,8 +109,8 @@ network_explorer(network: Network, vl_id : str = None, use_name:bool  = True, de
             return format_to_html_table(network.get_2_windings_transformers().loc[id], id, type)
         elif type == 'THREE_WINDINGS_TRANSFORMER':
             return format_to_html_table(network.get_3_windings_transformers().loc[id], id, type)
-        elif type == 'DANGLING_LINE': 
-            return format_to_html_table(network.get_dangling_lines().loc[id], id, type)
+        elif type == 'BOUNDARY_LINE': 
+            return format_to_html_table(network.get_boundary_lines().loc[id], id, type)
         elif type == 'TIE_LINE':
             return format_to_html_table(network.get_tie_lines().loc[id], id, type)
         return f"Equipment of type '{type}' with id '{id}'"
